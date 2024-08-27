@@ -26,5 +26,15 @@
     "strictFunctionTypes": true,
     "useUnknownInCatchVariables": false,
     "allowUnreachableCode": false,
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@modules/*": ["src/modules/*"],
+      "@v1/*": ["src/modules/v1/*"],
+      "@configs/*": ["src/configs/*"],
+      "@entities/*": ["src/entities/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@constants/*": ["src/constants/*"],
+      "@router/*": ["src/router/*"]
+    }
   }
 }
