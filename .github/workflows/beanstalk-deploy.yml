@@ -20,7 +20,7 @@ jobs:
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: keep-in-touch-be
+        application_name: test
         environment_name: keep-in-touch-dev-env 
         version_label: 12345
         region: ap-northeast-2
