@@ -33,3 +33,12 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+## 로컬용
+*.env
+
+## 개발 서버용
+*.env.dev
+
+## 운영 서버용
+*.env.prod

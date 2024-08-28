@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from '@modules/health/health.module';
 import { CommonModule } from '@common/common.module';
-import { MessagesModule } from '@modules/v1/messages/messages.module';
+import { RouterModule } from '@router/router.module';
+
 @Module({
-  imports: [HealthModule, CommonModule, MessagesModule],
+  imports: [HealthModule, CommonModule, RouterModule.register()],
   controllers: [AppController],
   providers: [AppService],
 })
