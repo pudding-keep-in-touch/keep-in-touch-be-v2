@@ -2,6 +2,7 @@ import * as Joi from 'joi';
 
 export function validateEnv() {
   return Joi.object({
+    APP_NAME: Joi.string().required(),
     APP_ENV: Joi.valid('local', 'dev', 'prod').default('local').required(),
 
     POSTGRES_HOST: Joi.string().required(),
