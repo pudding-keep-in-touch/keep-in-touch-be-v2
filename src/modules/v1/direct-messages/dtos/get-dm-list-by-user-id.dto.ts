@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 
 export class RequestGetDmListByUserIdDto {
   @ApiProperty({
@@ -11,31 +11,33 @@ export class RequestGetDmListByUserIdDto {
   })
   @IsEnum(['received', 'sent'])
   @IsOptional()
-  type: 'received' | 'sent' = 'received';
+  type?: 'received' | 'sent' = 'received';
 
   @ApiProperty({
     name: 'page',
     example: 1,
     description: '조회 할 페이지',
-    required: true,
+    required: false,
+    default: 1,
   })
   @IsNumber()
-  // @Min(1)
-  // @IsOptional()
+  @Min(1)
+  @IsOptional()
   @Type(() => Number)
-  page = 1;
+  page?: number;
 
   @ApiProperty({
     name: 'limit',
     example: 10,
     description: '조회 갯수',
-    required: true,
+    required: false,
+    default: 10,
   })
   @IsNumber()
-  // @Min(1)
-  // @IsOptional()
+  @Min(1)
+  @IsOptional()
   @Type(() => Number)
-  limit = 10;
+  limit?: number;
 }
 
 export class ResponseGetDmListByUserIdDto {}
