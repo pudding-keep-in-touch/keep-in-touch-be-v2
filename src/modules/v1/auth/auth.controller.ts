@@ -4,8 +4,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { response } from '@common/helpers/common.helper';
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
-import { Users } from '@entities/users.entity';
 import { BaseResponseDto } from '@common/common.dto';
+import { ResponseGoogleCallbackDto } from './dtos/google-callback.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -27,8 +27,9 @@ export class AuthController {
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
     description: 'Swagger에서 테스트 할 수 없습니다. localhost:3000/api/v1/auth/google/callback 으로 테스트 해주세요.',
+    responseType: ResponseGoogleCallbackDto,
   })
-  async googleLoginCallback(@Req() req: any): Promise<BaseResponseDto<{ accessToken: string; user: Partial<Users> }>> {
+  async googleLoginCallback(@Req() req: any): Promise<BaseResponseDto<ResponseGoogleCallbackDto>> {
     const { accessToken, user } = await this.authService.googleLogin(req.user);
 
     const userInfo = {
