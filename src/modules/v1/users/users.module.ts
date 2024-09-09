@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Users } from '@entities/users.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { DirectMessagesModule } from '@v1/direct-messages/direct-messages.module';
+import { UsersRepository } from '@repositories/users.repository';
 
 @Module({
-  imports: [DirectMessagesModule],
+  imports: [TypeOrmModule.forFeature([Users])],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersRepository],
+  exports: [UsersService],
 })
 export class UsersModule {}
