@@ -23,7 +23,6 @@ export class UsersController {
     // query: { type: RequestGetDmListByUserIdDto },
   })
   async getDmListByUserId(@Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<any> {
-    console.log(request);
     const result = await this.usersService.getDmListByUserId(userId, request);
     return response(result, '쪽지 리스트 조회 성공');
   }

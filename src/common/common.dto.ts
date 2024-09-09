@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class BaseResponseDto<T> {
-  @ApiProperty({ description: '성공 여부', example: true })
-  result: boolean;
-
   @ApiProperty({ description: '상태값', example: 200 })
   status: number;
 
