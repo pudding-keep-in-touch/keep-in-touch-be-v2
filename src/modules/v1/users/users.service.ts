@@ -72,4 +72,29 @@ export class UsersService {
       return mockDms;
     }
   }
+
+  // 이메일 조회
+  async findByEmail(email: string): Promise<Users | null> {
+    return this.usersRepository.getUserByEmail(email);
+  }
+
+  async createOrUpdateGoogleUser(googleUser: any): Promise<Users> {
+    let user = await this.findByEmail(googleUser.email);
+
+    if (!user) {
+      // 새 사용자 생성
+      user = this.usersRepository.create({
+        email: googleUser.email,
+        nickname: `${googleUser.firstName} ${googleUser.lastName}`.trim(),
+        loginType: 2, // 구글 로그인 타입
+        status: 1, // 활성 상태
+      });
+    } else {
+      // 기존 사용자 정보 업데이트
+      user.nickname = `${googleUser.firstName} ${googleUser.lastName}`.trim();
+      user.loginType = 2; // 구글 로그인으로 업데이트
+    }
+
+    return await this.usersRepository.save(user);
+  }
 }
