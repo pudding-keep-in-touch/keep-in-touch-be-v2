@@ -24,9 +24,9 @@ export class Users {
     type: 'varchar',
     length: 255,
     name: 'password',
-    nullable: false,
+    nullable: true,
   })
-  password: string;
+  password: string | null;
 
   @ApiProperty({ description: '유저 닉네임', example: 'user123' })
   @Column({
