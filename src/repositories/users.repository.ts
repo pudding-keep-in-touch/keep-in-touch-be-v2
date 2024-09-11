@@ -16,6 +16,7 @@ export class UsersRepository extends Repository<Users> {
 
   // 유저 아이디 기준으로 조회
   async getUserById(id: number): Promise<Users | null> {
+    console.log('id', id);
     return await this.findOne({ where: { id } });
   }
 }

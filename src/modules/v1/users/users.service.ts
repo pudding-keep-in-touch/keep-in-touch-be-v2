@@ -4,12 +4,13 @@ import { RequestSignUpDto } from './dtos/signup.dto';
 import { UsersRepository } from '@repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { Users } from '@entities/users.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   // constructor(private readonly directMessagesService: DirectMessagesService) {}
 
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository, private readonly configService: ConfigService) {}
 
   // 회원가입
   async signup(requestDto: RequestSignUpDto): Promise<Users> {
@@ -99,6 +100,9 @@ export class UsersService {
   }
 
   async findById(id: number): Promise<Users | null> {
-    return this.usersRepository.getUserById(id);
+    console.log('Searching for user with id:', id);
+    const user = await this.usersRepository.getUserById(id);
+    console.log('Found user:', user);
+    return user;
   }
 }
