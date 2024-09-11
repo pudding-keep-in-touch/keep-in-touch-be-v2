@@ -26,3 +26,4 @@ jobs:
         version_description: ${{ github.event.head_commit.message }}
         region: ap-northeast-2
         deployment_package: ${{ github.sha }}.zip
+        use_existing_version_if_available : true
