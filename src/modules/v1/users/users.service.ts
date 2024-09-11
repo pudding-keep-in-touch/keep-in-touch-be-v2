@@ -4,13 +4,12 @@ import { RequestSignUpDto } from './dtos/signup.dto';
 import { UsersRepository } from '@repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { Users } from '@entities/users.entity';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   // constructor(private readonly directMessagesService: DirectMessagesService) {}
 
-  constructor(private readonly usersRepository: UsersRepository, private readonly configService: ConfigService) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   // 회원가입
   async signup(requestDto: RequestSignUpDto): Promise<Users> {

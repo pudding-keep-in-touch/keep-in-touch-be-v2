@@ -1,5 +1,5 @@
 import { RequestGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
-import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
+import { GenerateSwaggerApiDoc, NotUserAuth, UserAuth } from '@common/common.decorator';
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from '@v1/users/users.service';
@@ -7,7 +7,6 @@ import { response } from '@common/helpers/common.helper';
 import { RequestSignUpDto } from './dtos/signup.dto';
 import { Users } from '@entities/users.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UserAuth } from '../auth/decorators/user.decorator';
 
 @ApiTags('users')
 @Controller('users')

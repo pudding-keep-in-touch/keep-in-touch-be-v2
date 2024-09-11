@@ -6,5 +6,5 @@ export function response<T>(data: T, message = '성공', status: number = HttpSt
     status,
     message,
     data,
-  } satisfies BaseResponseDto<T>;
+  } as BaseResponseDto<T>;
 }
