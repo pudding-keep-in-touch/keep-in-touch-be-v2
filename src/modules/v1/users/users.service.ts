@@ -97,4 +97,8 @@ export class UsersService {
 
     return await this.usersRepository.save(user);
   }
+
+  async findById(id: number): Promise<Users | null> {
+    return this.usersRepository.getUserById(id);
+  }
 }

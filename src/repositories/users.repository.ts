@@ -13,4 +13,9 @@ export class UsersRepository extends Repository<Users> {
   async createUser(email: string, password: string, loginType: number): Promise<Users> {
     return await this.save({ email, password, loginType });
   }
+
+  // 유저 아이디 기준으로 조회
+  async getUserById(id: number): Promise<Users | null> {
+    return await this.findOne({ where: { id } });
+  }
 }
