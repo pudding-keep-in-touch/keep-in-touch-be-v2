@@ -14,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { isEmpty, isUndefined } from 'lodash';
 import { BaseResponseDto } from './common.dto';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 /**
  * @brief Auth가 필요하지 않을때 데코레이터
@@ -63,3 +64,9 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };
+
+// Auth 데코레이터
+export const UserAuth = createParamDecorator((_: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest();
+  return request.user;
+});

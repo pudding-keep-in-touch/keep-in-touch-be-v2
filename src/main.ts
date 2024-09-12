@@ -3,11 +3,16 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
+
+  ConfigModule.forRoot({
+    isGlobal: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,6 +30,15 @@ async function bootstrap() {
     .setDescription('API description')
     // .setVersion('1.0')
     // .addTag('your-tag')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'jwt',
+        in: 'header',
+      },
+      'jwt',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
