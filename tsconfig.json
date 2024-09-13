@@ -34,6 +34,7 @@
       "@modules/*": ["src/modules/*"],
       "@entities/*": ["src/entities/*"],
       "@repositories/*": ["src/repositories/*"],
+      "@gateways/*": ["src/gateways/*"],
       "@constants/*": ["src/constants/*"],
       "@router/*": ["src/router/*"]
     }

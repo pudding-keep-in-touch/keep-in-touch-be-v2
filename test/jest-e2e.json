@@ -15,6 +15,7 @@
     "^@modules/(.*)$": "<rootDir>/../src/modules/$1",
     "^@entities/(.*)$": "<rootDir>/../src/entities/$1",
     "^@repositories/(.*)$": "<rootDir>/../src/repositories/$1",
+    "^@gateways/(.*)$": "<rootDir>/../src/gateways/$1",
     "^@constants/(.*)$": "<rootDir>/../src/constants/$1"
   }
 }

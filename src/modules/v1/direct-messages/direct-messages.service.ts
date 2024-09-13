@@ -1,10 +1,10 @@
 import { Emotions } from '@entities/emotions.entity';
 import { Users } from '@entities/users.entity';
+import { DirectMessageGateway } from '@gateways/direct-message.gateway';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
 import { EmotionsRepository } from '@repositories/emotions.repository';
 import { UsersRepository } from '@repositories/users.repository';
-import { DirectMessageGateway } from 'src/gateways/direct-message.gateway';
 import { CreateDmDto } from './dtos/create-dm.dto';
 import { RequestGetDmDetailDto } from './dtos/get-dm-detail.dto';
 
