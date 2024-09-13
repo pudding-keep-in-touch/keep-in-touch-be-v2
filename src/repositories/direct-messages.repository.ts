@@ -11,6 +11,10 @@ export class DirectMessagesRepository extends Repository<DirectMessage> {
 
   // 쪽지 생성
   async createDm(senderId: number, receiverId: number, emotionId: number, content: string): Promise<DirectMessage> {
-    return await this.save({ senderId, receiverId, emotionId, content });
+    const sender = await this.manager.findOne('Users', { where: { id: senderId } });
+    const receiver = await this.manager.findOne('Users', { where: { id: receiverId } });
+    const emotion = await this.manager.findOne('Emotions', { where: { id: emotionId } });
+
+    return await this.save({ sender, receiver, emotion, content });
   }
 }
