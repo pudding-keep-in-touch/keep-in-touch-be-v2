@@ -13,30 +13,6 @@ export class DirectMessage {
   id: number;
 
   @ApiProperty({
-    description: '보낸 사람 id',
-    example: 1,
-  })
-  @ManyToOne(() => Users, (user) => user.id, { cascade: false })
-  @JoinColumn({ name: 'sender_id' })
-  sender: Users;
-
-  @ApiProperty({
-    description: '받는 사람 id',
-    example: 1,
-  })
-  @ManyToOne(() => Users, (user) => user.id, { cascade: false })
-  @JoinColumn({ name: 'receiver_id' })
-  receiver: Users;
-
-  @ApiProperty({
-    description: '감정 아이디',
-    example: '1',
-  })
-  @OneToOne(() => Emotions, { cascade: false })
-  @JoinColumn({ name: 'emotion_id' })
-  emotion: Emotions;
-
-  @ApiProperty({
     description: '쪽지 내용',
     example: '사실 너에게 말하고 싶은게 있어',
   })
@@ -52,6 +28,7 @@ export class DirectMessage {
   @Column({
     type: 'boolean',
     name: 'is_read',
+    nullable: false,
     default: false,
   })
   is_read: boolean;
@@ -59,7 +36,8 @@ export class DirectMessage {
   @ApiProperty({ description: '쪽지 삭제 여부', example: false })
   @Column({
     type: 'boolean',
-    name: 'is_read',
+    name: 'is_deleted',
+    nullable: false,
     default: false,
   })
   is_deleted: boolean;
@@ -80,4 +58,28 @@ export class DirectMessage {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: '보낸 사람 id',
+    example: 1,
+  })
+  @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
+  @JoinColumn({ name: 'sender_id' })
+  sender: Users;
+
+  @ApiProperty({
+    description: '받는 사람 id',
+    example: 1,
+  })
+  @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
+  @JoinColumn({ name: 'receiver_id' })
+  receiver: Users;
+
+  @ApiProperty({
+    description: '감정 아이디',
+    example: '1',
+  })
+  @OneToOne(() => Emotions, { cascade: false, nullable: false })
+  @JoinColumn({ name: 'emotion_id' })
+  emotion: Emotions;
 }
