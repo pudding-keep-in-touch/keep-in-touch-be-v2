@@ -1,7 +1,7 @@
 import { Emotions } from '@entities/emotions.entity';
 import { Users } from '@entities/users.entity';
-import { DirectMessageGateway } from '@gateways/direct-message.gateway';
-import { Injectable, NotFoundException } from '@nestjs/common';
+// import { DirectMessageGateway } from '@gateways/direct-message.gateway';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
 import { EmotionsRepository } from '@repositories/emotions.repository';
 import { UsersRepository } from '@repositories/users.repository';
@@ -14,8 +14,8 @@ export class DirectMessagesService {
     private readonly directMessageRepository: DirectMessagesRepository,
     private readonly userRepository: UsersRepository,
     private readonly emotionsRepository: EmotionsRepository,
-    private readonly directMessageGateway: DirectMessageGateway,
-  ) {}
+  ) // private readonly directMessageGateway: DirectMessageGateway,
+  {}
   // 받은 메시지 조회
   async getReceivedDmListByUserId() {
     return {};
@@ -49,28 +49,28 @@ export class DirectMessagesService {
   }
 
   // 메시지 전송
-  async createDm(requestDto: CreateDmDto) {
+  async createDm(requestDto: CreateDmDto): Promise<{ dmId: number; receiverId: number }> {
     try {
       const existReceiver: Users = await this.userRepository.getUserByEmail(requestDto.receiver_email);
 
       if (!existReceiver) {
-        throw new NotFoundException('받는 사람을 찾을 수 없습니다.');
+        throw new BadRequestException('받는 사람을 찾을 수 없습니다.');
       }
 
       const emotion: Emotions = await this.emotionsRepository.getEmotionByName(requestDto.emotion_name);
 
       if (!emotion) {
-        throw new NotFoundException('감정을 찾을 수 없습니다.');
+        throw new BadRequestException('감정을 찾을 수 없습니다.');
       }
 
       const newDm = await this.directMessageRepository.createDm(requestDto.sender_id, existReceiver.id, emotion.id, requestDto.content);
 
       // 상대방에게 쪽지 도착 알림 전송
-      const notificationMessage = `새로운 쪽지가 도착했습니다: ${newDm.id}(보낸 사람 아이디: ${requestDto.sender_id})`;
+      // const notificationMessage = `새로운 쪽지가 도착했습니다: ${newDm.id}(보낸 사람 아이디: ${requestDto.sender_id})`;
 
-      this.directMessageGateway.sendNotificationToUser(existReceiver.id, notificationMessage);
+      // this.directMessageGateway.sendNotificationToUser(existReceiver.id, notificationMessage);
 
-      return { dmId: newDm.id };
+      return { dmId: newDm.id, receiverId: existReceiver.id };
     } catch (error) {
       throw error;
     }
