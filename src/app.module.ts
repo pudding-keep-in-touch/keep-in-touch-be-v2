@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthModule } from '@modules/health/health.module';
 import { CommonModule } from '@common/common.module';
 import { RouterModule } from '@router/router.module';
-import { DirectMessagesModule } from '@modules/v1/direct-messages/direct-messages.module';
-import { HealthModule } from '@health/health.module';
+import { ConfigModule } from '@nestjs/config';
+import { validateEnv } from '@configs/process-env.config';
 
 @Module({
-  imports: [CommonModule, HealthModule, RouterModule.register(), DirectMessagesModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      validationSchema: validateEnv(),
+    }),
+    HealthModule,
+    CommonModule,
+    RouterModule.register(),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
