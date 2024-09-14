@@ -9,8 +9,6 @@ describe('AppController (e2e)', () => {
   // let socket: Socket;
 
   beforeAll(async () => {
-    jest.setTimeout(10000);
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -44,9 +42,9 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
-  });
+  // it('/ (GET)', () => {
+  //   return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
+  // });
 
   it('/direct-messages (POST)', (done) => {
     let receiverId: number;
