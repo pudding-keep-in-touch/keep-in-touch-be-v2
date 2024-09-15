@@ -17,6 +17,7 @@ export class DirectMessagesService {
     private readonly userRepository: UsersRepository,
     private readonly emotionsRepository: EmotionsRepository, // private readonly directMessageGateway: DirectMessageGateway,
   ) {}
+
   // 받은 메시지 조회
   async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<DirectMessage[]> {
     return await this.directMessageRepository.getDmListByUserId(userId, request.type, request.page, request.limit, request.order);

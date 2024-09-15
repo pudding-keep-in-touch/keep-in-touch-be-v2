@@ -4,10 +4,46 @@ import { UsersRepository } from '@repositories/users.repository';
 import { Users } from '@entities/users.entity';
 import { DirectMessagesService } from '@v1/direct-messages/direct-messages.service';
 import { LoginType, UserStatus } from './user.enum';
+import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
+import { getFormatDate } from '@common/helpers/date.helper';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository, private readonly directMessagesService: DirectMessagesService) {}
+
+  // 유저 홈 화면 조회
+  async getUserHome(userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
+    if (isOwner) {
+      const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
+      return {
+        isOwner,
+        dmList: dmList.map((dm) => {
+          return {
+            id: dm.id,
+            senderId: dm.sender.id,
+            receiverId: dm.receiver.id,
+            content: dm.content,
+            emotion: {
+              name: dm.emotion.name,
+              emoji: dm.emotion.emoji,
+            },
+            comment: {},
+            isRead: dm.isRead,
+            createdAt: getFormatDate(dm.createdAt), //FIXME 시간 포맷 변경 필요
+          };
+        })
+      }
+    } else {
+      const friend = await this.usersRepository.getUserById(userId);
+      return {
+        isOwner,
+        friendUser: {
+          id: friend.id,
+          nickname: friend.nickname,
+        }
+      }
+    }
+  }
 
   // 유저 id 기준 받은/보낸 쪽지 리스트 조회
   async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<ResponseGetDmListByUserIdDto[] | null> {
@@ -24,7 +60,7 @@ export class UsersService {
         },
         comment: {},
         isRead: dm.isRead,
-        createdAt: dm.createdAt, //FIXME 시간 포맷 변경 필요
+        createdAt: getFormatDate(dm.createdAt), //FIXME 시간 포맷 변경 필요
       };
     });
 
