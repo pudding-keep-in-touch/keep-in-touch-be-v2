@@ -7,6 +7,8 @@ import { EmotionsRepository } from '@repositories/emotions.repository';
 import { UsersRepository } from '@repositories/users.repository';
 import { CreateDmDto } from './dtos/create-dm.dto';
 import { RequestGetDmDetailDto } from './dtos/get-dm-detail.dto';
+import { RequestGetDmListByUserIdDto } from './dtos/get-dm-list-by-user-id.dto';
+import { DirectMessage } from '@entities/direct-messages.entity';
 
 @Injectable()
 export class DirectMessagesService {
@@ -16,12 +18,11 @@ export class DirectMessagesService {
     private readonly emotionsRepository: EmotionsRepository, // private readonly directMessageGateway: DirectMessageGateway,
   ) {}
   // 받은 메시지 조회
-  async getReceivedDmListByUserId() {
-    return {};
+  async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<DirectMessage[]> {
+    return await this.directMessageRepository.getDmListByUserId(userId, request.type, request.page, request.limit, request.order);
   }
 
-  // 보낸 메시지 조회
-
+  
   // 메시지 상세 조회
   async getDmDetail(directMessageId: number, request: RequestGetDmDetailDto): Promise<any> {
     // user id 조회

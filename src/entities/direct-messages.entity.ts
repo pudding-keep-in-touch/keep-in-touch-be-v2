@@ -79,6 +79,7 @@ export class DirectMessage {
     description: '감정 아이디',
     example: '1',
   })
+  
   @OneToOne(() => Emotions, { cascade: false, nullable: false })
   @JoinColumn({ name: 'emotion_id' })
   emotion: Emotions;

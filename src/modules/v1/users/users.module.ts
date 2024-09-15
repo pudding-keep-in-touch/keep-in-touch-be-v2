@@ -3,9 +3,14 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from '@repositories/users.repository';
 import { CustomTypeOrmModule } from '@common/custom-typeorm/custom-typeorm.module';
+import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
+import { DirectMessagesModule } from '@v1/direct-messages/direct-messages.module';
 
 @Module({
-  imports: [CustomTypeOrmModule.forCustomRepository([UsersRepository])],
+  imports: [
+    DirectMessagesModule,
+    CustomTypeOrmModule.forCustomRepository([UsersRepository, DirectMessagesRepository])
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
