@@ -1,27 +1,15 @@
 import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from '@v1/users/users.service';
 import { response } from '@common/helpers/common.helper';
-import { RequestSignUpDto } from './dtos/signup.dto';
 import { BaseResponseDto } from '@common/common.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @NotUserAuth()
-  @Post('signup')
-  @GenerateSwaggerApiDoc({
-    summary: '회원가입',
-    description: '아이디와 비밀번호를 통하여 회원가입을 진행한다.',
-  })
-  async register(@Body() requestDto: RequestSignUpDto) {
-    const user = await this.usersService.signup(requestDto);
-    return response(user, '회원가입이 완료되었습니다.');
-  }
 
   @Get(':userId/home')
   getUserHome() {
