@@ -11,6 +11,6 @@ import { DirectMessagesService } from './direct-messages.service';
   imports: [CustomTypeOrmModule.forCustomRepository([DirectMessagesRepository, UsersRepository, EmotionsRepository])],
   controllers: [DirectMessagesController],
   providers: [DirectMessagesService, DirectMessageGateway],
-  exports: [DirectMessagesService], // 밖에서도 해당 서비스를 사용할 케이스가 있는가?
+  exports: [DirectMessagesService], 
 })
 export class DirectMessagesModule {}
