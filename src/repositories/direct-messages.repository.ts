@@ -9,6 +9,27 @@ export class DirectMessagesRepository extends Repository<DirectMessage> {
     return await this.findOne({ where: { id: dmId } });
   }
 
+  // 유저 id 기준 쪽지 리스트 조회
+  async getDmListByUserId(
+    userId: number, 
+    type: 'received' | 'sent', 
+    page: number, 
+    limit: number, 
+    order: 'desc' | 'asc'
+  ): Promise<DirectMessage[] | null> {
+    const skip = (page - 1) * limit;
+    const take = limit;
+    const userField = type === 'received' ? 'receiver' : 'sender';
+  
+    return await this.find({
+      where: { [userField]: { id: userId }, isDeleted: false },
+      relations: ['sender', 'receiver', 'emotion'],
+      skip,
+      take,
+      order: { createdAt: order }
+    });
+  }  
+
   // 쪽지 생성
   async createDm(senderId: number, receiverId: number, emotionId: number, content: string): Promise<DirectMessage> {
     const sender = await this.manager.findOne('Users', { where: { id: senderId } });
