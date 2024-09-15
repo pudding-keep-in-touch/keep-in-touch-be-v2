@@ -27,7 +27,7 @@ export class DirectMessage {
   @ApiProperty({ description: '쪽지 읽음 여부', example: false })
   @Column({
     type: 'boolean',
-    name: 'isRead',
+    name: 'is_read',
     nullable: false,
     default: false,
   })
@@ -36,7 +36,7 @@ export class DirectMessage {
   @ApiProperty({ description: '쪽지 삭제 여부', example: false })
   @Column({
     type: 'boolean',
-    name: 'iseleted',
+    name: 'is_deleted',
     nullable: false,
     default: false,
   })
