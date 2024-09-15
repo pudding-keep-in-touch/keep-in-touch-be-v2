@@ -3,33 +3,34 @@ import { IsNumber, IsString, MaxLength } from 'class-validator';
 
 export class CreateDmDto {
   @ApiProperty({
+    name: 'senderId',
     description: '보낸 사람 id',
     example: 1,
     required: true,
   })
   @IsNumber()
-  sender_id: number;
+  senderId: number;
 
   // 받는 사람 이메일
   @ApiProperty({
-    name: 'receiver_email',
+    name: 'receiverEmail',
     description: '받는 사람 가입 이메일',
     example: 'user@example.com',
     required: true,
   })
   @IsString()
   @MaxLength(100)
-  receiver_email: string;
+  receiverEmail: string;
 
   @ApiProperty({
-    name: 'emotion_name',
+    name: 'emotionName',
     description: '감정 이름(응원과 감사, 솔직한 대화)',
-    example: 'thanks',
+    example: '응원과 감사',
     required: true,
   })
   @IsString()
   @MaxLength(50)
-  emotion_name: string;
+  emotionName: string;
 
   @ApiProperty({
     name: 'content',

@@ -1,6 +1,6 @@
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
+import { Emotions } from '@entities/emotions.entity';
 import { Repository } from 'typeorm';
-import { Emotions } from './../entities/emotions.entity';
 
 @CustomEntityRepository(Emotions)
 export class EmotionsRepository extends Repository<Emotions> {
