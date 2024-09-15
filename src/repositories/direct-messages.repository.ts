@@ -1,5 +1,6 @@
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { DirectMessage } from '@entities/direct-messages.entity';
+import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 import { Repository } from 'typeorm';
 
 @CustomEntityRepository(DirectMessage)
@@ -12,14 +13,14 @@ export class DirectMessagesRepository extends Repository<DirectMessage> {
   // 유저 id 기준 쪽지 리스트 조회
   async getDmListByUserId(
     userId: number, 
-    type: 'received' | 'sent', 
+    type: DmUserType, 
     page: number, 
     limit: number, 
     order: 'desc' | 'asc'
   ): Promise<DirectMessage[] | null> {
     const skip = (page - 1) * limit;
     const take = limit;
-    const userField = type === 'received' ? 'receiver' : 'sender';
+    const userField = type === DmUserType.RECEIVED ? 'receiver' : 'sender';
   
     return await this.find({
       where: { [userField]: { id: userId }, isDeleted: false },

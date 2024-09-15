@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 
 export class RequestGetDmListByUserIdDto {
   @ApiProperty({
@@ -9,9 +10,9 @@ export class RequestGetDmListByUserIdDto {
     description: '조회 타입(received: 쪽지 받은, sent: 쪽지 보낸)',
     required: false,
   })
-  @IsEnum(['received', 'sent'])
+  @IsEnum(DmUserType)
   @IsOptional()
-  type?: 'received' | 'sent' = 'received';
+  type?: DmUserType = DmUserType.RECEIVED;
 
   @ApiProperty({
     name: 'page',
