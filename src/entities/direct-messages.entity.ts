@@ -20,7 +20,7 @@ export class DirectMessages {
     type: 'varchar',
     name: 'content',
     nullable: false,
-    length: 100,
+    length: 200,
   })
   content: string;
 
