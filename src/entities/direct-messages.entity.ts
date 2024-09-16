@@ -4,7 +4,7 @@ import { Emotions } from './emotions.entity';
 import { Users } from './users.entity';
 
 @Entity('direct_messages')
-export class DirectMessage {
+export class DirectMessages {
   @ApiProperty({
     description: '시퀀스 번호',
     example: 1,
@@ -36,7 +36,7 @@ export class DirectMessage {
   @ApiProperty({ description: '쪽지 삭제 여부', example: false })
   @Column({
     type: 'boolean',
-    name: 'iseleted',
+    name: 'isDeleted',
     nullable: false,
     default: false,
   })
@@ -79,7 +79,6 @@ export class DirectMessage {
     description: '감정 아이디',
     example: '1',
   })
-  
   @OneToOne(() => Emotions, { cascade: false, nullable: false })
   @JoinColumn({ name: 'emotion_id' })
   emotion: Emotions;

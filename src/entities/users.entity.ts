@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { DirectMessage } from './direct-messages.entity';
+import { DirectMessages } from './direct-messages.entity';
 
 @Entity('users')
 export class Users {
@@ -89,9 +89,9 @@ export class Users {
   })
   updatedAt: Date;
 
-  @OneToMany(() => DirectMessage, (directMessage) => directMessage.sender)
-  sentMessage: DirectMessage[];
+  @OneToMany(() => DirectMessages, (directMessage) => directMessage.sender)
+  sentMessage: DirectMessages[];
 
-  @OneToMany(() => DirectMessage, (directMessage) => directMessage.receiver)
-  receiveMessage: DirectMessage[];
+  @OneToMany(() => DirectMessages, (directMessage) => directMessage.receiver)
+  receiveMessage: DirectMessages[];
 }
