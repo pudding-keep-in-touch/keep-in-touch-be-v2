@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-// import { io, Socket } from 'socket.io-client';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
-  // let socket: Socket;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -42,11 +40,20 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  // it('/ (GET)', () => {
-  //   return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
-  // });
+  it('쪽지 상세 조회', (done) => {
+    request(app.getHttpServer())
+      .get('/v1/direct-messages/5')
+      .expect(200)
+      .expect((res) => {
+        console.log(res);
+      })
+      .end((err) => {
+        if (err) return done(err);
+        done();
+      });
+  });
 
-  it('/direct-messages (POST)', (done) => {
+  it('쪽지 전송하기', (done) => {
     let receiverId: number;
 
     request(app.getHttpServer())

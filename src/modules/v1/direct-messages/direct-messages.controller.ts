@@ -1,8 +1,7 @@
 import { DirectMessagesService } from './direct-messages.service';
 import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { RequestGetDmDetailDto } from './dtos/get-dm-detail.dto';
 import { response } from '@common/helpers/common.helper';
 import { CreateDmDto } from './dtos/create-dm.dto';
 
@@ -17,8 +16,9 @@ export class DirectMessagesController {
     summary: '메시지 상세 조회',
     description: '메시지 id 기준 받은/보낸 쪽지 상세 조회',
   })
-  async getDmDetail(@Param('directMessageId') directMessageId: number, @Query() request: RequestGetDmDetailDto): Promise<any> {
-    const result = await this.directMessagesService.getDmDetail(directMessageId, request);
+  async getDmDetail(@Param('directMessageId') directMessageId: number): Promise<any> {
+    const result = await this.directMessagesService.getDmDetail(directMessageId);
+
     return response(result, '쪽지 상세 조회 성공');
   }
 
