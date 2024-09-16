@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { UsersRepository } from '@repositories/users.repository';
 import { Users } from '@entities/users.entity';
@@ -86,6 +86,18 @@ export class UsersService {
     }
 
     return await this.usersRepository.save(user);
+  }
+
+  // 회원 탈퇴
+  async withdrawUser(userId: number): Promise<void> {
+    const user = await this.usersRepository.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    user.status = UserStatus.WITHDRAWN;
+
+    await this.usersRepository.save(user);
   }
 
   // 유저 이메일 조회
