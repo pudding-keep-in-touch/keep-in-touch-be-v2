@@ -6,6 +6,6 @@ export const getNowDate = (format = 'YYYY-MM-DD HH:mm:ss'): string => {
 };
 
 // 시간 포맷하기
-export const getFormatDate = (date = '', format = 'YYYY-MM-DD HH:mm:ss'): string => {
+export const getFormatDate = (date: string | number | Date | dayjs.Dayjs, format = 'YYYY-MM-DD HH:mm:ss'): string => {
   return dayjs(date).format(format);
 };

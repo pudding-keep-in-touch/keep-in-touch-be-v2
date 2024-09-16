@@ -14,14 +14,14 @@ export class DirectMessagesRepository extends Repository<DirectMessage> {
   async getDmListByUserId(
     userId: number, 
     type: DmUserType, 
-    page: number, 
-    limit: number, 
-    order: 'desc' | 'asc'
+    page: number = 1, 
+    limit: number = 10, 
+    order: 'desc' | 'asc' = 'desc'
   ): Promise<DirectMessage[] | null> {
     const skip = (page - 1) * limit;
     const take = limit;
     const userField = type === DmUserType.RECEIVED ? 'receiver' : 'sender';
-  
+
     return await this.find({
       where: { [userField]: { id: userId }, isDeleted: false },
       relations: ['sender', 'receiver', 'emotion'],
