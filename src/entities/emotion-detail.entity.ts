@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Emotions } from './emotions.entity';
 
-@Entity('emotionDetail')
+@Entity('emotion_details')
 export class EmotionDetail {
   @ApiProperty({ description: '시퀀스 번호', example: 1 })
   @PrimaryGeneratedColumn({

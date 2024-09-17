@@ -8,8 +8,8 @@ export enum LoginType {
 
 // 유저 계정 상태
 export enum UserStatus {
-  NORMAL = 1,
-  WITHDRAWN = 2,
-  DORMANT = 3,
-  SUSPENDED = 4,
+  NORMAL = 1, // 정상
+  WITHDRAWN = 2, // 탈퇴
+  DORMANT = 3, // 휴면
+  SUSPENDED = 4, // 정지
 }

@@ -25,7 +25,7 @@ export class RequestGetDmListByUserIdDto {
   @Min(1)
   @IsOptional()
   @Type(() => Number)
-  page?: number;
+  page?: number = 1;
 
   @ApiProperty({
     name: 'limit',
@@ -38,7 +38,7 @@ export class RequestGetDmListByUserIdDto {
   @Min(1)
   @IsOptional()
   @Type(() => Number)
-  limit?: number;
+  limit?: number = 10;
 
   @ApiProperty({
     name: 'order',
@@ -82,5 +82,5 @@ export class ResponseGetDmListByUserIdDto {
   isRead: boolean;
 
   @ApiProperty({ description: '생성 시간', example: '2024-09-15T10:30:00Z' })
-  createdAt: Date;
+  createdAt: string;
 }

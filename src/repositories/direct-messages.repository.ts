@@ -11,7 +11,13 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
   }
 
   // 유저 id 기준 쪽지 리스트 조회
-  async getDmListByUserId(userId: number, type: DmUserType, page: number, limit: number, order: 'desc' | 'asc'): Promise<DirectMessages[] | null> {
+  async getDmListByUserId(
+    userId: number,
+    type: DmUserType,
+    page: number = 1,
+    limit: number = 10,
+    order: 'desc' | 'asc' = 'desc',
+  ): Promise<DirectMessages[] | null> {
     const skip = (page - 1) * limit;
     const take = limit;
     const userField = type === DmUserType.RECEIVED ? 'receiver' : 'sender';

@@ -1,12 +1,13 @@
 import { Users } from '@entities/users.entity';
 import { Repository } from 'typeorm';
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
+import { UserStatus } from '@v1/users/user.enum';
 
 @CustomEntityRepository(Users)
 export class UsersRepository extends Repository<Users> {
   // 유저 이메일 기준으로 조회
   async getUserByEmail(email: string): Promise<Users | null> {
-    return await this.findOne({ where: { email } });
+    return await this.findOne({ where: { email, status: UserStatus.NORMAL } });
   }
 
   // 회원 등록
@@ -16,6 +17,6 @@ export class UsersRepository extends Repository<Users> {
 
   // 유저 아이디 기준으로 조회
   async getUserById(id: number): Promise<Users | null> {
-    return await this.findOne({ where: { id } });
+    return await this.findOne({ where: { id, status: UserStatus.NORMAL } });
   }
 }
