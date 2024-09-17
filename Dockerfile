@@ -1,25 +1,20 @@
-FROM node:20.17.0-alpine
-
-RUN npm i -g pnpm
-
-FROM base AS dependencies
+FROM node:22-slim
 
 WORKDIR /app
+
+RUN npm install -g pnpm
+
+RUN apt-get update && apt-get install -y \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package.json pnpm-lock.yaml ./
+
 RUN pnpm install
 
-FROM base AS build
-
-WORKDIR /app
 COPY . .
-COPY --from=dependencies /app/node_modules ./node_modules
-RUN pnpm build
-RUN pnpm prune --prod
 
-FROM base AS deploy
+EXPOSE 3000
 
-WORKDIR /app
-COPY --from=build /app/dist/ ./dist/
-COPY --from=build /app/node_modules ./node_modules
-
-CMD [ "node", "dist/main.js" ]
+ENTRYPOINT ["pnpm", "run", "start:dev"]
