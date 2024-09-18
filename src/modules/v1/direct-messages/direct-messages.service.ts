@@ -52,7 +52,7 @@ export class DirectMessagesService {
         name: receivedDm.emotion.name,
         emoji: receivedDm.emotion.emoji,
       },
-      isRead: receivedDm.isRead,
+      isRead: true,
       comments: {},
       createdAt: getFormatDate(receivedDm.createdAt),
     };
