@@ -11,5 +11,5 @@ export interface DirectMessage {
   emotion: Emotion;
   isRead: boolean;
   comments: any;
-  createdAt: Date;
+  createdAt: string;
 }
