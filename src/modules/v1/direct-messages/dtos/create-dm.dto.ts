@@ -39,6 +39,6 @@ export class CreateDmDto {
     required: true,
   })
   @IsString()
-  @MaxLength(100)
+  @MaxLength(200)
   content: string;
 }
