@@ -1,6 +1,8 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RouterModule as NestRouterModule } from '@nestjs/core';
-import { MessagesModule } from '@modules/v1/messages/messages.module';
+import { AuthModule } from '@v1/auth/auth.module';
+import { UsersModule } from '@v1/users/users.module';
+import { DirectMessagesModule } from '@v1/direct-messages/direct-messages.module';
 
 @Module({})
 export class RouterModule {
@@ -8,11 +10,21 @@ export class RouterModule {
     return {
       module: RouterModule,
       imports: [
-        MessagesModule,
+        UsersModule,
+        DirectMessagesModule,
+        AuthModule,
         NestRouterModule.register([
           {
             path: '/v1',
-            module: MessagesModule,
+            module: DirectMessagesModule,
+          },
+          {
+            path: '/v1',
+            module: AuthModule,
+          },
+          {
+            path: '/v1',
+            module: UsersModule,
           },
         ]),
       ],
