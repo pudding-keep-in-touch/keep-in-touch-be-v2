@@ -8,6 +8,11 @@ import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  // 환경 변수 로드
+  const environment = configService.get('NODE_ENV') || 'development';
+  console.log(`Application is running in ${environment} mode`);
 
   app.enableCors();
 
@@ -24,8 +29,6 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new AllExceptionsFilter());
-
-  const configService = app.get(ConfigService);
 
   // swagger 설정
   const config = new DocumentBuilder()
