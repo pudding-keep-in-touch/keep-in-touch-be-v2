@@ -10,9 +10,9 @@ import { validateEnv } from '@configs/process-env.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-      validationSchema: validateEnv(),
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      validationSchema: validateEnv,
+      isGlobal: true
     }),
     HealthModule,
     CommonModule,
