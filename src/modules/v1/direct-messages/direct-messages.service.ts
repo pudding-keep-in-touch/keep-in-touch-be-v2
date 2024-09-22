@@ -1,4 +1,4 @@
-import { getFormatDate } from './../../../common/helpers/date.helper';
+import { getFormatDate } from '@common/helpers/date.helper';
 import { Emotions } from '@entities/emotions.entity';
 import { Users } from '@entities/users.entity';
 // import { DirectMessageGateway } from '@gateways/direct-message.gateway';
