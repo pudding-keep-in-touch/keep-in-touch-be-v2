@@ -11,7 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // 환경 변수 로드
-  const environment = configService.get('NODE_ENV') || 'development';
+  const environment = configService.get('APP_ENV') || 'development';
   console.log(`Application is running in ${environment} mode`);
 
   app.enableCors();
