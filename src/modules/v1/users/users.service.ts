@@ -47,7 +47,7 @@ export class UsersService {
 
   // 유저 id 기준 받은/보낸 쪽지 리스트 조회
   async getDmListByUserId(loginUser: Users, userId: number, request: RequestGetDmListByUserIdDto): Promise<ResponseGetDmListByUserIdDto[] | null> {
-    if(loginUser.id !== userId) {
+    if(loginUser.id != userId) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
     const dmList = await this.directMessagesService.getDmListByUserId(userId, request);
