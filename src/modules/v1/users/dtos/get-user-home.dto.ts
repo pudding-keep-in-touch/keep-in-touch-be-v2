@@ -1,4 +1,5 @@
 import { Emotions } from "@entities/emotions.entity";
+import { Users } from "@entities/users.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { ResponseGetDmListByUserIdDto } from "@v1/direct-messages/dtos/get-dm-list-by-user-id.dto";
 import { IsOptional } from "class-validator";
@@ -14,7 +15,10 @@ class ResponseGetFriendDto {
 export class ResponseGetUserHomeDto {
   @ApiProperty({ description: '현재 home url이 로그인한 유저인지 판별하는 값', example: true, nullable: false })
   isOwner: boolean;
-
+  
+  @ApiProperty({ description: '현재 로그인한 유저', nullable: false, type: [Users]})
+  loginUser: Users;
+  
   @ApiProperty({ description: '쪽지 리스트', nullable: true, type: [ResponseGetDmListByUserIdDto] })
   @IsOptional()
   dmList?: ResponseGetDmListByUserIdDto[] | [];

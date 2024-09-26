@@ -36,7 +36,7 @@ export class AuthController {
      * 구글 로그인 콜백 처리
      * URL 하드코딩 되어 있으므로 개발/운영 환경 변수로 설정 필요
      */
-    const redirectUrl = `http://localhost:3020/auth/callback?accessToken=${accessToken}&userId=${user.id}`;
+    const redirectUrl = `${process.env.REDIRECT_URL}/auth/callback?accessToken=${accessToken}&userId=${user.id}`;;
     res.redirect(redirectUrl);
   }
 }
