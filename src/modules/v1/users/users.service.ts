@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { UsersRepository } from '@repositories/users.repository';
 import { Users } from '@entities/users.entity';
@@ -37,7 +37,7 @@ export class UsersService {
             },
             comment: {},
             isRead: dm.isRead,
-            createdAt: getFormatDate(dm.createdAt), //FIXME 시간 포맷 변경 필요
+            createdAt: getFormatDate(dm.createdAt),
           };
         }),
         emotions,
@@ -56,7 +56,10 @@ export class UsersService {
   }
 
   // 유저 id 기준 받은/보낸 쪽지 리스트 조회
-  async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<ResponseGetDmListByUserIdDto[] | null> {
+  async getDmListByUserId(loginUser: Users, userId: number, request: RequestGetDmListByUserIdDto): Promise<ResponseGetDmListByUserIdDto[] | null> {
+    if(loginUser.id != userId) {
+      throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
+    }
     const dmList = await this.directMessagesService.getDmListByUserId(userId, request);
     const parserData = dmList.map((dm) => {
       return {
@@ -70,7 +73,7 @@ export class UsersService {
         },
         comment: {},
         isRead: dm.isRead,
-        createdAt: getFormatDate(dm.createdAt), //FIXME 시간 포맷 변경 필요
+        createdAt: getFormatDate(dm.createdAt),
       };
     });
 

@@ -34,8 +34,8 @@ export class UsersController {
     description: '유저 id 기준 받은/보낸 쪽지 리스트 조회 하기',
     responseType: ResponseGetDmListByUserIdDto,
   })
-  async getDmListByUserId(@Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
-    const result = await this.usersService.getDmListByUserId(userId, request);
+  async getDmListByUserId(@UserAuth() users: Users, @Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
+    const result = await this.usersService.getDmListByUserId(users, userId, request);
     return response(result, '쪽지 리스트 조회 성공');
   }
 

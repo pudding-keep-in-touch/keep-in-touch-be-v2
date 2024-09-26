@@ -24,14 +24,14 @@ export class DirectMessagesController {
     return response(result, '쪽지 상세 조회 성공');
   }
 
-  // @UseGuards(JwtAuthGuard) 추가 및 sender_id 삭제 예정
   @Post()
+  @UseGuards(JwtAuthGuard)
   @GenerateSwaggerApiDoc({
     summary: '쪽지 전송',
-    description: '받는 사람 가입 email로 쪽지 보내기',
+    description: '받는 사람 id로 쪽지 보내기',
   })
-  async createDm(@Body() createDmDto: CreateDmDto) {
-    const result = await this.directMessagesService.createDm(createDmDto);
+  async createDm(@UserAuth() user: Users, @Body() createDmDto: CreateDmDto) {
+    const result = await this.directMessagesService.createDm(user.id, createDmDto);
 
     return response(result, '쪽지 전송 성공');
   }
