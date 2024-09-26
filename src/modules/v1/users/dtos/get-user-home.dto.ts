@@ -1,3 +1,4 @@
+import { Emotions } from "@entities/emotions.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { ResponseGetDmListByUserIdDto } from "@v1/direct-messages/dtos/get-dm-list-by-user-id.dto";
 import { IsOptional } from "class-validator";
@@ -19,6 +20,9 @@ export class ResponseGetUserHomeDto {
   dmList?: ResponseGetDmListByUserIdDto[] | [];
 
   @ApiProperty({ description: '친구 정보', nullable: true, type: ResponseGetFriendDto })
-  friendUser?: ResponseGetFriendDto;  
+  friendUser?: ResponseGetFriendDto;
+
+  @ApiProperty({description: '메시지 타입', nullable:false, type: [Emotions]})
+  emotions: Emotions[]
 }
 

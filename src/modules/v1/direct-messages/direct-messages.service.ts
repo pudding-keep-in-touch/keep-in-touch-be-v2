@@ -1,4 +1,4 @@
-import { getFormatDate } from './../../../common/helpers/date.helper';
+import { getFormatDate } from '@common/helpers/date.helper';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
 import { CreateDmDto } from './dtos/create-dm.dto';

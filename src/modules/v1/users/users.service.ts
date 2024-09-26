@@ -6,15 +6,23 @@ import { DirectMessagesService } from '@v1/direct-messages/direct-messages.servi
 import { LoginType, UserStatus } from './user.enum';
 import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
 import { getFormatDate } from '@common/helpers/date.helper';
+import { EmotionsRepository } from '@repositories/emotions.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository, private readonly directMessagesService: DirectMessagesService) {}
+  constructor(
+    private readonly usersRepository: UsersRepository, 
+    private readonly directMessagesService: DirectMessagesService,
+    private readonly emotionsRepository: EmotionsRepository
+  ) {}
 
   // 유저 홈 화면 조회
   async getUserHome(userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
+    const emotions = await this.emotionsRepository.getEmotions();
+    
     if (isOwner) {
       const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
+
       return {
         isOwner,
         dmList: dmList.map((dm) => {
@@ -31,8 +39,9 @@ export class UsersService {
             isRead: dm.isRead,
             createdAt: getFormatDate(dm.createdAt),
           };
-        })
-      }
+        }),
+        emotions,
+      };
     } else {
       const friend = await this.usersRepository.getUserById(userId);
       return {
@@ -40,7 +49,8 @@ export class UsersService {
         friendUser: {
           id: friend.id,
           nickname: friend.nickname,
-        }
+        },
+        emotions
       }
     }
   }
