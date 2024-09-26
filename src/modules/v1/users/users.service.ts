@@ -17,14 +17,15 @@ export class UsersService {
   ) {}
 
   // 유저 홈 화면 조회
-  async getUserHome(userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
+  async getUserHome(loginUser: Users, userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
     const emotions = await this.emotionsRepository.getEmotions();
-    
+
     if (isOwner) {
       const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
 
       return {
         isOwner,
+        loginUser,
         dmList: dmList.map((dm) => {
           return {
             id: dm.id,
@@ -46,6 +47,7 @@ export class UsersService {
       const friend = await this.usersRepository.getUserById(userId);
       return {
         isOwner,
+        loginUser,
         friendUser: {
           id: friend.id,
           nickname: friend.nickname,

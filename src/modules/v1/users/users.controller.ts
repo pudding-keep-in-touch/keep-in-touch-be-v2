@@ -24,7 +24,7 @@ export class UsersController {
   })
   async getUserHome(@UserAuth() users: Users, @Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
     const isOwner = userId == users.id;
-    const result = await this.usersService.getUserHome(userId, isOwner);
+    const result = await this.usersService.getUserHome(users, userId, isOwner);
     return response(result, '유저 홈 화면 조회 성공');
   }
 
