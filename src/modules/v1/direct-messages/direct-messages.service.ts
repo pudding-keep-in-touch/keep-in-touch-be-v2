@@ -1,7 +1,4 @@
 import { getFormatDate } from '@common/helpers/date.helper';
-import { Emotions } from '@entities/emotions.entity';
-import { Users } from '@entities/users.entity';
-// import { DirectMessageGateway } from '@gateways/direct-message.gateway';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
 import { CreateDmDto } from './dtos/create-dm.dto';
