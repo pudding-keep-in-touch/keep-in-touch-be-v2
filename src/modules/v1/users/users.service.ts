@@ -25,7 +25,10 @@ export class UsersService {
 
       return {
         isOwner,
-        loginUser,
+        loginUser: {
+          id: loginUser.id,
+          nickname: loginUser.nickname
+        },
         dmList: dmList.map((dm) => {
           return {
             id: dm.id,
@@ -45,9 +48,14 @@ export class UsersService {
       };
     } else {
       const friend = await this.usersRepository.getUserById(userId);
+      if(!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.')
+
       return {
         isOwner,
-        loginUser,
+        loginUser: {
+          id: loginUser.id,
+          nickname: loginUser.nickname
+        },
         friendUser: {
           id: friend.id,
           nickname: friend.nickname,
@@ -62,6 +70,7 @@ export class UsersService {
     if(loginUser.id != userId) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
+
     const dmList = await this.directMessagesService.getDmListByUserId(userId, request);
     const parserData = dmList.map((dm) => {
       return {
