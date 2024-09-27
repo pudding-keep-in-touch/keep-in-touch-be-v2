@@ -51,6 +51,8 @@ export class DirectMessagesService {
 
   // 메시지 전송
   async createDm(senderId: number, requestDto: CreateDmDto): Promise<{ dmId: number }> {
+    if(senderId === requestDto.receiverId) throw new BadRequestException("쪽지를 보낼 수 없습니다.");
+    
     try {
       const { receiverId, emotionId, content } = requestDto;
 
