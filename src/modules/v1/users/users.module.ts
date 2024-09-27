@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from '@repositories/users.repository';
@@ -13,7 +13,7 @@ import { EmotionsRepository } from '@repositories/emotions.repository';
     CustomTypeOrmModule.forCustomRepository([UsersRepository, DirectMessagesRepository, EmotionsRepository])
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [Logger, UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}
