@@ -8,12 +8,12 @@ import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import { Users } from '@entities/users.entity';
 
 @ApiTags('direct-messages')
+@UseGuards(JwtAuthGuard)
 @Controller('direct-messages')
 export class DirectMessagesController {
   constructor(private readonly directMessagesService: DirectMessagesService) {}
 
   @Get(':directMessageId')
-  @UseGuards(JwtAuthGuard)
   @GenerateSwaggerApiDoc({
     summary: '메시지 상세 조회',
     description: '메시지 id 기준 받은/보낸 쪽지 상세 조회',
@@ -25,7 +25,6 @@ export class DirectMessagesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @GenerateSwaggerApiDoc({
     summary: '쪽지 전송',
     description: '받는 사람 id로 쪽지 보내기',

@@ -31,12 +31,13 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
     });
   }
 
-  // 쪽지 생성
-  async createDm(senderId: number, receiverId: number, emotionId: number, content: string): Promise<DirectMessages> {
-    const sender = await this.manager.findOne('Users', { where: { id: senderId } });
-    const receiver = await this.manager.findOne('Users', { where: { id: receiverId } });
-    const emotion = await this.manager.findOne('Emotions', { where: { id: emotionId } });
+  async updateIsRead(dm: DirectMessages, isRead: boolean): Promise<DirectMessages> {
+    dm.isRead = isRead
+    return await this.save(dm);
+  }
 
-    return await this.save({ sender, receiver, emotion, content });
+  // 쪽지 생성
+  async createDm(newDm: Omit<DirectMessages, 'id' | 'sender' | 'receiver' | 'emotion' | 'createdAt' | 'updatedAt'>): Promise<DirectMessages> {
+    return await this.save(newDm);
   }
 }
