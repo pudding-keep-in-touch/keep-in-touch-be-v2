@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger,LoggerService, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, LoggerService, NotFoundException } from '@nestjs/common';
 import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { UsersRepository } from '@repositories/users.repository';
 import { Users } from '@entities/users.entity';
@@ -12,9 +12,9 @@ import { EmotionsRepository } from '@repositories/emotions.repository';
 export class UsersService {
   constructor(
     @Inject(Logger) private readonly logger: LoggerService,
-    private readonly usersRepository: UsersRepository, 
+    private readonly usersRepository: UsersRepository,
     private readonly directMessagesService: DirectMessagesService,
-    private readonly emotionsRepository: EmotionsRepository
+    private readonly emotionsRepository: EmotionsRepository,
   ) {}
 
   // 유저 홈 화면 조회
@@ -23,12 +23,13 @@ export class UsersService {
       const emotions = await this.emotionsRepository.getEmotions();
       if (isOwner) {
         const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
-  
+
         return {
           isOwner,
           loginUser: {
             id: loginUser.id,
-            nickname: loginUser.nickname
+            nickname: loginUser.nickname,
+            email: loginUser.email,
           },
           dmList: dmList.map((dm) => {
             return {
@@ -49,34 +50,35 @@ export class UsersService {
         };
       } else {
         const friend = await this.usersRepository.getUserById(userId);
-        if(!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.')
-  
+        if (!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
         return {
           isOwner,
           loginUser: {
             id: loginUser.id,
-            nickname: loginUser.nickname
+            nickname: loginUser.nickname,
+            email: loginUser.email,
           },
           friendUser: {
             id: friend.id,
             nickname: friend.nickname,
           },
-          emotions
-        }
+          emotions,
+        };
       }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error("============== getUserHome error: ", error)
+      this.logger.error('============== getUserHome error: ', error);
       throw new InternalServerErrorException('홈 화면을 가져오는 도중 오류가 발생했습니다.');
     }
   }
 
   // 유저 id 기준 받은/보낸 쪽지 리스트 조회
   async getDmListByUserId(loginUser: Users, userId: number, request: RequestGetDmListByUserIdDto): Promise<ResponseGetDmListByUserIdDto[] | null> {
-    if(loginUser.id != userId) {
+    if (loginUser.id != userId) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
 
@@ -97,14 +99,14 @@ export class UsersService {
           createdAt: getFormatDate(dm.createdAt),
         };
       });
-  
+
       return parserData;
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
       }
 
-      this.logger.error("============== getDmListByUserId error: ", error)
+      this.logger.error('============== getDmListByUserId error: ', error);
       throw new InternalServerErrorException('쪽지 리스트를 가져오는 도중 오류가 발생했습니다.');
     }
   }
@@ -112,7 +114,6 @@ export class UsersService {
   // 구글 로그인 유저 생성 또는 업데이트
   async createOrUpdateGoogleUser(googleUser: any): Promise<Users> {
     try {
-
       let user = await this.getUserByEmail(googleUser.email);
 
       if (!user) {
@@ -128,13 +129,12 @@ export class UsersService {
         user.nickname = `${googleUser.firstName} ${googleUser.lastName}`.trim();
         user.loginType = LoginType.GOOGLE; // 구글 로그인으로 업데이트
       }
-  
+
       return await this.usersRepository.save(user);
     } catch (error) {
-      this.logger.error("============== createOrUpdateGoogleUser error: ", error)
+      this.logger.error('============== createOrUpdateGoogleUser error: ', error);
       throw new InternalServerErrorException('구글 로그인 및 업데이트 도중 오류가 발생했습니다.');
     }
-
   }
 
   // 회원 탈퇴
@@ -144,19 +144,18 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException('사용자를 찾을 수 없습니다.');
       }
-  
+
       user.status = UserStatus.WITHDRAWN;
-  
+
       await this.usersRepository.save(user);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error("============== withdrawUser error: ", error)
+      this.logger.error('============== withdrawUser error: ', error);
       throw new InternalServerErrorException('탈퇴 도중 오류가 발생했습니다.');
     }
-
   }
 
   // 유저 이메일 조회
