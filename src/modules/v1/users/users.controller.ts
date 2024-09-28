@@ -24,7 +24,7 @@ export class UsersController {
   })
   async getUserHome(@UserAuth() users: Users, @Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
     const isOwner = userId == users.id;
-    const result = await this.usersService.getUserHome(userId, isOwner);
+    const result = await this.usersService.getUserHome(users, userId, isOwner);
     return response(result, '유저 홈 화면 조회 성공');
   }
 
@@ -34,8 +34,8 @@ export class UsersController {
     description: '유저 id 기준 받은/보낸 쪽지 리스트 조회 하기',
     responseType: ResponseGetDmListByUserIdDto,
   })
-  async getDmListByUserId(@Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
-    const result = await this.usersService.getDmListByUserId(userId, request);
+  async getDmListByUserId(@UserAuth() users: Users, @Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
+    const result = await this.usersService.getDmListByUserId(users, userId, request);
     return response(result, '쪽지 리스트 조회 성공');
   }
 

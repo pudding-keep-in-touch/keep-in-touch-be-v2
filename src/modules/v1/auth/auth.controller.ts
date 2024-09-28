@@ -1,10 +1,9 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { response } from '@common/helpers/common.helper';
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
-import { BaseResponseDto } from '@common/common.dto';
 import { ResponseGoogleCallbackDto } from './dtos/google-callback.dto';
 
 @ApiTags('auth')
@@ -29,18 +28,15 @@ export class AuthController {
     description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v1/auth/google/callback 으로 테스트 해주세요.',
     responseType: ResponseGoogleCallbackDto,
   })
-  async googleLoginCallback(@Req() req: any): Promise<BaseResponseDto<ResponseGoogleCallbackDto>> {
+  async googleLoginCallback(@Req() req: any, @Res() res: Response): Promise<void> {
     const { accessToken, user } = await this.authService.googleLogin(req.user);
 
-    const userInfo = {
-      accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        nickname: user.nickname,
-        loginType: user.loginType,
-      },
-    };
-    return response(userInfo, '로그인 성공');
+    /**
+     * @memo
+     * 구글 로그인 콜백 처리
+     * URL 하드코딩 되어 있으므로 개발/운영 환경 변수로 설정 필요
+     */
+    const redirectUrl = `${process.env.REDIRECT_URL}/auth/callback?accessToken=${accessToken}&userId=${user.id}`;;
+    res.redirect(redirectUrl);
   }
 }

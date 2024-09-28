@@ -7,4 +7,8 @@ export class EmotionsRepository extends Repository<Emotions> {
   async getEmotionByName(emotionName: string): Promise<Emotions | null> {
     return await this.findOne({ where: { name: emotionName } });
   }
+
+  async getEmotions(): Promise<Emotions[]> {
+    return await this.find();
+  }
 }

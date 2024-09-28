@@ -4,9 +4,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  // 환경 변수 로드
+  const environment = configService.get('APP_ENV') || 'development';
+  console.log(`Application is running in ${environment} mode`);
 
   app.enableCors();
 
@@ -22,7 +28,7 @@ async function bootstrap() {
     }),
   );
 
-  const configService = app.get(ConfigService);
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // swagger 설정
   const config = new DocumentBuilder()

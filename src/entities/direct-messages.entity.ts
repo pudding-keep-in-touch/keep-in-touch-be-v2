@@ -4,13 +4,39 @@ import { Emotions } from './emotions.entity';
 import { Users } from './users.entity';
 
 @Entity('direct_messages')
-export class DirectMessage {
+export class DirectMessages {
   @ApiProperty({
     description: '시퀀스 번호',
     example: 1,
   })
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
+
+  @ApiProperty({ description: '쪽지 보내는 유저 시퀀스 번호', example: 1 })
+  @Column({
+    type: 'bigint',
+    name: 'sender_id',
+    nullable: false,
+    unsigned: true,
+  })
+  senderId: number
+
+  @ApiProperty({ description: '쪽지 받는 유저 시퀀스 번호', example: 1 })
+  @Column({
+    type: 'bigint',
+    name: 'receiver_id',
+    nullable: false,
+    unsigned: true,
+  })
+  receiverId: number
+
+  @ApiProperty({ description: '감정 고유 번호', example: 1 })
+  @Column({
+    type: 'int',
+    name: 'emotion_id',
+    nullable: false,
+  })
+  emotionId: number
 
   @ApiProperty({
     description: '쪽지 내용',
@@ -20,11 +46,11 @@ export class DirectMessage {
     type: 'varchar',
     name: 'content',
     nullable: false,
-    length: 100,
+    length: 200,
   })
   content: string;
 
-  @ApiProperty({ description: '쪽지 읽음 여부', example: false })
+  @ApiProperty({ description: '쪽지 읽음 여부', example: false, required: false })
   @Column({
     type: 'boolean',
     name: 'is_read',
@@ -33,7 +59,7 @@ export class DirectMessage {
   })
   isRead: boolean;
 
-  @ApiProperty({ description: '쪽지 삭제 여부', example: false })
+  @ApiProperty({ description: '쪽지 삭제 여부', example: false, required: false })
   @Column({
     type: 'boolean',
     name: 'is_deleted',
@@ -42,7 +68,7 @@ export class DirectMessage {
   })
   isDeleted: boolean;
 
-  @ApiProperty({ description: '쪽지 생성 시각', example: '2024-09-10 00:00:00' })
+  @ApiProperty({ description: '쪽지 생성 시각', example: '2024-09-10 00:00:00', required: false })
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',
@@ -50,7 +76,7 @@ export class DirectMessage {
   })
   createdAt: Date;
 
-  @ApiProperty({ description: '쪽지 수정 시각', example: '2024-09-10 00:00:00' })
+  @ApiProperty({ description: '쪽지 수정 시각', example: '2024-09-10 00:00:00', required: false })
   @UpdateDateColumn({
     type: 'timestamp',
     name: 'updated_at',
@@ -59,28 +85,15 @@ export class DirectMessage {
   })
   updatedAt: Date;
 
-  @ApiProperty({
-    description: '보낸 사람 id',
-    example: 1,
-  })
   @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
-  @JoinColumn({ name: 'sender_id' })
+  @JoinColumn({ name: 'sender_id', referencedColumnName: "id" })
   sender: Users;
 
-  @ApiProperty({
-    description: '받는 사람 id',
-    example: 1,
-  })
   @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
-  @JoinColumn({ name: 'receiver_id' })
+  @JoinColumn({ name: 'receiver_id', referencedColumnName: "id" })
   receiver: Users;
 
-  @ApiProperty({
-    description: '감정 아이디',
-    example: '1',
-  })
-  
   @OneToOne(() => Emotions, { cascade: false, nullable: false })
-  @JoinColumn({ name: 'emotion_id' })
+  @JoinColumn({ name: 'emotion_id', referencedColumnName: 'id' })
   emotion: Emotions;
 }

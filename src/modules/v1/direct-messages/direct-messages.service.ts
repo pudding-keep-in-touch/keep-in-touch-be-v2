@@ -1,77 +1,79 @@
-import { Emotions } from '@entities/emotions.entity';
-import { Users } from '@entities/users.entity';
-// import { DirectMessageGateway } from '@gateways/direct-message.gateway';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { getFormatDate } from '@common/helpers/date.helper';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
-import { EmotionsRepository } from '@repositories/emotions.repository';
-import { UsersRepository } from '@repositories/users.repository';
 import { CreateDmDto } from './dtos/create-dm.dto';
-import { RequestGetDmDetailDto } from './dtos/get-dm-detail.dto';
 import { RequestGetDmListByUserIdDto } from './dtos/get-dm-list-by-user-id.dto';
-import { DirectMessage } from '@entities/direct-messages.entity';
+import { DirectMessages } from '@entities/direct-messages.entity';
+import { DirectMessage } from 'src/interfaces/direct-message.interface';
+import { UsersRepository } from '@repositories/users.repository';
 
 @Injectable()
 export class DirectMessagesService {
   constructor(
     private readonly directMessageRepository: DirectMessagesRepository,
-    private readonly userRepository: UsersRepository,
-    private readonly emotionsRepository: EmotionsRepository, // private readonly directMessageGateway: DirectMessageGateway,
+    private readonly usersRepository: UsersRepository
   ) {}
 
+  // 로그인한 유저와 조회하려고 하는 메시지의 보낸 사람이 같은지 확인
+  async checkDirectMessageOwnership(userId: number, senderId: number): Promise<boolean> {
+    return userId === senderId;
+  }
+
   // 받은 메시지 조회
-  async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<DirectMessage[]> {
+  async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<DirectMessages[]> {
     return await this.directMessageRepository.getDmListByUserId(userId, request.type, request.page, request.limit, request.order);
   }
 
-  
   // 메시지 상세 조회
-  async getDmDetail(directMessageId: number, request: RequestGetDmDetailDto): Promise<any> {
-    // user id 조회
-    if (request.type === 'received') {
-      return {
-        id: directMessageId,
-        senderId: 10,
-        receiverId: 12,
-        content: '안녕, 너가 토이 프로젝트를 배포까지 하다니 진짜 대단하다..!!',
-        emotion: {
-          name: '응원과 감사',
-          emoji: '🌟',
-        },
-        isRead: false,
-        isDeleted: false,
-        createdAt: '2024-09-02',
-        comments: {
-          emoji: '😁',
-          content: '덕분에 자신감이 생겼어. 고마워',
-          createdAt: '2024-09-02',
-        },
-      };
+  async getDmDetail(directMessageId: number, userId: number): Promise<DirectMessage> {
+    const receivedDm = await this.directMessageRepository.getDmById(directMessageId);
+
+    if (!receivedDm) {
+      throw new BadRequestException('쪽지를 찾을 수 없습니다.');
     }
+
+    const isOnwer = await this.checkDirectMessageOwnership(userId, receivedDm.sender.id);
+
+    if (!isOnwer) {
+      throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
+    }
+
+    const updatedDm = await this.directMessageRepository.updateIsRead(receivedDm, true);
+
+    return {
+      id: updatedDm.id,
+      senderId: updatedDm.sender.id,
+      receiverId: updatedDm.receiver.id,
+      content: updatedDm.content,
+      emotion: {
+        name: updatedDm.emotion.name,
+        emoji: updatedDm.emotion.emoji,
+      },
+      isRead: updatedDm.isRead,
+      comments: {},
+      createdAt: getFormatDate(updatedDm.createdAt),
+    };
   }
 
   // 메시지 전송
-  async createDm(requestDto: CreateDmDto): Promise<{ dmId: number; receiverId: number }> {
+  async createDm(senderId: number, requestDto: CreateDmDto): Promise<{ dmId: number }> {
+    if(senderId == requestDto.receiverId) throw new BadRequestException("쪽지를 보낼 수 없습니다.");
+
     try {
-      const existReceiver: Users = await this.userRepository.getUserByEmail(requestDto.receiverEmail);
+      const receiverUser = await this.usersRepository.getUserById(requestDto.receiverId);
+      if(!receiverUser) throw new NotFoundException("사용자를 찾을 수 없습니다.");
 
-      if (!existReceiver) {
-        throw new BadRequestException('받는 사람을 찾을 수 없습니다.');
+      const newDm = {
+        content: requestDto.content,
+        senderId: senderId,
+        receiverId: requestDto.receiverId,
+        emotionId: requestDto.emotionId,
+        isRead: false,
+        isDeleted: false,
       }
+      const dm = await this.directMessageRepository.createDm(newDm);
 
-      const emotion: Emotions = await this.emotionsRepository.getEmotionByName(requestDto.emotionName);
-
-      if (!emotion) {
-        throw new BadRequestException('감정을 찾을 수 없습니다.');
-      }
-
-      const newDm = await this.directMessageRepository.createDm(requestDto.senderId, existReceiver.id, emotion.id, requestDto.content);
-
-      // 상대방에게 쪽지 도착 알림 전송
-      // const notificationMessage = `새로운 쪽지가 도착했습니다: ${newDm.id}(보낸 사람 아이디: ${requestDto.sender_id})`;
-
-      // this.directMessageGateway.sendNotificationToUser(existReceiver.id, notificationMessage);
-
-      return { dmId: newDm.id, receiverId: existReceiver.id };
+      return { dmId: dm.id };
     } catch (error) {
       throw error;
     }
