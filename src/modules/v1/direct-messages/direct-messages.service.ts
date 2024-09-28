@@ -9,10 +9,7 @@ import { UsersRepository } from '@repositories/users.repository';
 
 @Injectable()
 export class DirectMessagesService {
-  constructor(
-    private readonly directMessageRepository: DirectMessagesRepository,
-    private readonly usersRepository: UsersRepository
-  ) {}
+  constructor(private readonly directMessageRepository: DirectMessagesRepository, private readonly usersRepository: UsersRepository) {}
 
   // 로그인한 유저와 조회하려고 하는 메시지의 보낸 사람이 같은지 확인
   async checkDirectMessageOwnership(userId: number, senderId: number): Promise<boolean> {
@@ -29,7 +26,7 @@ export class DirectMessagesService {
     const receivedDm = await this.directMessageRepository.getDmById(directMessageId);
 
     if (!receivedDm) {
-      throw new BadRequestException('쪽지를 찾을 수 없습니다.');
+      throw new NotFoundException('쪽지를 찾을 수 없습니다.');
     }
 
     const isOnwer = await this.checkDirectMessageOwnership(userId, receivedDm.sender.id);
@@ -57,11 +54,12 @@ export class DirectMessagesService {
 
   // 메시지 전송
   async createDm(senderId: number, requestDto: CreateDmDto): Promise<{ dmId: number }> {
-    if(senderId == requestDto.receiverId) throw new BadRequestException("쪽지를 보낼 수 없습니다.");
-
     try {
+      if (senderId === requestDto.receiverId) throw new BadRequestException('쪽지를 보내는 사람과 받는 사람이 동일합니다.');
+
       const receiverUser = await this.usersRepository.getUserById(requestDto.receiverId);
-      if(!receiverUser) throw new NotFoundException("사용자를 찾을 수 없습니다.");
+
+      if (!receiverUser) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
       const newDm = {
         content: requestDto.content,
@@ -70,7 +68,8 @@ export class DirectMessagesService {
         emotionId: requestDto.emotionId,
         isRead: false,
         isDeleted: false,
-      }
+      };
+
       const dm = await this.directMessageRepository.createDm(newDm);
 
       return { dmId: dm.id };
