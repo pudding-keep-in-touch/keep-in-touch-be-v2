@@ -7,9 +7,9 @@ import { CreateDmDto } from './dtos/create-dm.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import { Users } from '@entities/users.entity';
 
+@Controller('direct-messages')
 @ApiTags('direct-messages')
 @UseGuards(JwtAuthGuard)
-@Controller('direct-messages')
 export class DirectMessagesController {
   constructor(private readonly directMessagesService: DirectMessagesService) {}
 

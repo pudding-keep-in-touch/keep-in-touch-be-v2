@@ -21,6 +21,7 @@ export class UsersService {
   async getUserHome(loginUser: Users, userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
     try {
       const emotions = await this.emotionsRepository.getEmotions();
+
       if (isOwner) {
         const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
 
@@ -48,24 +49,25 @@ export class UsersService {
           }),
           emotions,
         };
-      } else {
-        const friend = await this.usersRepository.getUserById(userId);
-        if (!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.');
-
-        return {
-          isOwner,
-          loginUser: {
-            id: loginUser.id,
-            nickname: loginUser.nickname,
-            email: loginUser.email,
-          },
-          friendUser: {
-            id: friend.id,
-            nickname: friend.nickname,
-          },
-          emotions,
-        };
       }
+
+      const friend = await this.usersRepository.getUserById(userId);
+
+      if (!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
+      return {
+        isOwner,
+        loginUser: {
+          id: loginUser.id,
+          nickname: loginUser.nickname,
+          email: loginUser.email,
+        },
+        friendUser: {
+          id: friend.id,
+          nickname: friend.nickname,
+        },
+        emotions,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

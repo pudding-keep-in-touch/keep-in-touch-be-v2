@@ -10,8 +10,8 @@ import { Users } from '@entities/users.entity';
 import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 
-@ApiTags('users')
 @Controller('users')
+@ApiTags('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -23,8 +23,9 @@ export class UsersController {
     responseType: ResponseGetUserHomeDto,
   })
   async getUserHome(@UserAuth() users: Users, @Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
-    const isOwner = userId == users.id;
+    const isOwner = userId === users.id;
     const result = await this.usersService.getUserHome(users, userId, isOwner);
+
     return response(result, '유저 홈 화면 조회 성공');
   }
 
@@ -34,8 +35,13 @@ export class UsersController {
     description: '유저 id 기준 받은/보낸 쪽지 리스트 조회 하기',
     responseType: ResponseGetDmListByUserIdDto,
   })
-  async getDmListByUserId(@UserAuth() users: Users, @Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
+  async getDmListByUserId(
+    @UserAuth() users: Users,
+    @Param('userId') userId: number,
+    @Query() request: RequestGetDmListByUserIdDto,
+  ): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
     const result = await this.usersService.getDmListByUserId(users, userId, request);
+
     return response(result, '쪽지 리스트 조회 성공');
   }
 

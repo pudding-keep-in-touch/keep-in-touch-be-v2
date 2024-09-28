@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 
 @CustomEntityRepository(Emotions)
 export class EmotionsRepository extends Repository<Emotions> {
-  async getEmotionByName(emotionName: string): Promise<Emotions | null> {
-    return await this.findOne({ where: { name: emotionName } });
+  async getEmotionById(emotionId: number): Promise<Emotions | null> {
+    return await this.findOne({ where: { id: emotionId } });
   }
 
   async getEmotions(): Promise<Emotions[]> {
