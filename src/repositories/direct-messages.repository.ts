@@ -22,7 +22,6 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
     const take = limit;
     const userField = type === DmUserType.RECEIVED ? 'receiver' : 'sender';
 
-    console.log("@@@@@@@@@@@",order);
     return await this.find({
       where: { [userField]: { id: userId }, isDeleted: false },
       relations: ['sender', 'receiver', 'emotion'],
