@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - develop
+      - infra-dev
 
 jobs:
   build-and-push-image:
@@ -25,18 +25,4 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: keepintouch/keepintouch-be:develop
-
-    # # 인스턴스 접속 & 애플리케이션 실행
-    # - name: Connect to Server & Execute Application
-    #   uses: appleboy/ssh-action@v0.1.6
-    #   with:
-    #     host: ${{ secrets.DEV_BE_HOST }}
-    #     username: ${{ secrets.DEV_BE_USERNAME }}
-    #     key: ${{ secrets.DEV_BE_SSH_KEY }}
-    #     port: 22
-    #     script: |
-    #       sudo docker stop keepintouch-be
-    #       sudo docker rm keepintouch-be
-    #       sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/keepintouch-be:develop
-    #       sudo docker run -d -p 3000:3000 --name keepintouch-be ${{ secrets.DOCKERHUB_USERNAME }}/keepintouch-be:develop --env-file ./.env
+        tags: keepintouch/keepintouch-be:0.1.0
