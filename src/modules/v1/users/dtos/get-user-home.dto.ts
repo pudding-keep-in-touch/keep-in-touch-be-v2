@@ -31,7 +31,11 @@ export class ResponseGetUserHomeDto {
 
   @ApiProperty({ description: '쪽지 리스트', nullable: true, type: [ResponseGetDmListByUserIdDto] })
   @IsOptional()
-  dmList?: ResponseGetDmListByUserIdDto[] | [];
+  receivedDmList?: ResponseGetDmListByUserIdDto[] | [];
+
+  @ApiProperty({ description: '쪽지 리스트', nullable: true, type: [ResponseGetDmListByUserIdDto] })
+  @IsOptional()
+  sentDmList?: ResponseGetDmListByUserIdDto[] | [];
 
   @ApiProperty({ description: '친구 정보', nullable: true, type: ResponseGetFriendDto })
   friendUser?: ResponseGetFriendDto;

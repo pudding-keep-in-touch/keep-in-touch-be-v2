@@ -7,6 +7,7 @@ import { LoginType, UserStatus } from './user.enum';
 import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
 import { getFormatDate } from '@common/helpers/date.helper';
 import { EmotionsRepository } from '@repositories/emotions.repository';
+import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 
 @Injectable()
 export class UsersService {
@@ -19,11 +20,12 @@ export class UsersService {
 
   // 유저 홈 화면 조회
   async getUserHome(loginUser: Users, userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
+
     try {
       const emotions = await this.emotionsRepository.getEmotions();
-
       if (isOwner) {
-        const dmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
+        const receivedDmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
+        const sentDmList = await this.directMessagesService.getDmListByUserId(userId, {type:DmUserType.SENT, limit: 3 });
 
         return {
           isOwner,
@@ -32,7 +34,22 @@ export class UsersService {
             nickname: loginUser.nickname,
             email: loginUser.email,
           },
-          dmList: dmList.map((dm) => {
+          receivedDmList: receivedDmList.map((dm) => {
+            return {
+              id: dm.id,
+              senderId: dm.sender.id,
+              receiverId: dm.receiver.id,
+              content: dm.content,
+              emotion: {
+                name: dm.emotion.name,
+                emoji: dm.emotion.emoji,
+              },
+              comment: {},
+              isRead: dm.isRead,
+              createdAt: getFormatDate(dm.createdAt),
+            };
+          }),
+          sentDmList: sentDmList.map((dm) => {
             return {
               id: dm.id,
               senderId: dm.sender.id,
@@ -49,25 +66,24 @@ export class UsersService {
           }),
           emotions,
         };
+      } else {
+        const friend = await this.usersRepository.getUserById(userId);
+        if (!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
+        return {
+          isOwner,
+          loginUser: {
+            id: loginUser.id,
+            nickname: loginUser.nickname,
+            email: loginUser.email,
+          },
+          friendUser: {
+            id: friend.id,
+            nickname: friend.nickname,
+          },
+          emotions,
+        };
       }
-
-      const friend = await this.usersRepository.getUserById(userId);
-
-      if (!friend) throw new NotFoundException('사용자를 찾을 수 없습니다.');
-
-      return {
-        isOwner,
-        loginUser: {
-          id: loginUser.id,
-          nickname: loginUser.nickname,
-          email: loginUser.email,
-        },
-        friendUser: {
-          id: friend.id,
-          nickname: friend.nickname,
-        },
-        emotions,
-      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
