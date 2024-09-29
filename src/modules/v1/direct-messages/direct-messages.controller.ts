@@ -15,7 +15,7 @@ export class DirectMessagesController {
 
   @Get(':directMessageId')
   @GenerateSwaggerApiDoc({
-    summary: '메시지 상세 조회',
+    summary: '받은/보낸 메시지 상세 조회',
     description: '메시지 id 기준 받은/보낸 쪽지 상세 조회',
   })
   async getDmDetail(@UserAuth() user: Users, @Param('directMessageId') directMessageId: number): Promise<any> {
