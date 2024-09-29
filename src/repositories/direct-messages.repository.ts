@@ -13,7 +13,7 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
   // 유저 id 기준 쪽지 리스트 조회
   async getDmListByUserId(
     userId: number,
-    type: DmUserType,
+    type: DmUserType = DmUserType.RECEIVED,
     page: number = 1,
     limit: number = 10,
     order: 'desc' | 'asc' = 'desc',
@@ -22,6 +22,7 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
     const take = limit;
     const userField = type === DmUserType.RECEIVED ? 'receiver' : 'sender';
 
+    console.log("@@@@@@@@@@@",order);
     return await this.find({
       where: { [userField]: { id: userId }, isDeleted: false },
       relations: ['sender', 'receiver', 'emotion'],
