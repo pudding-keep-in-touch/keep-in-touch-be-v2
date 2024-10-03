@@ -27,7 +27,7 @@ export class DirectMessagesService {
   }
 
   // 보낸/받은 메시지 상세 조회
-  async getDmDetail(directMessageId: number, userId: number): Promise<DirectMessage> {
+  async getDmDetail(directMessageId: number, userId: number): Promise<DirectMessage & { receiverNickname: string }> {
     const receivedDm = await this.directMessagesRepository.getDmById(directMessageId);
 
     if (!receivedDm) {
@@ -46,6 +46,7 @@ export class DirectMessagesService {
       id: updatedDm.id,
       senderId: updatedDm.sender.id,
       receiverId: updatedDm.receiver.id,
+      receiverNickname: updatedDm.receiver.nickname,
       content: updatedDm.content,
       emotion: {
         name: updatedDm.emotion.name,
@@ -60,7 +61,7 @@ export class DirectMessagesService {
   // 메시지 전송
   async createDm(senderId: number, requestDto: CreateDmDto): Promise<{ dmId: number }> {
     try {
-      if (senderId === requestDto.receiverId) throw new BadRequestException('쪽지를 보내는 사람과 받는 사람이 동일합니다.');
+      if (senderId == requestDto.receiverId) throw new BadRequestException('쪽지를 보내는 사람과 받는 사람이 동일합니다.');
 
       const receiverUser = await this.usersRepository.getUserById(requestDto.receiverId);
 
