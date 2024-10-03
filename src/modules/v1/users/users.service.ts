@@ -54,6 +54,7 @@ export class UsersService {
               id: dm.id,
               senderId: dm.sender.id,
               receiverId: dm.receiver.id,
+              receiverNickname: dm.receiver.nickname,
               content: dm.content,
               emotion: {
                 name: dm.emotion.name,
@@ -107,6 +108,7 @@ export class UsersService {
           id: dm.id,
           senderId: dm.sender.id,
           receiverId: dm.receiver.id,
+          receiverNickname: dm.receiver.nickname,
           content: dm.content,
           emotion: {
             name: dm.emotion.name,
