@@ -37,7 +37,7 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: keepintouch/keepintouch-be:0.1.0
+        tags: keepintouch/keepintouch-be:develop
     
     # 인스턴스 접속 & 애플리케이션 실행
     - name: Connect to Server & Execute Application
