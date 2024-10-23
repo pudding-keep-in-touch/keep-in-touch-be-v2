@@ -7,7 +7,7 @@ import { response } from '@common/helpers/common.helper';
 import { BaseResponseDto } from '@common/common.dto';
 import { UserAuth } from '@common/common.decorator';
 import { Users } from '@entities/users.entity';
-import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
+import { ResponseGetUserHomeDto, ResponseGetFriendDto } from './dtos/get-user-home.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 
 @Controller('users')
@@ -43,6 +43,18 @@ export class UsersController {
     const result = await this.usersService.getDmListByUserId(users, userId, request);
 
     return response(result, '쪽지 리스트 조회 성공');
+  }
+
+  @Get(':userId')
+  @GenerateSwaggerApiDoc({
+    summary: '쪽지 받는 사람 닉네임 조회',
+    description: '쪽지 받는 사람 닉네임 조회',
+    responseType: ResponseGetFriendDto,
+  })
+  async getFriendName(@Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetFriendDto>> {
+    const result = await this.usersService.getUsernameById(userId);
+
+    return response(result, '쪽지 받는 사람 닉네임 조회 성공');
   }
 
   @Delete(':userId/withdraw')

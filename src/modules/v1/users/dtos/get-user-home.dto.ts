@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { IsOptional } from 'class-validator';
 
-class ResponseGetFriendDto {
+export class ResponseGetFriendDto {
   @ApiProperty({ description: '친구 id', example: 1 })
   id: number;
 
