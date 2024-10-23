@@ -4,7 +4,7 @@ import { UsersRepository } from '@repositories/users.repository';
 import { Users } from '@entities/users.entity';
 import { DirectMessagesService } from '@v1/direct-messages/direct-messages.service';
 import { LoginType, UserStatus } from './user.enum';
-import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
+import { ResponseGetFriendDto, ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
 import { getFormatDate } from '@common/helpers/date.helper';
 import { EmotionsRepository } from '@repositories/emotions.repository';
 import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
@@ -20,12 +20,11 @@ export class UsersService {
 
   // 유저 홈 화면 조회
   async getUserHome(loginUser: Users, userId: number, isOwner: boolean): Promise<ResponseGetUserHomeDto> {
-
     try {
       const emotions = await this.emotionsRepository.getEmotions();
       if (isOwner) {
         const receivedDmList = await this.directMessagesService.getDmListByUserId(userId, { limit: 3 });
-        const sentDmList = await this.directMessagesService.getDmListByUserId(userId, {type:DmUserType.SENT, limit: 3 });
+        const sentDmList = await this.directMessagesService.getDmListByUserId(userId, { type: DmUserType.SENT, limit: 3 });
 
         return {
           isOwner,
@@ -186,5 +185,11 @@ export class UsersService {
   // 유저 id 조회
   async getUserById(id: number): Promise<Users> {
     return await this.usersRepository.getUserById(id);
+  }
+
+  async getUsernameById(id: number): Promise<ResponseGetFriendDto> {
+    const user = await this.getUserById(id);
+
+    return { id, nickname: user.nickname };
   }
 }
