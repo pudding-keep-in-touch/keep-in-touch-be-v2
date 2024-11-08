@@ -13,5 +13,6 @@ export async function postgreSqlConfig(configService: ConfigService): Promise<Ty
     entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
     synchronize: false,
     autoLoadEntities: true,
+    logging: configService.get('APP_ENV') === 'local',
   };
 }
