@@ -1,5 +1,5 @@
 import { BaseResponseDto } from '@common/common.dto';
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { type ExceptionFilter, Catch, type ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
@@ -16,7 +16,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
-      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null && 'message' in exceptionResponse) {
+      } else if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null &&
+        'message' in exceptionResponse
+      ) {
         message = (exceptionResponse as { message: string }).message;
       }
     }
@@ -24,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const responseBody: BaseResponseDto<null> = {
       status: status,
       message: message,
-      data: null,  // 에러 발생 시에는 데이터가 없음
+      data: null, // 에러 발생 시에는 데이터가 없음
     };
 
     response.status(status).json(responseBody);

@@ -69,6 +69,9 @@ export class ResponseGetDmListByUserIdDto {
   @ApiProperty({ description: '받는 사람 ID', example: 3 })
   receiverId: number;
 
+  @ApiProperty({ description: '받는 사람 닉네임', example: '홍길동', nullable: true })
+  receiverNickname?: string;
+
   @ApiProperty({ description: '쪽지 내용', example: '안녕하세요, 잘 지내시나요?' })
   content: string;
 

@@ -1,4 +1,7 @@
-import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
+import {
+  type RequestGetDmListByUserIdDto,
+  ResponseGetDmListByUserIdDto,
+} from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { Controller, Get, Param, Query, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -7,11 +10,11 @@ import { response } from '@common/helpers/common.helper';
 import { BaseResponseDto } from '@common/common.dto';
 import { UserAuth } from '@common/common.decorator';
 import { Users } from '@entities/users.entity';
-import { ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
+import { ResponseGetUserHomeDto, ResponseGetFriendDto } from './dtos/get-user-home.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 
-@ApiTags('users')
 @Controller('users')
+@ApiTags('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -22,9 +25,13 @@ export class UsersController {
     description: '유저 홈 화면 조회',
     responseType: ResponseGetUserHomeDto,
   })
-  async getUserHome(@UserAuth() users: Users, @Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
-    const isOwner = userId == users.id;
+  async getUserHome(
+    @UserAuth() users: Users,
+    @Param('userId') userId: number,
+  ): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
+    const isOwner = userId === users.id;
     const result = await this.usersService.getUserHome(users, userId, isOwner);
+
     return response(result, '유저 홈 화면 조회 성공');
   }
 
@@ -34,9 +41,26 @@ export class UsersController {
     description: '유저 id 기준 받은/보낸 쪽지 리스트 조회 하기',
     responseType: ResponseGetDmListByUserIdDto,
   })
-  async getDmListByUserId(@UserAuth() users: Users, @Param('userId') userId: number, @Query() request: RequestGetDmListByUserIdDto): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
+  async getDmListByUserId(
+    @UserAuth() users: Users,
+    @Param('userId') userId: number,
+    @Query() request: RequestGetDmListByUserIdDto,
+  ): Promise<BaseResponseDto<ResponseGetDmListByUserIdDto[]>> {
     const result = await this.usersService.getDmListByUserId(users, userId, request);
+
     return response(result, '쪽지 리스트 조회 성공');
+  }
+
+  @Get(':userId')
+  @GenerateSwaggerApiDoc({
+    summary: '쪽지 받는 사람 닉네임 조회',
+    description: '쪽지 받는 사람 닉네임 조회',
+    responseType: ResponseGetFriendDto,
+  })
+  async getFriendName(@Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetFriendDto>> {
+    const result = await this.usersService.getUsernameById(userId);
+
+    return response(result, '쪽지 받는 사람 닉네임 조회 성공');
   }
 
   @Delete(':userId/withdraw')

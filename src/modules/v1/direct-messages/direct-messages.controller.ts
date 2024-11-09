@@ -7,15 +7,15 @@ import { CreateDmDto } from './dtos/create-dm.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import { Users } from '@entities/users.entity';
 
+@Controller('direct-messages')
 @ApiTags('direct-messages')
 @UseGuards(JwtAuthGuard)
-@Controller('direct-messages')
 export class DirectMessagesController {
   constructor(private readonly directMessagesService: DirectMessagesService) {}
 
   @Get(':directMessageId')
   @GenerateSwaggerApiDoc({
-    summary: '메시지 상세 조회',
+    summary: '받은/보낸 메시지 상세 조회',
     description: '메시지 id 기준 받은/보낸 쪽지 상세 조회',
   })
   async getDmDetail(@UserAuth() user: Users, @Param('directMessageId') directMessageId: number): Promise<any> {
