@@ -1,4 +1,4 @@
-import { applyDecorators, SetMetadata, Type } from '@nestjs/common';
+import { applyDecorators, SetMetadata, type Type } from '@nestjs/common';
 import { SwaggerDocInterface } from './common.interface';
 import {
   ApiBearerAuth,
@@ -14,7 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { isEmpty, isUndefined } from 'lodash';
 import { BaseResponseDto } from './common.dto';
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
 /**
  * @brief Auth가 필요하지 않을때 데코레이터
@@ -42,19 +42,38 @@ export const ResponseDtoType = <T extends Type<unknown>>(t: T) =>
 
 export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) => {
   const methodDecorators: MethodDecorator[] = [];
-  const { jwt = true, summary, description, responseType, headers = [], tags = [], params = [], query = [], body = {} } = swaggerDocInterface;
+  const {
+    jwt = true,
+    summary,
+    description,
+    responseType,
+    headers = [],
+    tags = [],
+    params = [],
+    query = [],
+    body = {},
+  } = swaggerDocInterface;
   //객체인지 배열인지 구분하여 처리
   const headerOptions = Array.isArray(headers) ? headers : [headers];
 
   if (jwt) methodDecorators.push(ApiBearerAuth('jwt'));
 
-  headerOptions.forEach((h) => methodDecorators.push(ApiHeader(h)));
+  //headerOptions.forEach((h) => methodDecorators.push(ApiHeader(h)));
+  for (const h of headerOptions) {
+    methodDecorators.push(ApiHeader(h));
+  }
 
   const paramsOptions = Array.isArray(params) ? params : [params];
-  paramsOptions.forEach((p) => methodDecorators.push(ApiParam(p)));
+  //paramsOptions.forEach((p) => methodDecorators.push(ApiParam(p)));
+  for (const p of paramsOptions) {
+    methodDecorators.push(ApiParam(p));
+  }
 
   const queryOptions = Array.isArray(query) ? query : [query];
-  queryOptions.forEach((q) => methodDecorators.push(ApiQuery(q)));
+  //queryOptions.forEach((q) => methodDecorators.push(ApiQuery(q)));
+  for (const q of queryOptions) {
+    methodDecorators.push(ApiQuery(q));
+  }
 
   if (Array.isArray(tags)) methodDecorators.push(ApiTags(...tags));
 

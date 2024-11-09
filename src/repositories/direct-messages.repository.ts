@@ -14,8 +14,8 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
   async getDmListByUserId(
     userId: number,
     type: DmUserType = DmUserType.RECEIVED,
-    page: number = 1,
-    limit: number = 10,
+    page = 1,
+    limit = 10,
     order: 'desc' | 'asc' = 'desc',
   ): Promise<DirectMessages[] | null> {
     const skip = (page - 1) * limit;
@@ -32,12 +32,14 @@ export class DirectMessagesRepository extends Repository<DirectMessages> {
   }
 
   async updateIsRead(dm: DirectMessages, isRead: boolean): Promise<DirectMessages> {
-    dm.isRead = isRead
+    dm.isRead = isRead;
     return await this.save(dm);
   }
 
   // 쪽지 생성
-  async createDm(newDm: Omit<DirectMessages, 'id' | 'sender' | 'receiver' | 'emotion' | 'createdAt' | 'updatedAt'>): Promise<DirectMessages> {
+  async createDm(
+    newDm: Omit<DirectMessages, 'id' | 'sender' | 'receiver' | 'emotion' | 'createdAt' | 'updatedAt'>,
+  ): Promise<DirectMessages> {
     return await this.save(newDm);
   }
 }

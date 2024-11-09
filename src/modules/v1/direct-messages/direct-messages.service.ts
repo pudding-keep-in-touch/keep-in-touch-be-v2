@@ -23,7 +23,13 @@ export class DirectMessagesService {
 
   // 받은 메시지 조회
   async getDmListByUserId(userId: number, request: RequestGetDmListByUserIdDto): Promise<DirectMessages[]> {
-    return await this.directMessagesRepository.getDmListByUserId(userId, request.type, request.page, request.limit, request.order);
+    return await this.directMessagesRepository.getDmListByUserId(
+      userId,
+      request.type,
+      request.page,
+      request.limit,
+      request.order,
+    );
   }
 
   // 보낸/받은 메시지 상세 조회
@@ -60,31 +66,28 @@ export class DirectMessagesService {
 
   // 메시지 전송
   async createDm(senderId: number, requestDto: CreateDmDto): Promise<{ dmId: number }> {
-    try {
-      if (senderId == requestDto.receiverId) throw new BadRequestException('쪽지를 보내는 사람과 받는 사람이 동일합니다.');
+    if (senderId === requestDto.receiverId)
+      throw new BadRequestException('쪽지를 보내는 사람과 받는 사람이 동일합니다.');
 
-      const receiverUser = await this.usersRepository.getUserById(requestDto.receiverId);
+    const receiverUser = await this.usersRepository.getUserById(requestDto.receiverId);
 
-      if (!receiverUser) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    if (!receiverUser) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
-      const emotion = await this.emotionsRepository.getEmotionById(requestDto.emotionId);
+    const emotion = await this.emotionsRepository.getEmotionById(requestDto.emotionId);
 
-      if (!emotion) throw new NotFoundException('감정을 찾을 수 없습니다.');
+    if (!emotion) throw new NotFoundException('감정을 찾을 수 없습니다.');
 
-      const newDm = {
-        content: requestDto.content,
-        senderId: senderId,
-        receiverId: requestDto.receiverId,
-        emotionId: requestDto.emotionId,
-        isRead: false,
-        isDeleted: false,
-      };
+    const newDm = {
+      content: requestDto.content,
+      senderId: senderId,
+      receiverId: requestDto.receiverId,
+      emotionId: requestDto.emotionId,
+      isRead: false,
+      isDeleted: false,
+    };
 
-      const dm = await this.directMessagesRepository.createDm(newDm);
+    const dm = await this.directMessagesRepository.createDm(newDm);
 
-      return { dmId: dm.id };
-    } catch (error) {
-      throw error;
-    }
+    return { dmId: dm.id };
   }
 }

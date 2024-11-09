@@ -19,7 +19,7 @@ export class DirectMessages {
     nullable: false,
     unsigned: true,
   })
-  senderId: number
+  senderId: number;
 
   @ApiProperty({ description: '쪽지 받는 유저 시퀀스 번호', example: 1 })
   @Column({
@@ -28,7 +28,7 @@ export class DirectMessages {
     nullable: false,
     unsigned: true,
   })
-  receiverId: number
+  receiverId: number;
 
   @ApiProperty({ description: '감정 고유 번호', example: 1 })
   @Column({
@@ -36,7 +36,7 @@ export class DirectMessages {
     name: 'emotion_id',
     nullable: false,
   })
-  emotionId: number
+  emotionId: number;
 
   @ApiProperty({
     description: '쪽지 내용',
@@ -86,11 +86,11 @@ export class DirectMessages {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
-  @JoinColumn({ name: 'sender_id', referencedColumnName: "id" })
+  @JoinColumn({ name: 'sender_id', referencedColumnName: 'id' })
   sender: Users;
 
   @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
-  @JoinColumn({ name: 'receiver_id', referencedColumnName: "id" })
+  @JoinColumn({ name: 'receiver_id', referencedColumnName: 'id' })
   receiver: Users;
 
   @OneToOne(() => Emotions, { cascade: false, nullable: false })

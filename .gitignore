@@ -36,6 +36,7 @@ lerna-debug.log*
 
 ## 로컬용
 *.env
+*.env.local
 
 ## 개발 서버용
 *.env.dev

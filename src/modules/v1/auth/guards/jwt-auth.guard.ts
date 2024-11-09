@@ -1,5 +1,5 @@
 import { NOT_AUTH } from '@common/common.decorator';
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import { Injectable, type ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';

@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'ty
 import { Emotions } from './emotions.entity';
 
 @Entity('emotion_details')
-export class EmotionDetail {
+export class EmotionDetails {
   @ApiProperty({ description: '시퀀스 번호', example: 1 })
   @PrimaryGeneratedColumn({
     type: 'int',

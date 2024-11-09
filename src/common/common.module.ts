@@ -1,4 +1,4 @@
-import { postgreSqlConfig } from '@configs/progres.config';
+import { postgreSqlConfig } from '@configs/postgres.config';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';

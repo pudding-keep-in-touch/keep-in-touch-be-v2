@@ -25,7 +25,7 @@ export class CustomTypeOrmModule {
         provide: repository, // 공급자를 넣어준다.
         useFactory: (dataSource: DataSource): typeof repository => {
           // entity를 넣어 레포지토리를 가져온다.
-          const baseRepository = dataSource.getRepository<any>(entity);
+          const baseRepository = dataSource.getRepository(entity);
 
           return new repository(baseRepository.target, baseRepository.manager, baseRepository.queryRunner);
         },

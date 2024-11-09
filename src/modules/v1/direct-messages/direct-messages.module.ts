@@ -1,5 +1,4 @@
 import { CustomTypeOrmModule } from '@common/custom-typeorm/custom-typeorm.module';
-import { DirectMessageGateway } from '@gateways/direct-message.gateway';
 import { Module } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
 import { EmotionsRepository } from '@repositories/emotions.repository';
@@ -10,7 +9,7 @@ import { DirectMessagesService } from './direct-messages.service';
 @Module({
   imports: [CustomTypeOrmModule.forCustomRepository([DirectMessagesRepository, UsersRepository, EmotionsRepository])],
   controllers: [DirectMessagesController],
-  providers: [DirectMessagesService, DirectMessageGateway],
+  providers: [DirectMessagesService],
   exports: [DirectMessagesService],
 })
 export class DirectMessagesModule {}

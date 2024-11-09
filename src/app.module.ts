@@ -12,7 +12,7 @@ import { validateEnv } from '@configs/process-env.config';
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       validationSchema: validateEnv,
-      isGlobal: true
+      isGlobal: true,
     }),
     HealthModule,
     CommonModule,
