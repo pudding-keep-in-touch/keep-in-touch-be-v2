@@ -5,7 +5,11 @@ import { UsersService } from '@v1/users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService, private readonly jwtService: JwtService, private readonly configService: ConfigService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async googleLogin(googleUser: any) {
     const user = await this.usersService.createOrUpdateGoogleUser(googleUser);

@@ -24,7 +24,8 @@ export class AuthController {
   @Get('google/callback')
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
-    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v1/auth/google/callback 으로 테스트 해주세요.',
+    description:
+      'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v1/auth/google/callback 으로 테스트 해주세요.',
     responseType: ResponseGoogleCallbackDto,
   })
   async googleLoginCallback(@Req() req: any, @Res() res: Response): Promise<void> {

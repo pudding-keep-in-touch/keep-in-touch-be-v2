@@ -1,4 +1,7 @@
-import { RequestGetDmListByUserIdDto, ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
+import {
+  type RequestGetDmListByUserIdDto,
+  ResponseGetDmListByUserIdDto,
+} from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { Controller, Get, Param, Query, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -22,8 +25,11 @@ export class UsersController {
     description: '유저 홈 화면 조회',
     responseType: ResponseGetUserHomeDto,
   })
-  async getUserHome(@UserAuth() users: Users, @Param('userId') userId: number): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
-    const isOwner = userId == users.id;
+  async getUserHome(
+    @UserAuth() users: Users,
+    @Param('userId') userId: number,
+  ): Promise<BaseResponseDto<ResponseGetUserHomeDto>> {
+    const isOwner = userId === users.id;
     const result = await this.usersService.getUserHome(users, userId, isOwner);
 
     return response(result, '유저 홈 화면 조회 성공');
