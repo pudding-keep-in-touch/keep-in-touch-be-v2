@@ -5,9 +5,13 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "pnpm biome format src test --write",
     "start": "nest start",
     "start:local": "NODE_ENV=local nest start --watch",
     "start:dev": "NODE_ENV=development nest start --watch",
@@ -45,7 +49,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -106,6 +111,9 @@
       ],
       "@router/(.*)": [
         "<rootDir>/router/$1"
+      ],
+      "@logger/(.*)": [
+        "<rootDir>/logger/$1"
       ]
     }
   }
