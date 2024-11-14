@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 
@@ -58,7 +58,12 @@ describe('AppController (e2e)', () => {
 
     request(app.getHttpServer())
       .post('/v1/direct-messages')
-      .send({ sender_id: 1, receiver_email: 'testuser2@test.com', emotion_name: '응원과 감사', content: '토이 3팀 손절보안관 울트라 캡숑 짱짱' })
+      .send({
+        sender_id: 1,
+        receiver_email: 'testuser2@test.com',
+        emotion_name: '응원과 감사',
+        content: '토이 3팀 손절보안관 울트라 캡숑 짱짱',
+      })
       .expect(201)
       .end((err, res) => {
         console.log('201 end: ', res.body);

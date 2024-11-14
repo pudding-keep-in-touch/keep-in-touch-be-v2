@@ -13,20 +13,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.local
-    container_name: keepintouch-server
-    restart: always
-    env_file:
-      - .env.local
-    ports:
-      - '3000:3000'
-    depends_on:
-      - postgres
-    #volumes:
-    #  - ./src:/app/src #실시간 코드 수정 반영
+  #app:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile.local
+  #  container_name: keepintouch-server
+  #  restart: always
+  #  env_file:
+  #    - .env.local
+  #  ports:
+  #    - '3000:3000'
+  #  depends_on:
+  #    - postgres
+  #volumes:
+  #  - ./src:/app/src #실시간 코드 수정 반영
 
   pgadmin:
     image: dpage/pgadmin4

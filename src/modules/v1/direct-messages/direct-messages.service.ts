@@ -1,12 +1,12 @@
 import { getFormatDate } from '@common/helpers/date.helper';
+import { DirectMessages } from '@entities/direct-messages.entity';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
+import { EmotionsRepository } from '@repositories/emotions.repository';
+import { UsersRepository } from '@repositories/users.repository';
+import { DirectMessage } from 'src/interfaces/direct-message.interface';
 import { CreateDmDto } from './dtos/create-dm.dto';
 import { RequestGetDmListByUserIdDto } from './dtos/get-dm-list-by-user-id.dto';
-import { DirectMessages } from '@entities/direct-messages.entity';
-import { UsersRepository } from '@repositories/users.repository';
-import { EmotionsRepository } from '@repositories/emotions.repository';
-import { DirectMessage } from 'src/interfaces/direct-message.interface';
 
 @Injectable()
 export class DirectMessagesService {
@@ -40,14 +40,17 @@ export class DirectMessagesService {
       throw new NotFoundException('쪽지를 찾을 수 없습니다.');
     }
 
+    // FIXME: received sent api가 왜 하나임????
     const isOnwer = await this.checkDirectMessageOwnership(userId, receivedDm.sender.id, receivedDm.receiver.id);
 
     if (!isOnwer) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
 
+    // FIXME: 받은 메세지인 경우에만 update 해야 함.
     const updatedDm = await this.directMessagesRepository.updateIsRead(receivedDm, true);
 
+    // FIXME: 내가 receiver면 senderId를 주면 안되고 sender면 receiverId를 줘야함....
     return {
       id: updatedDm.id,
       senderId: updatedDm.sender.id,
