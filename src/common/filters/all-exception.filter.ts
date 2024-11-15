@@ -7,6 +7,15 @@ import { Request, Response } from 'express';
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly logger: CustomLogger) {}
 
+  private maskSensitiveFields(data: any) {
+    const sensitiveFields = ['password', 'token', 'authorization'];
+    if (typeof data !== 'object') return data;
+    return Object.entries(data).reduce((acc: Record<string, any>, [key, value]) => {
+      acc[key] = sensitiveFields.includes(key.toLowerCase()) ? '***' : value;
+      return acc;
+    }, {});
+  }
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -24,10 +33,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const logMessage = `\n[${request.method}] ${request.url} ${status} - Error: ${
       typeof exceptionResponse === 'object' ? JSON.stringify(exceptionResponse) : exceptionResponse
     }
-Headers: ${JSON.stringify(request.headers)}
+Headers: ${JSON.stringify(this.maskSensitiveFields(request.headers))}
 Query: ${JSON.stringify(request.query)}
 Params: ${JSON.stringify(request.params)}
-Body: ${JSON.stringify(request.body)}
+Body: ${JSON.stringify(this.maskSensitiveFields(request.body))}
 IP: ${request.ip}
 User-Agent: ${request.get('user-agent')}
 `;
