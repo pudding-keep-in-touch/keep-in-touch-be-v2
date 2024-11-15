@@ -1,8 +1,8 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { RouterModule as NestRouterModule } from '@nestjs/core';
 import { AuthModule } from '@v1/auth/auth.module';
-import { UsersModule } from '@v1/users/users.module';
 import { DirectMessagesModule } from '@v1/direct-messages/direct-messages.module';
+import { UsersModule } from '@v1/users/users.module';
 
 @Module({})
 export class RouterModule {

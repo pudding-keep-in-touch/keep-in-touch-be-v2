@@ -1,17 +1,17 @@
+import { GenerateSwaggerApiDoc } from '@common/common.decorator';
+import { UserAuth } from '@common/common.decorator';
+import { BaseResponseDto } from '@common/common.dto';
+import { response } from '@common/helpers/common.helper';
+import { Users } from '@entities/users.entity';
+import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import {
   type RequestGetDmListByUserIdDto,
   ResponseGetDmListByUserIdDto,
 } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
-import { GenerateSwaggerApiDoc } from '@common/common.decorator';
-import { Controller, Get, Param, Query, UseGuards, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from '@v1/users/users.service';
-import { response } from '@common/helpers/common.helper';
-import { BaseResponseDto } from '@common/common.dto';
-import { UserAuth } from '@common/common.decorator';
-import { Users } from '@entities/users.entity';
-import { ResponseGetUserHomeDto, ResponseGetFriendDto } from './dtos/get-user-home.dto';
-import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
+import { ResponseGetFriendDto, ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
 
 @Controller('users')
 @ApiTags('users')

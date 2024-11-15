@@ -1,11 +1,11 @@
-import { DirectMessagesService } from './direct-messages.service';
 import { GenerateSwaggerApiDoc, UserAuth } from '@common/common.decorator';
+import { response } from '@common/helpers/common.helper';
+import { Users } from '@entities/users.entity';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { response } from '@common/helpers/common.helper';
-import { CreateDmDto } from './dtos/create-dm.dto';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
-import { Users } from '@entities/users.entity';
+import { DirectMessagesService } from './direct-messages.service';
+import { CreateDmDto } from './dtos/create-dm.dto';
 
 @Controller('direct-messages')
 @ApiTags('direct-messages')

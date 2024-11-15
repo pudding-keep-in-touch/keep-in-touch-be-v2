@@ -1,6 +1,6 @@
+import { join } from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { join } from 'node:path';
 
 export async function postgreSqlConfig(configService: ConfigService): Promise<TypeOrmModuleOptions> {
   return {
