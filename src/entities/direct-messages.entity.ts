@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Emotions } from './emotions.entity';
 import { Users } from './users.entity';
 
@@ -9,7 +18,7 @@ export class DirectMessages {
     description: '시퀀스 번호',
     example: 1,
   })
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @PrimaryGeneratedColumn({ type: 'bigint', name: 'id' })
   id: number;
 
   @ApiProperty({ description: '쪽지 보내는 유저 시퀀스 번호', example: 1 })
@@ -85,11 +94,19 @@ export class DirectMessages {
   })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
+  @ManyToOne(
+    () => Users,
+    (user) => user.id,
+    { cascade: false, nullable: false },
+  )
   @JoinColumn({ name: 'sender_id', referencedColumnName: 'id' })
   sender: Users;
 
-  @ManyToOne(() => Users, (user) => user.id, { cascade: false, nullable: false })
+  @ManyToOne(
+    () => Users,
+    (user) => user.id,
+    { cascade: false, nullable: false },
+  )
   @JoinColumn({ name: 'receiver_id', referencedColumnName: 'id' })
   receiver: Users;
 

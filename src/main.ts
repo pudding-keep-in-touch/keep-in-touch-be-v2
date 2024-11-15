@@ -1,19 +1,26 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
+import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
+import { CustomLogger } from '@logger/custom-logger.service';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
   const configService = app.get(ConfigService);
 
+  const logger = app.get(CustomLogger);
+  //app.useLogger(logger);
   // 환경 변수 로드
   const environment = configService.get('APP_ENV') || 'development';
-  console.log(`Application is running in ${environment} mode`);
+  logger.log(`Application is running in ${environment} mode`);
 
+  //FIXME: 더 안전한 CORS 설정 필요
   app.enableCors();
 
   ConfigModule.forRoot({
@@ -27,8 +34,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
+  app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
   // swagger 설정
   const config = new DocumentBuilder()
@@ -49,6 +56,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(configService.get('APP_PORT') || 3000);
 }
 bootstrap();

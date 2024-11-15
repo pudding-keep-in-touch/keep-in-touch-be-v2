@@ -1,7 +1,7 @@
-import { Users } from '@entities/users.entity';
-import { Repository } from 'typeorm';
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
+import { Users } from '@entities/users.entity';
 import { UserStatus } from '@v1/users/user.enum';
+import { Repository } from 'typeorm';
 
 @CustomEntityRepository(Users)
 export class UsersRepository extends Repository<Users> {

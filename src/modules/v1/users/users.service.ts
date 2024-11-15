@@ -1,3 +1,5 @@
+import { getFormatDate } from '@common/helpers/date.helper';
+import { Users } from '@entities/users.entity';
 import {
   ForbiddenException,
   Inject,
@@ -7,18 +9,16 @@ import {
   type LoggerService,
   NotFoundException,
 } from '@nestjs/common';
+import { EmotionsRepository } from '@repositories/emotions.repository';
+import { UsersRepository } from '@repositories/users.repository';
+import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
+import { DirectMessagesService } from '@v1/direct-messages/direct-messages.service';
 import {
   RequestGetDmListByUserIdDto,
   ResponseGetDmListByUserIdDto,
 } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
-import { UsersRepository } from '@repositories/users.repository';
-import { Users } from '@entities/users.entity';
-import { DirectMessagesService } from '@v1/direct-messages/direct-messages.service';
-import { LoginType, UserStatus } from './user.enum';
 import { ResponseGetFriendDto, ResponseGetUserHomeDto } from './dtos/get-user-home.dto';
-import { getFormatDate } from '@common/helpers/date.helper';
-import { EmotionsRepository } from '@repositories/emotions.repository';
-import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
+import { LoginType, UserStatus } from './user.enum';
 
 @Injectable()
 export class UsersService {
@@ -175,6 +175,7 @@ export class UsersService {
   }
 
   // 회원 탈퇴
+  // FIXME: 본인 확인이 없음 - request.user.id와 userId가 같은지 확인 필요
   async withdrawUser(userId: number): Promise<void> {
     try {
       const user = await this.usersRepository.getUserById(userId);

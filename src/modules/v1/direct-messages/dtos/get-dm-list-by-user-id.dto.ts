@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
-import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 
 export class RequestGetDmListByUserIdDto {
   @ApiProperty({
