@@ -1,11 +1,11 @@
+import { CommonModule } from '@common/common.module';
+import { validateEnv } from '@configs/process-env.config';
+import { HealthModule } from '@modules/health/health.module';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { RouterModule } from '@router/router.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HealthModule } from '@modules/health/health.module';
-import { CommonModule } from '@common/common.module';
-import { RouterModule } from '@router/router.module';
-import { ConfigModule } from '@nestjs/config';
-import { validateEnv } from '@configs/process-env.config';
 import { LoggerModule } from './logger/logger.module';
 
 @Module({

@@ -1,4 +1,4 @@
-import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
+import { Injectable, LoggerService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as winston from 'winston';
 //import * as DailyRotateFile from 'winston-daily-rotate-file';
@@ -6,7 +6,7 @@ import * as winston from 'winston';
 const { combine, timestamp, printf, colorize, align } = winston.format;
 
 @Injectable()
-export class CustomLogger implements NestLoggerService {
+export class CustomLogger implements LoggerService {
   private logger: winston.Logger;
 
   constructor(private readonly configService: ConfigService) {
@@ -57,9 +57,10 @@ export class CustomLogger implements NestLoggerService {
     //  level: 'warn', // warn 레벨 이상(warn과 error)만 기록
     //  format: fileFormat,
     //});
-    let level = 'debug';
-    if (this.configService.get('APP_ENV') === 'production') {
-      level = 'info';
+    let level = 'info';
+    const environment = this.configService.get<string>('APP_ENV');
+    if (environment === 'local') {
+      level = 'debug';
     }
 
     this.logger = winston.createLogger({

@@ -1,7 +1,7 @@
 import { BaseResponseDto } from '@common/common.dto';
-import { type ExceptionFilter, Catch, type ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { CustomLogger } from '@logger/custom-logger.service';
+import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -24,14 +24,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const logMessage = `\n[${request.method}] ${request.url} ${status} - Error: ${
       typeof exceptionResponse === 'object' ? JSON.stringify(exceptionResponse) : exceptionResponse
     }
-{
 Headers: ${JSON.stringify(request.headers)}
 Query: ${JSON.stringify(request.query)}
 Params: ${JSON.stringify(request.params)}
 Body: ${JSON.stringify(request.body)}
 IP: ${request.ip}
 User-Agent: ${request.get('user-agent')}
-}`;
+`;
     if (status >= 500) {
       this.logger.error(logMessage, (exception as Error).stack, 'AllExceptionsFilter');
     } else if (status >= 400) {
