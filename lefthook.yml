@@ -1,8 +1,8 @@
 pre-commit:
   commands:
     biome:
-      glob: '*.{js,ts,tsx,jsx}'
-      run: echo "⌛️ Running Biome..." && pnpm biome check --write --no-errors-on-unmatched {staged_files}
+      glob: '*.{js,ts}'
+      run: echo "⌛️ Running Biome..." && pnpm biome check --write --no-errors-on-unmatched {staged_files} && git add {staged_files}
 # test 추가되면 run test
 
 commit-msg:

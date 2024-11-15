@@ -14,24 +14,23 @@ module.exports = {
   parserPreset: {
     parserOpts: {
       // :gitmoji: type: subject #123 형식 파싱
-      headerPattern: /^:(?<gitmoji>[\w-]+):\s(?<type>\w*):\s(?<subject>.*)/,
+      headerPattern: /^:(?<gitmoji>[\w-]+):\s(?<type>\w+)(?::\s)(?<subject>(?:(?!#).)*?)(?:\s+#\d+)?$/,
       headerCorrespondence: ['gitmoji', 'type', 'subject'],
     },
   },
   plugins: [
     {
       rules: {
-        'gitmoji-type-enum': ({ type, gitmoji }) => {
-          if (!type || !gitmoji)
-            return [false, '커밋 메시지 형식이 올바르지 않습니다'];
+        'gitmoji-type-enum': ({ type, gitmoji } = {}) => {
+          if (!type || !gitmoji) return [false, '커밋 메세지는 :gitmoji: type: subject 형식이어야 합니다'];
+          if (typeof type !== 'string' || typeof gitmoji !== 'string') {
+            return [false, 'type과 gitmoji는 문자열이어야 합니다'];
+          }
+
           const expectedGitmoji = gitmojis[type];
-          if (!expectedGitmoji)
-            return [false, `올바른 type이 아닙니다: ${types.join(', ')}`];
+          if (!expectedGitmoji) return [false, `올바른 type이 아닙니다: \n사용가능 타입: ${types.join(', ')}`];
           if (gitmoji !== expectedGitmoji.replace(/:/g, '')) {
-            return [
-              false,
-              `${type} 타입에는 ${expectedGitmoji} 이모지를 사용해야 합니다`,
-            ];
+            return [false, `${type} 타입에는 ${expectedGitmoji} 이모지를 사용해야 합니다`];
           }
           return [true];
         },
