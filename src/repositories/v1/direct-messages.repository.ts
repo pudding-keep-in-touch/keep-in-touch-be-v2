@@ -1,5 +1,5 @@
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
-import { DirectMessages } from '@entities/direct-messages.entity';
+import { DirectMessages } from '@entities/v1/direct-messages.entity';
 import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 import { Repository } from 'typeorm';
 

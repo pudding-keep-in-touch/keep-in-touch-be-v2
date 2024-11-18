@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { DirectMessages } from './direct-messages.entity';
 
-@Entity('users')
+@Entity({ name: 'users', schema: 'v1' })
 export class Users {
   @ApiProperty({ description: '시퀀스 번호', example: 1 })
   @PrimaryGeneratedColumn({

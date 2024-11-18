@@ -1,9 +1,9 @@
 import { getFormatDate } from '@common/helpers/date.helper';
-import { DirectMessages } from '@entities/direct-messages.entity';
+import { DirectMessages } from '@entities/v1/direct-messages.entity';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { DirectMessagesRepository } from '@repositories/direct-messages.repository';
-import { EmotionsRepository } from '@repositories/emotions.repository';
-import { UsersRepository } from '@repositories/users.repository';
+import { DirectMessagesRepository } from '@repositories/v1/direct-messages.repository';
+import { EmotionsRepository } from '@repositories/v1/emotions.repository';
+import { UsersRepository } from '@repositories/v1/users.repository';
 import { DirectMessage } from 'src/interfaces/direct-message.interface';
 import { CreateDmDto } from './dtos/create-dm.dto';
 import { RequestGetDmListByUserIdDto } from './dtos/get-dm-list-by-user-id.dto';

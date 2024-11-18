@@ -1,6 +1,6 @@
 import { GenerateSwaggerApiDoc, UserAuth } from '@common/common.decorator';
 import { response } from '@common/helpers/common.helper';
-import { Users } from '@entities/users.entity';
+import { Users } from '@entities/v1/users.entity';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';

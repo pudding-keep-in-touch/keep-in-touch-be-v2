@@ -1,5 +1,5 @@
 import { getFormatDate } from '@common/helpers/date.helper';
-import { Users } from '@entities/users.entity';
+import { Users } from '@entities/v1/users.entity';
 import {
   ForbiddenException,
   Inject,
@@ -9,8 +9,8 @@ import {
   type LoggerService,
   NotFoundException,
 } from '@nestjs/common';
-import { EmotionsRepository } from '@repositories/emotions.repository';
-import { UsersRepository } from '@repositories/users.repository';
+import { EmotionsRepository } from '@repositories/v1/emotions.repository';
+import { UsersRepository } from '@repositories/v1/users.repository';
 import { DmUserType } from '@v1/direct-messages/direct-messages.enum';
 import { DirectMessagesService } from '@v1/direct-messages/direct-messages.service';
 import {

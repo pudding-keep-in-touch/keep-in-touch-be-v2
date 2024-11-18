@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('emotions')
+@Entity({ name: 'emotions', schema: 'v1' })
 export class Emotions {
   @ApiProperty({ description: '시퀀스 번호', example: 1 })
   @PrimaryGeneratedColumn({

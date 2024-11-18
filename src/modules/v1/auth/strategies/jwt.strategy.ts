@@ -1,4 +1,4 @@
-import { Users } from '@entities/users.entity';
+import { Users } from '@entities/v1/users.entity';
 import { UsersService } from '@modules/v1/users/users.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

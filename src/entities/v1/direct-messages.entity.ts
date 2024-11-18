@@ -12,7 +12,7 @@ import {
 import { Emotions } from './emotions.entity';
 import { Users } from './users.entity';
 
-@Entity('direct_messages')
+@Entity({ name: 'direct_messages', schema: 'v1' })
 export class DirectMessages {
   @ApiProperty({
     description: '시퀀스 번호',

@@ -1,4 +1,4 @@
-import { Users } from '@entities/users.entity';
+import { Users } from '@entities/v1/users.entity';
 
 export class ResponseGoogleCallbackDto {
   accessToken: string;

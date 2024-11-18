@@ -1,4 +1,4 @@
-import { Emotions } from '@entities/emotions.entity';
+import { Emotions } from '@entities/v1/emotions.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { ResponseGetDmListByUserIdDto } from '@v1/direct-messages/dtos/get-dm-list-by-user-id.dto';
 import { IsOptional } from 'class-validator';

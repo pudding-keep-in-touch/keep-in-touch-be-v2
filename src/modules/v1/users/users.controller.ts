@@ -2,7 +2,7 @@ import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { UserAuth } from '@common/common.decorator';
 import { BaseResponseDto } from '@common/common.dto';
 import { response } from '@common/helpers/common.helper';
-import { Users } from '@entities/users.entity';
+import { Users } from '@entities/v1/users.entity';
 import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
