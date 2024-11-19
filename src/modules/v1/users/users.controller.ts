@@ -1,11 +1,11 @@
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { UserAuth } from '@common/common.decorator';
 import { BaseResponseDto } from '@common/common.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { response } from '@common/helpers/common.helper';
 import { Users } from '@entities/v1/users.entity';
 import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import {
   type RequestGetDmListByUserIdDto,
   ResponseGetDmListByUserIdDto,

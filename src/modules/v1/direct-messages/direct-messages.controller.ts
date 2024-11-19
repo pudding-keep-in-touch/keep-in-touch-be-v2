@@ -1,9 +1,9 @@
 import { GenerateSwaggerApiDoc, UserAuth } from '@common/common.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { response } from '@common/helpers/common.helper';
 import { Users } from '@entities/v1/users.entity';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@v1/auth/guards/jwt-auth.guard';
 import { DirectMessagesService } from './direct-messages.service';
 import { CreateDmDto } from './dtos/create-dm.dto';
 

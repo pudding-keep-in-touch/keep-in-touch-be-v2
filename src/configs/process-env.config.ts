@@ -12,6 +12,7 @@ export const validateEnv = Joi.object({
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_CALLBACK_URL: Joi.string().required(),
+  GOOGLE_CALLBACK_URL_V2: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().required(),
   // 필요한 경우 다른 환경 변수들도 추가

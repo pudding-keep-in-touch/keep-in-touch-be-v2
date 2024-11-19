@@ -1,10 +1,9 @@
-import { Users } from '@entities/v1/users.entity';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
-import { UserStatus } from '@v1/users/user.enum';
-import { UsersService } from '@v1/users/users.service';
+import { User } from '@entities/v2/user.entity';
+import { UsersService } from '@v2/users/users.service';
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
@@ -21,19 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any): Promise<Users> {
+  async validate(payload: any): Promise<User> {
     const user = await this.usersService.getUserById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
-
-    switch (user.status) {
-      case UserStatus.NORMAL:
-        return user;
-      case UserStatus.SUSPENDED:
-        throw new UnauthorizedException('계정이 정지되었습니다.');
-      default:
-        throw new UnauthorizedException('유효하지 않은 계정 상태입니다.');
-    }
+    return user;
   }
 }
