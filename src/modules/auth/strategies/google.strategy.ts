@@ -1,15 +1,20 @@
-import { CustomLogger } from '@logger/custom-logger.service';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, type VerifyCallback } from 'passport-google-oauth20';
 
+type GoogleProfile = {
+  id: string;
+  displayName: string;
+  name: { familyName: string; givenName: string };
+  emails: { value: string; verified: boolean }[];
+  photos: { value: string }[];
+  provider: string;
+};
+
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly logger: CustomLogger,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
     const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
@@ -22,8 +27,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) {
-    this.logger.debug(`google strategy', accessToken: ${accessToken}, refreshToken: ${refreshToken}`);
+  // NOTE: _로 시작하는 변수는 사용하지 않는 변수를 의미함
+  async validate(_accessToken: string, _refreshToken: string, profile: GoogleProfile, done: VerifyCallback) {
     try {
       const { name, emails, photos } = profile;
       const user = {

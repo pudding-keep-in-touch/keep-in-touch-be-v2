@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Message } from './message.entity.entity';
+import { Message } from './message.entity';
 import { ReactionTemplate } from './reaction-template.entity';
 
 @Entity({ name: 'reactions' })

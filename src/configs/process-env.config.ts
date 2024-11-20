@@ -14,5 +14,6 @@ export const validateEnv = Joi.object({
   GOOGLE_CALLBACK_URL: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().required(),
+  REDIRECT_URL: Joi.string().uri().required(),
   // 필요한 경우 다른 환경 변수들도 추가
 });

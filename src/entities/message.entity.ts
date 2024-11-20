@@ -14,11 +14,11 @@ import { Question } from './question.entity.entity';
 import { Reaction } from './reaction.entity';
 import { User } from './user.entity';
 
-export const MESSAGE_STATUS = {
-  NORMAL: 1,
-  HIDDEN: 2,
-  REPORTED: 3,
-};
+export enum MessageStatus {
+  NORMAL = 1,
+  HIDDEN = 2,
+  REPORTED = 3,
+}
 
 @Entity({ name: 'messages' })
 export class Message {
@@ -28,8 +28,8 @@ export class Message {
   @Column({ length: 200 })
   content: string;
 
-  @Column({ type: 'smallint', default: MESSAGE_STATUS.NORMAL })
-  status: number;
+  @Column({ type: 'smallint', default: MessageStatus.NORMAL })
+  status: MessageStatus;
 
   @Column({ name: 'sender_id', type: 'bigint' })
   senderId: number;

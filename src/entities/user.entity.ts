@@ -9,12 +9,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MessageStatistic } from './message-statistic.entity';
-import { Message } from './message.entity.entity';
+import { Message } from './message.entity';
 import { Question } from './question.entity.entity';
+
+export enum LoginType {
+  EMAIL = 1,
+  GOOGLE = 2,
+  NAVER = 3,
+  KAKAO = 4,
+}
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn({ name: 'user_id' })
+  @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
   userId: number;
 
   @Column({ length: 255, unique: true })
@@ -32,8 +39,8 @@ export class User {
   @Column({ length: 10, nullable: true })
   gender: string;
 
-  @Column({ name: 'login_type' })
-  loginType: number;
+  @Column({ name: 'login_type', type: 'smallint' })
+  loginType: LoginType;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
