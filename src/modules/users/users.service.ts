@@ -1,20 +1,18 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
-import { UserRepository } from '@modules/users/user.repository';
+import { UsersRepository } from '@modules/users/users.repository';
 
-import { LoginType } from './user.enum';
+import { LoginType } from './users.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UsersRepository) {}
 
   // 구글 로그인 유저 생성 또는 업데이트
   async createOrUpdateGoogleUser(googleUser: GoogleUser): Promise<{ userId: number; email: string }> {
     const user = await this.getUserByEmail(googleUser.email);
-
-    console.debug('user: ', user);
 
     if (user !== null) {
       if (user.loginType !== LoginType.GOOGLE) {
@@ -32,8 +30,17 @@ export class UsersService {
     return { userId: result.identifiers[0].id, email: googleUser.email };
   }
 
+  /**
+   * id 기준으로 사용자 닉네임 조회
+   *
+   * @param userId
+   * @returns
+   */
   async getNicknameByUserId(userId: number): Promise<string> {
     const user = await this.userRepository.getUserById(userId);
+    if (user === null) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
     return user.nickname;
   }
 

@@ -3,7 +3,7 @@ import { User } from '@entities/user.entity';
 import { Repository } from 'typeorm';
 
 @CustomEntityRepository(User)
-export class UserRepository extends Repository<User> {
+export class UsersRepository extends Repository<User> {
   // 유저 이메일 기준으로 조회
   async getUserByEmail(email: string): Promise<User | null> {
     return await this.findOne({ where: { email } });

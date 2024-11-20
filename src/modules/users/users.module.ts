@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 
 import { CustomTypeOrmModule } from '@common/custom-typeorm/custom-typeorm.module';
-import { UserRepository } from '@modules/users/user.repository';
+import { UsersRepository } from '@modules/users/users.repository';
 
 import { LoggerModule } from '@logger/logger.module';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [CustomTypeOrmModule.forCustomRepository([UserRepository]), LoggerModule],
+  imports: [CustomTypeOrmModule.forCustomRepository([UsersRepository]), LoggerModule],
   providers: [UsersService],
   exports: [UsersService],
 })
