@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   async googleLogin(googleUser: any) {
-    const { userId, email } = await this.usersService.createOrUpdateGoogleUser(googleUser);
+    const { userId, email } = await this.usersService.createOrGetGoogleUser(googleUser);
 
     const payload = { email: email, sub: userId };
     const accessToken = this.jwtService.sign(payload, {

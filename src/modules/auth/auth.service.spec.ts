@@ -3,7 +3,6 @@ import { UsersService } from '@modules/users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GoogleUser } from '../../common/types/google-user.type';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
@@ -19,7 +18,7 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: {
-            createOrUpdateGoogleUser: jest.fn(),
+            createOrGetGoogleUser: jest.fn(),
           },
         },
         {
@@ -55,16 +54,16 @@ describe('AuthService', () => {
         lastName: 'User',
       };
 
-      const mockUserInput = {
+      const userInfo = {
         userId: 1,
         email: 'test@gmail.com',
       };
 
-      jest.spyOn(usersService, 'createOrUpdateGoogleUser').mockResolvedValue(mockUserInput);
+      jest.spyOn(usersService, 'createOrGetGoogleUser').mockResolvedValue(userInfo);
 
       const result = await service.googleLogin(mockGoogleUser);
 
-      expect(usersService.createOrUpdateGoogleUser).toHaveBeenCalledWith(mockGoogleUser);
+      expect(usersService.createOrGetGoogleUser).toHaveBeenCalledWith(mockGoogleUser);
       expect(jwtService.sign).toHaveBeenCalledWith(
         { email: 'test@gmail.com', sub: 1 },
         { secret: 'testSecret', expiresIn: '1h' },

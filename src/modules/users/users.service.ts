@@ -10,8 +10,13 @@ import { LoginType } from './users.constants';
 export class UsersService {
   constructor(private readonly userRepository: UsersRepository) {}
 
-  // 구글 로그인 유저 생성 또는 업데이트
-  async createOrUpdateGoogleUser(googleUser: GoogleUser): Promise<{ userId: number; email: string }> {
+  /**
+   * 구글 사용자 로그인 혹은 회원가입
+   *
+   * @param googleUser
+   * @returns
+   */
+  async createOrGetGoogleUser(googleUser: GoogleUser): Promise<{ userId: number; email: string }> {
     const user = await this.getUserByEmail(googleUser.email);
 
     if (user !== null) {
@@ -36,7 +41,7 @@ export class UsersService {
    * @param userId
    * @returns
    */
-  async getNicknameByUserId(userId: number): Promise<string> {
+  async getNicknameById(userId: number): Promise<string> {
     const user = await this.userRepository.getUserById(userId);
     if (user === null) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');

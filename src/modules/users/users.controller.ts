@@ -9,7 +9,7 @@ export class UsersController {
 
   @Get(':userId/nickname')
   async getUserNickname(@Param('userId') userId: number): Promise<BaseResponseDto<string>> {
-    const nickname = await this.usersService.getNicknameByUserId(userId);
+    const nickname = await this.usersService.getNicknameById(userId);
     return response(nickname, '유저 닉네임 조회 성공');
   }
 }
