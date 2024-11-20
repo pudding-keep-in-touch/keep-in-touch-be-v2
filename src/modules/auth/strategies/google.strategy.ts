@@ -12,7 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-    const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL_V2');
+    const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
 
     super({
       clientID,
