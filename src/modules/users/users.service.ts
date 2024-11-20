@@ -4,6 +4,7 @@ import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UsersRepository } from '@modules/users/users.repository';
 
+import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { LoginType } from './users.constants';
 
 @Injectable()
@@ -41,12 +42,12 @@ export class UsersService {
    * @param userId
    * @returns
    */
-  async getNicknameById(userId: number): Promise<string> {
+  async getNicknameById(userId: number): Promise<ResponseGetUserNicknameDto> {
     const user = await this.userRepository.getUserById(userId);
     if (user === null) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
-    return user.nickname;
+    return { userId: user.userId, nickname: user.nickname };
   }
 
   /**

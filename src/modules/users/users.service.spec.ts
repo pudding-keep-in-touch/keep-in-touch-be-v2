@@ -85,7 +85,7 @@ describe('UsersService', () => {
 
       const result = await service.getNicknameById(userId);
 
-      expect(result).toBe('John Doe');
+      expect(result).toEqual({ userId: 1, nickname: 'John Doe' });
       expect(repository.getUserById).toHaveBeenCalledWith(userId);
     });
 
