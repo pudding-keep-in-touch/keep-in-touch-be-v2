@@ -20,6 +20,7 @@ describe('UsersService', () => {
             getUserByEmail: jest.fn(),
             insert: jest.fn(),
             getUserById: jest.fn(),
+            createUser: jest.fn(),
           },
         },
       ],
@@ -33,29 +34,26 @@ describe('UsersService', () => {
     it('새 구글 유저 생성', async () => {
       const googleUser: GoogleUser = {
         email: 'test@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
+        displayName: 'John Doe',
       };
 
       jest.spyOn(repository, 'getUserByEmail').mockResolvedValue(null);
       jest.spyOn(repository, 'insert').mockResolvedValue({ identifiers: [{ id: 1 }], generatedMaps: [], raw: [] });
+      jest.spyOn(repository, 'createUser').mockResolvedValue(1);
 
       const result = await service.createOrGetGoogleUser(googleUser);
 
       expect(result).toEqual({ userId: 1, email: 'test@example.com' });
       expect(repository.getUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(repository.insert).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        nickname: 'John Doe',
-        loginType: LoginType.GOOGLE,
-      });
+      expect(repository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
+
+      expect(result).toEqual({ userId: 1, email: 'test@example.com' });
     });
 
     it('다른 로그인 방식으로 가입된 사용자면 Conflict exception', async () => {
       const googleUser: GoogleUser = {
         email: 'test@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
+        displayName: 'John Doe',
       };
 
       const existingUser: User = {

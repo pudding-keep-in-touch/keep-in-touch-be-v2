@@ -27,13 +27,8 @@ export class UsersService {
       return { userId: user.userId, email: user.email };
     }
 
-    const result = await this.userRepository.insert({
-      email: googleUser.email,
-      nickname: `${googleUser.firstName} ${googleUser.lastName}`.trim(),
-      loginType: LoginType.GOOGLE,
-    });
-
-    return { userId: result.identifiers[0].id, email: googleUser.email };
+    const userId = await this.userRepository.createUser(googleUser.email, googleUser.displayName, LoginType.GOOGLE);
+    return { userId, email: googleUser.email };
   }
 
   /**

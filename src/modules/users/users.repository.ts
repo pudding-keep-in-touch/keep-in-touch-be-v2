@@ -9,9 +9,16 @@ export class UsersRepository extends Repository<User> {
     return await this.findOne({ where: { email } });
   }
 
-  // 회원 등록
-  async createUser(email: string, password: string, loginType: number): Promise<number> {
-    const result = await this.insert({ email, password, loginType });
+  /**
+   * 회원 생성
+   *
+   * @param email
+   * @param nickname
+   * @param loginType
+   * @returns 생성한 user의 userId
+   */
+  async createUser(email: string, nickname: string, loginType: number): Promise<number> {
+    const result = await this.insert({ email, nickname, loginType });
     return result.identifiers[0].id;
   }
 
