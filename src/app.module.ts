@@ -3,7 +3,9 @@ import { validateEnv } from '@configs/process-env.config';
 import { HealthModule } from '@modules/health/health.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { RouterModule } from '@router/router.module';
+
+import { AuthModule } from '@modules/auth/auth.module';
+import { UsersModule } from '@modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './logger/logger.module';
@@ -17,8 +19,9 @@ import { LoggerModule } from './logger/logger.module';
     }),
     HealthModule,
     CommonModule,
-    RouterModule.register(),
     LoggerModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

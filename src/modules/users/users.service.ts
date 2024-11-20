@@ -1,18 +1,14 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
-import { User } from '@entities/v2/user.entity';
-import { CustomLogger } from '@logger/custom-logger.service';
-import { GoogleUser } from '@v2/auth/types/google-user.type';
-import { UserRepository } from '@v2/users/user.repository';
+import { GoogleUser } from '@common/types/google-user.type';
+import { User } from '@entities/user.entity';
+import { UserRepository } from '@modules/users/user.repository';
 
 import { LoginType } from './user.enum';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly logger: CustomLogger,
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   // 구글 로그인 유저 생성 또는 업데이트
   async createOrUpdateGoogleUser(googleUser: GoogleUser): Promise<{ userId: number; email: string }> {
@@ -34,6 +30,11 @@ export class UsersService {
     });
 
     return { userId: result.identifiers[0].id, email: googleUser.email };
+  }
+
+  async getNicknameByUserId(userId: number): Promise<string> {
+    const user = await this.userRepository.getUserById(userId);
+    return user.nickname;
   }
 
   /**

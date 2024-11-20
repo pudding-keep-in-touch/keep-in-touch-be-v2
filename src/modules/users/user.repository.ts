@@ -1,5 +1,5 @@
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
-import { User } from '@entities/v2/user.entity';
+import { User } from '@entities/user.entity';
 import { Repository } from 'typeorm';
 
 @CustomEntityRepository(User)

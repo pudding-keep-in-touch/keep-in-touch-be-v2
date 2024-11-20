@@ -97,12 +97,6 @@
       "@modules/(.*)": [
         "<rootDir>/modules/$1"
       ],
-      "@v1/(.*)": [
-        "<rootDir>/modules/v1/$1"
-      ],
-      "@v2/(.*)": [
-        "<rootDir>/modules/v2/$1"
-      ],
       "@common/(.*)": [
         "<rootDir>/common/$1"
       ],
@@ -114,9 +108,6 @@
       ],
       "@repositories/(.*)": [
         "<rootDir>/repositories/$1"
-      ],
-      "@router/(.*)": [
-        "<rootDir>/router/$1"
       ],
       "@logger/(.*)": [
         "<rootDir>/logger/$1"
