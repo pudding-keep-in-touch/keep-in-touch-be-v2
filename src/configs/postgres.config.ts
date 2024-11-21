@@ -11,6 +11,7 @@ export async function postgreSqlConfig(configService: ConfigService): Promise<Ty
     password: configService.get('POSTGRES_PASSWORD'),
     database: configService.get('POSTGRES_DATABASE'),
     entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
+    schema: configService.get('POSTGRES_SCHEMA'),
     synchronize: false,
     autoLoadEntities: true,
     logging: configService.get('APP_ENV') === 'local',

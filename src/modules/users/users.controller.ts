@@ -1,12 +1,14 @@
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { BaseResponseDto } from '@common/common.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { response } from '@common/helpers/common.helper';
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

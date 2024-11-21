@@ -9,6 +9,7 @@ export const validateEnv = Joi.object({
   POSTGRES_USERNAME: Joi.string().required(),
   POSTGRES_PASSWORD: Joi.string().required(),
   POSTGRES_DATABASE: Joi.string().required(),
+  POSTGRES_SCHEMA: Joi.string().required().default('public'),
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_CALLBACK_URL: Joi.string().required(),

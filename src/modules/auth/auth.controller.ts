@@ -23,7 +23,7 @@ export class AuthController {
     description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/google/login 으로 테스트 해주세요.',
   })
   async googleLogin() {
-    // Google 로그인 페이지로 리디렉션t
+    // Google 로그인 페이지로 리디렉션
   }
 
   @Get('google/callback')

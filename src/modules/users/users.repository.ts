@@ -19,7 +19,7 @@ export class UsersRepository extends Repository<User> {
    */
   async createUser(email: string, nickname: string, loginType: number): Promise<number> {
     const result = await this.insert({ email, nickname, loginType });
-    return result.identifiers[0].id;
+    return result.identifiers[0].userId;
   }
 
   async getUserById(id: number): Promise<User | null> {
