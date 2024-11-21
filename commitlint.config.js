@@ -14,7 +14,7 @@ module.exports = {
   parserPreset: {
     parserOpts: {
       // :gitmoji: type: subject #123 형식 파싱
-      headerPattern: /^:(?<gitmoji>[\w-]+):\s(?<type>\w+)(?::\s)(?<subject>(?:(?!#).)*?)(?:\s+#\d+)?$/,
+      headerPattern: /^:(?<gitmoji>[\w-]+):\s(?<type>\w+)(?::\s)(?<subject>(?:(?!#).)*?)(?:\s+#\d+)*$/,
       headerCorrespondence: ['gitmoji', 'type', 'subject'],
     },
   },

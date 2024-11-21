@@ -15,10 +15,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const logger = app.get(CustomLogger);
-  //app.useLogger(logger);
+  app.useLogger(logger);
   // 환경 변수 로드
   const environment = configService.get('APP_ENV') || 'development';
-  logger.log(`Application is running in ${environment} mode`);
+  logger.log(`Application is running in ${environment} mode`, 'Bootstrap');
 
   //FIXME: 더 안전한 CORS 설정 필요
   app.enableCors();
@@ -36,12 +36,13 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new AllExceptionsFilter(logger));
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
+  app.setGlobalPrefix('v2', { exclude: ['health'] });
 
   // swagger 설정
   const config = new DocumentBuilder()
     .setTitle(`${configService.get('APP_NAME')}_${configService.get('APP_ENV')}`)
     .setDescription('API description')
-    // .setVersion('1.0')
+    .setVersion('2.0')
     // .addTag('your-tag')
     .addBearerAuth(
       {
@@ -54,7 +55,7 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/v2', app, document);
 
   await app.listen(configService.get('APP_PORT') || 3000);
 }
