@@ -39,4 +39,4 @@ jobs:
           sudo docker rm keepintouch-be-v2
           sudo docker rmi keepintouch-be-v2:release-v2
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/keepintouch-be:release-v2
-          sudo docker run -d -p 8000:8000 --name keepintouch-be-v2 ${{ secrets.DOCKERHUB_USERNAME }}/keepintouch-be:release-v2 --env_file ${{secrets.DEV_BE_ENV_WD}}
+          sudo docker run -d -p 3000:3000 --name keepintouch-be-v2 ${{ secrets.DOCKERHUB_USERNAME }}/keepintouch-be:release-v2 --env-file ${{secrets.DEV_BE_ENV_WD}}
