@@ -1,5 +1,5 @@
 pre-commit:
-  pararell: true
+  parallel: true
   commands:
     biome:
       glob: '*.{js,ts}'

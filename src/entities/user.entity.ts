@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { MessageStatistic } from './message-statistic.entity';
 import { Message } from './message.entity';
-import { Question } from './question.entity.entity';
+import { Question } from './question.entity';
 
 export enum LoginType {
   EMAIL = 1,

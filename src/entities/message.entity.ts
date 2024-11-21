@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Emotion } from './emotion.entity';
-import { Question } from './question.entity.entity';
+import { Question } from './question.entity';
 import { Reaction } from './reaction.entity';
 import { User } from './user.entity';
 
