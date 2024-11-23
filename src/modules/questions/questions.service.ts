@@ -1,4 +1,5 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { QuestionRepository } from './repository/question.repository';
 
@@ -10,8 +11,8 @@ export class QuestionsService {
     const { content, isHidden } = createQuestionDto;
 
     const questionCount = await this.questionRepository.countQuestionsByUserId(userId);
-    if (questionCount >= 10) {
-      throw new ForbiddenException('질문은 10개까지만 생성할 수 있습니다.');
+    if (questionCount >= QUESTION_COUNT_LIMIT) {
+      throw new ConflictException('질문은 10개까지만 생성할 수 있습니다.');
     }
 
     const questionId = await this.questionRepository.createQuestion(content, isHidden, userId);

@@ -28,7 +28,7 @@ export class Question {
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number;
 
-  @Column({ length: QUESTION_CONTENT_MAX }) // 200
+  @Column({ length: QUESTION_CONTENT_MAX }) // 140
   content: string;
 
   @Column({ name: 'is_hidden', default: false })
