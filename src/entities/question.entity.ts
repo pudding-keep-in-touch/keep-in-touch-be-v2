@@ -1,3 +1,4 @@
+import { QUESTION_CONTENT_MAX } from '@modules/questions/constants/question.constant';
 import {
   Column,
   CreateDateColumn,
@@ -27,7 +28,7 @@ export class Question {
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number;
 
-  @Column({ length: 200 })
+  @Column({ length: QUESTION_CONTENT_MAX }) // 200
   content: string;
 
   @Column({ name: 'is_hidden', default: false })
