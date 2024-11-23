@@ -12,12 +12,12 @@ export class QuestionRepository extends Repository<Question> {
    * @param userId
    * @returns
    */
-  async createQuestion(content: string, isHidden: boolean, userId: number): Promise<number> {
+  async createQuestion(content: string, isHidden: boolean, userId: string): Promise<string> {
     const result = await this.insert({ content, isHidden, userId });
     return result.identifiers[0].questionId;
   }
 
-  async countQuestionsByUserId(userId: number): Promise<number> {
+  async countQuestionsByUserId(userId: string): Promise<number> {
     return this.count({ where: { userId } });
   }
 }

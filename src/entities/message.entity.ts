@@ -23,7 +23,7 @@ export enum MessageStatus {
 @Entity({ name: 'messages' })
 export class Message {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'message_id' })
-  messageId: number;
+  messageId: string;
 
   @Column({ length: 200 })
   content: string;
@@ -32,16 +32,16 @@ export class Message {
   status: MessageStatus;
 
   @Column({ name: 'sender_id', type: 'bigint' })
-  senderId: number;
+  senderId: string;
 
   @Column({ name: 'receiver_id', type: 'bigint' })
-  receiverId: number;
+  receiverId: string;
 
   @Column({ name: 'emotion_id', nullable: true })
-  emotionId: number;
+  emotionId: string;
 
   @Column({ name: 'question_id', type: 'bigint', nullable: true })
-  questionId: number;
+  questionId: string;
 
   @Column({ name: 'read_at', type: 'timestamp', nullable: true })
   readAt: Date;

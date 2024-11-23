@@ -13,7 +13,7 @@ import { ReactionTemplate } from './reaction-template.entity';
 @Entity({ name: 'reactions' })
 export class Reaction {
   @PrimaryGeneratedColumn({ name: 'reaction_id', type: 'bigint' })
-  reactionId: number;
+  reactionId: string;
 
   @ManyToOne(
     () => Message,

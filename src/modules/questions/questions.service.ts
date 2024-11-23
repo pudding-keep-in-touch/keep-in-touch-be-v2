@@ -7,7 +7,7 @@ import { QuestionRepository } from './repository/question.repository';
 export class QuestionsService {
   constructor(private readonly questionRepository: QuestionRepository) {}
 
-  async createQuestion(createQuestionDto: CreateQuestionDto, userId: number) {
+  async createQuestion(createQuestionDto: CreateQuestionDto, userId: string) {
     const { content, isHidden } = createQuestionDto;
 
     const questionCount = await this.questionRepository.countQuestionsByUserId(userId);

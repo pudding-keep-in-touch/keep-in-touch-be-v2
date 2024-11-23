@@ -12,7 +12,7 @@ export enum ReactionTemplateType {
 @Entity({ name: 'reaction_templates' })
 export class ReactionTemplate {
   @PrimaryGeneratedColumn({ name: 'reaction_template_id' })
-  reactionTemplateId: number;
+  reactionTemplateId: string;
 
   @Column({ length: 10 })
   emoji: string;

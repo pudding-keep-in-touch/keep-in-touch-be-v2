@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { GenerateSwaggerApiDoc, UserAuth } from '@common/common.decorator';
@@ -24,6 +24,6 @@ export class QuestionsController {
     @UserAuth() user: User,
   ): Promise<BaseResponseDto<ResponseCreateQuestionDto>> {
     const result = await this.questionsService.createQuestion(createQuestionDto, user.userId);
-    return response(result, '질문이 성공적으로 등록되었습니다.');
+    return response(result, '질문이 성공적으로 등록되었습니다.', HttpStatus.CREATED);
   }
 }

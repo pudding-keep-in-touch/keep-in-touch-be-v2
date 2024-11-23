@@ -4,7 +4,7 @@ import { Message } from './message.entity';
 @Entity({ name: 'emotions' })
 export class Emotion {
   @PrimaryGeneratedColumn({ name: 'emotion_id' })
-  emotionId: number;
+  emotionId: string;
 
   @Column({ length: 50 })
   name: string;

@@ -16,7 +16,7 @@ import { User } from './user.entity';
 @Entity({ name: 'questions' })
 export class Question {
   @PrimaryGeneratedColumn({ name: 'question_id', type: 'bigint' })
-  questionId: number;
+  questionId: string;
 
   @ManyToOne(
     () => User,
@@ -26,7 +26,7 @@ export class Question {
   user: User;
 
   @Column({ name: 'user_id', type: 'bigint' })
-  userId: number;
+  userId: string;
 
   @Column({ length: QUESTION_CONTENT_MAX }) // 140
   content: string;

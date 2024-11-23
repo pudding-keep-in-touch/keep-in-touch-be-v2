@@ -29,5 +29,5 @@ export class ResponseCreateQuestionDto {
     description: '생성된 질문 ID',
     example: 1,
   })
-  questionId: number;
+  questionId: string;
 }

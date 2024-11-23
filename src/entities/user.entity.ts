@@ -22,7 +22,7 @@ export enum LoginType {
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
-  userId: number;
+  userId: string;
 
   @Column({ length: 255, unique: true })
   email: string;

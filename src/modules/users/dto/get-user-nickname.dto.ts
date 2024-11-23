@@ -3,10 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 export class ResponseGetUserNicknameDto {
   @ApiProperty({
     name: 'userId',
-    example: 1,
+    example: '1',
     description: '유저 id',
   })
-  userId: number;
+  userId: string;
 
   @ApiProperty({
     name: 'nickname',

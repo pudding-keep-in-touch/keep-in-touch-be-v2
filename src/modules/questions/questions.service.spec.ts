@@ -43,14 +43,14 @@ describe('QuestionsService', () => {
         content: 'test content',
         isHidden: false,
       };
-      const userId = 1;
+      const userId = '1';
 
       jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(9);
-      jest.spyOn(repository, 'createQuestion').mockResolvedValue(1);
+      jest.spyOn(repository, 'createQuestion').mockResolvedValue('1');
 
       const result = await service.createQuestion(dto, userId);
 
-      expect(result).toEqual({ questionId: 1 });
+      expect(result).toEqual({ questionId: '1' });
     });
     // !SECTION success case
 
@@ -60,7 +60,7 @@ describe('QuestionsService', () => {
         content: 'test content',
         isHidden: false,
       };
-      const userId = 1;
+      const userId = '1';
 
       jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(QUESTION_COUNT_LIMIT);
 
