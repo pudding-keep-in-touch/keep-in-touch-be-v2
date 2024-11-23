@@ -19,7 +19,6 @@ export class UsersController {
   })
   async getUserNickname(@Param('userId') userId: string): Promise<BaseResponseDto<ResponseGetUserNicknameDto>> {
     const nickname = await this.usersService.getNicknameById(userId);
-    console.log(typeof nickname.userId);
     return response(nickname, '유저 닉네임 조회 성공');
   }
 }

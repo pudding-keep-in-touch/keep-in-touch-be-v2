@@ -31,10 +31,12 @@ import { LoggerModule } from './logger/logger.module';
   controllers: [AppController],
   providers: [
     AppService,
+    // @see https://docs.nestjs.com/fundamentals/testing#overriding-globally-registered-enhancers
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useExisting: JwtAuthGuard,
     },
+    JwtAuthGuard,
   ],
 })
 export class AppModule {}

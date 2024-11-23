@@ -43,3 +43,6 @@ lerna-debug.log*
 
 ## 운영 서버용
 *.env.prod
+
+# test env
+.env.test

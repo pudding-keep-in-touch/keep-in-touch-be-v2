@@ -34,7 +34,6 @@
       "@entities/*": ["src/entities/*"],
       "@repositories/*": ["src/repositories/*"],
       "@constants/*": ["src/constants/*"],
-      "@router/*": ["src/router/*"],
       "@logger/*": ["src/logger/*"]
     }
   }
