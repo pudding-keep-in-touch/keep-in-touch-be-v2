@@ -1,4 +1,5 @@
 import {
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
@@ -14,6 +15,12 @@ import { ReactionTemplate } from './reaction-template.entity';
 export class Reaction {
   @PrimaryGeneratedColumn({ name: 'reaction_id', type: 'bigint' })
   reactionId: string;
+
+  @Column({ name: 'message_id', type: 'bigint' })
+  messageId: string;
+
+  @Column({ name: 'reaction_template_id', type: 'integer' })
+  reactionTemplateId: number;
 
   @ManyToOne(
     () => Message,

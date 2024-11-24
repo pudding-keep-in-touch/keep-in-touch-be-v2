@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -37,7 +38,7 @@ export class Message {
   @Column({ name: 'receiver_id', type: 'bigint' })
   receiverId: string;
 
-  @Column({ name: 'emotion_id', nullable: true })
+  @Column({ name: 'emotion_id', type: 'integer', nullable: true })
   emotionId: string;
 
   @Column({ name: 'question_id', type: 'bigint', nullable: true })
@@ -46,6 +47,7 @@ export class Message {
   @Column({ name: 'read_at', type: 'timestamp', nullable: true })
   readAt: Date;
 
+  @Index()
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

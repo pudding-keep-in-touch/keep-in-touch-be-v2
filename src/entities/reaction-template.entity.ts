@@ -11,7 +11,7 @@ export enum ReactionTemplateType {
 
 @Entity({ name: 'reaction_templates' })
 export class ReactionTemplate {
-  @PrimaryGeneratedColumn({ name: 'reaction_template_id' })
+  @PrimaryGeneratedColumn({ name: 'reaction_template_id', type: 'integer' })
   reactionTemplateId: string;
 
   @Column({ length: 10 })
