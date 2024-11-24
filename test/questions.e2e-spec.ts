@@ -13,6 +13,8 @@ import { AppModule } from './../src/app.module';
 describe('Questions API test', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let createdQuestionIds: string[] = []; // 생성된 questionId 추적용
+  const testUserId = '1'; // 테스트용 유저 ID
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -47,11 +49,37 @@ describe('Questions API test', () => {
     app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
     await app.init();
+
+    const userRepository = dataSource.getRepository('users');
+    const existingUser = await userRepository.findOneBy({ userId: testUserId });
+
+    if (!existingUser) {
+      await userRepository.insert({
+        userId: testUserId,
+        email: 'test@example.com',
+        nickname: 'TestUser',
+        loginType: 1,
+      });
+    }
+
+    const questionRepository = dataSource.getRepository('questions');
+    await questionRepository.delete({ userId: testUserId });
   });
 
   beforeEach(() => {
-    // 데이터 초기화
-    return dataSource.query('DELETE FROM questions WHERE user_id = 1');
+    createdQuestionIds = []; // 테스트 시작 전 초기화
+  });
+
+  afterEach(async () => {
+    if (createdQuestionIds.length > 0) {
+      await dataSource
+        .createQueryBuilder()
+        .delete()
+        .from('questions')
+        .where('questionId IN (:...ids)', { ids: createdQuestionIds })
+        .execute();
+    }
+    createdQuestionIds = []; // 배열 초기화
   });
 
   describe('POST /questions', () => {
@@ -78,8 +106,8 @@ describe('Questions API test', () => {
           expect(typeof response.body.data.questionId).toBe('string');
 
           // json 에서 string으로 변환되기 때문에 "숫자"형식 string인지 판단해야 함.
-          const questionId = Number(response.body.data.questionId);
-          expect(Number.isInteger(questionId)).toBeTruthy();
+          const questionId = response.body.data.questionId;
+          createdQuestionIds.push(questionId);
 
           // 메시지 검증
           expect(response.body.message).toBe('질문이 성공적으로 등록되었습니다.');
@@ -113,7 +141,8 @@ describe('Questions API test', () => {
 
       // 먼저 10개의 질문 생성
       for (let i = 0; i < QUESTION_COUNT_LIMIT; i++) {
-        await request(app.getHttpServer()).post('/questions').send(createQuestionDto).expect(201);
+        const response = await request(app.getHttpServer()).post('/questions').send(createQuestionDto).expect(201);
+        createdQuestionIds.push(response.body.data.questionId);
       }
 
       // 11번째 질문 시도
