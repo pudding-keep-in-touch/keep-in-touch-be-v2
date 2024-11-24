@@ -38,14 +38,29 @@ describe('QuestionsService', () => {
 
     // NOTE: QUESTION_COUNT_LIMIT에 따라 변경
     // SECTION success case
-    it('총 질문이 10개 이하이면 새 질문 생성', async () => {
+    it(`총 질문이 ${QUESTION_COUNT_LIMIT}개 미만이면 새 질문 생성`, async () => {
       const dto: CreateQuestionDto = {
         content: 'test content',
         isHidden: false,
       };
       const userId = '1';
 
-      jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(9);
+      jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(0);
+      jest.spyOn(repository, 'createQuestion').mockResolvedValue('1');
+
+      const result = await service.createQuestion(dto, userId);
+
+      expect(result).toEqual({ questionId: '1' });
+    });
+
+    it(`총 질문이 정확히 ${QUESTION_COUNT_LIMIT} - 1 개일 때 새 질문 생성`, async () => {
+      const dto: CreateQuestionDto = {
+        content: 'test content',
+        isHidden: false,
+      };
+      const userId = '1';
+
+      jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(QUESTION_COUNT_LIMIT - 1);
       jest.spyOn(repository, 'createQuestion').mockResolvedValue('1');
 
       const result = await service.createQuestion(dto, userId);
@@ -55,16 +70,20 @@ describe('QuestionsService', () => {
     // !SECTION success case
 
     //SECTION failure case
-    it('총 질문이 10 이상일 때 생성 시도하면 ConflictException', async () => {
+    it('총 질문이 10개 이상일 때 생성 시도하면 ConflictException', async () => {
       const dto: CreateQuestionDto = {
         content: 'test content',
         isHidden: false,
       };
       const userId = '1';
 
-      jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(QUESTION_COUNT_LIMIT);
+      const countSpy = jest.spyOn(repository, 'countQuestionsByUserId').mockResolvedValue(QUESTION_COUNT_LIMIT);
+      const createSpy = jest.spyOn(repository, 'createQuestion');
 
       await expect(service.createQuestion(dto, userId)).rejects.toThrow(ConflictException);
+
+      expect(countSpy).toHaveBeenCalledWith(userId);
+      expect(createSpy).not.toHaveBeenCalled();
     });
 
     // !SECTION failure case

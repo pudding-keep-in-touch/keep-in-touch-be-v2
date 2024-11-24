@@ -17,20 +17,6 @@ describe('Questions API test', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-      //providers: [
-      //  {
-      //    provide: APP_GUARD,
-      //    useValue: {
-      //      canActivate: (context: ExecutionContext) => {
-      //        const request = context.switchToHttp().getRequest();
-      //        request.user = {
-      //          userId: 1,
-      //          email: 'test@example.com',
-      //        };
-      //      },
-      //    },
-      //  },
-      //],
     })
       .overrideProvider(JwtAuthGuard)
       .useValue({

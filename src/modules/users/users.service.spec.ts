@@ -43,10 +43,8 @@ describe('UsersService', () => {
 
       const result = await service.createOrGetGoogleUser(googleUser);
 
-      expect(result).toEqual({ userId: '1', email: 'test@example.com' });
       expect(repository.getUserByEmail).toHaveBeenCalledWith('test@example.com');
       expect(repository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
-
       expect(result).toEqual({ userId: '1', email: 'test@example.com' });
     });
 
