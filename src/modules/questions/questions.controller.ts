@@ -18,6 +18,8 @@ export class QuestionsController {
   @GenerateSwaggerApiDoc({
     summary: '질문 등록',
     description: '질문을 등록합니다.',
+    responseType: ResponseCreateQuestionDto,
+    responseStatus: HttpStatus.CREATED,
   })
   async createQuestion(
     @Body() createQuestionDto: CreateQuestionDto,
