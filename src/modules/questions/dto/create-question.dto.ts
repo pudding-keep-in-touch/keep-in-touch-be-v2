@@ -27,7 +27,7 @@ export class CreateQuestionDto {
 export class ResponseCreateQuestionDto {
   @ApiProperty({
     description: '생성된 질문 ID',
-    example: 1,
+    example: '1',
   })
   questionId: string;
 }
