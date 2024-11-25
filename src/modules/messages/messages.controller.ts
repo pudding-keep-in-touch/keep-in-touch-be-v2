@@ -21,7 +21,8 @@ export class MessagesController {
   async createMessage(@Body() createMessageDto: CreateMessageDto, @UserAuth() user: User) {
     return response(
       await this.messagesService.createMessage(createMessageDto, user.userId),
-      '쪽지를 성공적으로 전송했습니다.',
+      '쪽지가 성공적으로 전송되었습니다.',
+      HttpStatus.CREATED,
     );
   }
 }
