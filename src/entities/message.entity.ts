@@ -1,3 +1,4 @@
+import { MESSAGE_CONTENT_MAX } from '@modules/messages/constants/messages.constant';
 import {
   Column,
   CreateDateColumn,
@@ -26,7 +27,7 @@ export class Message {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'message_id' })
   messageId: string;
 
-  @Column({ length: 200 })
+  @Column({ length: MESSAGE_CONTENT_MAX })
   content: string;
 
   @Column({ type: 'smallint', default: MessageStatus.NORMAL })

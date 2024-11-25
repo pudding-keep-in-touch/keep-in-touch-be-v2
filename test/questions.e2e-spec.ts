@@ -53,6 +53,7 @@ describe('Questions API test', () => {
     const userRepository = dataSource.getRepository('users');
     const existingUser = await userRepository.findOneBy({ userId: testUserId });
 
+    // TODO: insert message statistics, 공통 setting 분리
     if (!existingUser) {
       await userRepository.insert({
         userId: testUserId,

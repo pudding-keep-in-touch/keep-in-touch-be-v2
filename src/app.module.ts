@@ -5,6 +5,7 @@ import { CommonModule } from '@common/common.module';
 import { validateEnv } from '@configs/process-env.config';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
+import { MessagesModule } from '@modules/messages/messages.module';
 import { QuestionsModule } from '@modules/questions/questions.module';
 import { UsersModule } from '@modules/users/users.module';
 
@@ -27,6 +28,7 @@ import { LoggerModule } from './logger/logger.module';
     AuthModule,
     UsersModule,
     QuestionsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [
