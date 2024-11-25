@@ -53,7 +53,8 @@
         "noExtraNonNullAssertion": "error",
         "noMisleadingInstantiator": "error",
         "noUnsafeDeclarationMerging": "error",
-        "useNamespaceKeyword": "error"
+        "useNamespaceKeyword": "error",
+        "noConsoleLog": "error"
       }
     },
     "ignore": ["**/*spec.ts", "node_modules", "dist", "build", "coverage", "*.lock", "package.json"]

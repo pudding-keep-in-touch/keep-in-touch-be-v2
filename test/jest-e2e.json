@@ -1,5 +1,9 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
@@ -9,13 +13,10 @@
   "moduleNameMapper": {
     "^@configs/(.*)$": "<rootDir>/../src/configs/$1",
     "^@common/(.*)$": "<rootDir>/../src/common/$1",
-    "^@router/(.*)$": "<rootDir>/../src/router/$1",
     "^@health/(.*)$": "<rootDir>/../src/modules/health/$1",
-    "^@v1/(.*)$": "<rootDir>/../src/modules/v1/$1",
     "^@modules/(.*)$": "<rootDir>/../src/modules/$1",
     "^@entities/(.*)$": "<rootDir>/../src/entities/$1",
     "^@repositories/(.*)$": "<rootDir>/../src/repositories/$1",
-    "^@gateways/(.*)$": "<rootDir>/../src/gateways/$1",
-    "^@constants/(.*)$": "<rootDir>/../src/constants/$1"
+    "^@logger/(.*)$": "<rootDir>/../src/logger/$1"
   }
 }

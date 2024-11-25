@@ -1,8 +1,9 @@
-import { SetMetadata, type Type, applyDecorators } from '@nestjs/common';
+import { HttpStatus, SetMetadata, type Type, applyDecorators } from '@nestjs/common';
 import { type ExecutionContext, createParamDecorator } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCreatedResponse,
   ApiExtraModels,
   ApiHeader,
   ApiOkResponse,
@@ -22,10 +23,15 @@ import { SwaggerDocInterface } from './common.interface';
 export const NOT_AUTH = Symbol('NOT_AUTH');
 export const NotUserAuth = () => SetMetadata(NOT_AUTH, true);
 
-export const ResponseDtoType = <T extends Type<unknown>>(t: T) =>
+const responseMap: Record<any, any> = {
+  [HttpStatus.CREATED]: ApiCreatedResponse,
+  [HttpStatus.OK]: ApiOkResponse,
+};
+
+export const ResponseDtoType = <T extends Type<unknown>>(t: T, status: HttpStatus) =>
   applyDecorators(
     ApiExtraModels(BaseResponseDto, t),
-    ApiOkResponse({
+    responseMap[status]({
       schema: {
         title: `ResponseDtoTypeOf${t.name}`,
         allOf: [
@@ -47,6 +53,7 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
     summary,
     description,
     responseType,
+    responseStatus = HttpStatus.OK,
     headers = [],
     tags = [],
     params = [],
@@ -58,19 +65,16 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (jwt) methodDecorators.push(ApiBearerAuth('jwt'));
 
-  //headerOptions.forEach((h) => methodDecorators.push(ApiHeader(h)));
   for (const h of headerOptions) {
     methodDecorators.push(ApiHeader(h));
   }
 
   const paramsOptions = Array.isArray(params) ? params : [params];
-  //paramsOptions.forEach((p) => methodDecorators.push(ApiParam(p)));
   for (const p of paramsOptions) {
     methodDecorators.push(ApiParam(p));
   }
 
   const queryOptions = Array.isArray(query) ? query : [query];
-  //queryOptions.forEach((q) => methodDecorators.push(ApiQuery(q)));
   for (const q of queryOptions) {
     methodDecorators.push(ApiQuery(q));
   }
@@ -79,7 +83,7 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (!isEmpty(body)) methodDecorators.push(ApiBody(body));
 
-  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType));
+  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };

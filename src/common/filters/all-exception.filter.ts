@@ -22,11 +22,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // 클라이언트에게 보낼 메시지 설정
-    const clientMessage =
-      status === HttpStatus.INTERNAL_SERVER_ERROR
-        ? 'Internal server error'
-        : (exception as HttpException).message || 'An error occurred';
+    let clientMessage = 'Internal server error';
+    if (exception instanceof HttpException && status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+      clientMessage = (exception.getResponse() as HttpException).message;
+      if (typeof clientMessage === 'object') {
+        // 에러 메시지가 객체인 경우 - validation pipe에서 발생하는 에러
+        clientMessage = Object.values(clientMessage)[0] as string;
+      }
+    }
 
     // exception의 세부 정보를 로깅
     const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : exception;

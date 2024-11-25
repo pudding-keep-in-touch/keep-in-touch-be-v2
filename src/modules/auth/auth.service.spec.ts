@@ -55,7 +55,7 @@ describe('AuthService', () => {
       };
 
       const userInfo = {
-        userId: 1,
+        userId: '1',
         email: 'test@gmail.com',
       };
 
@@ -65,10 +65,10 @@ describe('AuthService', () => {
 
       expect(usersService.createOrGetGoogleUser).toHaveBeenCalledWith(mockGoogleUser);
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { email: 'test@gmail.com', sub: 1 },
+        { email: 'test@gmail.com', sub: '1' },
         { secret: 'testSecret', expiresIn: '1h' },
       );
-      expect(result).toEqual({ accessToken: 'testAccessToken', userId: 1 });
+      expect(result).toEqual({ accessToken: 'testAccessToken', userId: '1' });
     });
   });
 });

@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { GenerateSwaggerApiDoc } from '@common/common.decorator';
+import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
 
 import { AuthService } from './auth.service';
 
@@ -17,6 +17,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  @NotUserAuth()
   @Get('google/login')
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인',
@@ -26,6 +27,7 @@ export class AuthController {
     // Google 로그인 페이지로 리디렉션
   }
 
+  @NotUserAuth()
   @Get('google/callback')
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',

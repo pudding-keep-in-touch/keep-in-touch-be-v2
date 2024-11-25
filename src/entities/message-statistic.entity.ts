@@ -6,7 +6,7 @@ export class MessageStatistic {
   @PrimaryColumn({ name: 'user_id', type: 'bigint' })
   @OneToOne(() => User)
   @JoinColumn({ name: 'user_id' })
-  userId: number;
+  userId: string;
 
   @Column({ name: 'received_message_count', default: 0 })
   receivedMessageCount: number;

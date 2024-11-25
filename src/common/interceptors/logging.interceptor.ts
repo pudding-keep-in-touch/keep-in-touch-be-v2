@@ -1,7 +1,7 @@
+import { CustomLogger } from '@logger/custom-logger.service';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CustomLogger } from 'src/logger/custom-logger.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
