@@ -1,8 +1,5 @@
+import { validateBigIntIdString } from '@common/validators/bigint-string.validator';
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { isNumberString } from 'class-validator';
-
-const MAX_BIGINT = '9223372036854775807';
-const MAX_BIGINT_LENGTH = 19;
 
 /**
  * 숫자 형식이 아니면 error
@@ -15,35 +12,10 @@ const MAX_BIGINT_LENGTH = 19;
 @Injectable()
 export class CheckBigIntIdPipe implements PipeTransform {
   transform(value: string) {
-    if (this.isBigIntString(value) === false) {
-      throw new BadRequestException('Invalid id format');
+    if (validateBigIntIdString(value) === false) {
+      throw new BadRequestException('Invalid bigint id');
     }
 
     return value;
-  }
-
-  private isBigIntString(value: string): boolean {
-    return (
-      this.isNumericString(value) &&
-      !this.hasLeadingZero(value) &&
-      !this.exceedsMaxLength(value) &&
-      !this.exceedsMaxValue(value)
-    );
-  }
-
-  private isNumericString(value: string): boolean {
-    return isNumberString(value, { no_symbols: true }); // 숫자 문자열 확인
-  }
-
-  private hasLeadingZero(value: string): boolean {
-    return value.startsWith('0'); // 선행 0 확인
-  }
-
-  private exceedsMaxLength(value: string): boolean {
-    return value.length > MAX_BIGINT_LENGTH; // 길이 초과 확인
-  }
-
-  private exceedsMaxValue(value: string): boolean {
-    return value > MAX_BIGINT; // 최대값 초과 확인
   }
 }
