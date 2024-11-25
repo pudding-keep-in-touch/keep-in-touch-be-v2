@@ -1,9 +1,9 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { QuestionRepository } from '@repositories/question.repository';
 import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { QuestionsService } from './questions.service';
-import { QuestionRepository } from './repository/question.repository';
 
 describe('QuestionsService', () => {
   let service: QuestionsService;

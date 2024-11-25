@@ -10,7 +10,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
     super({

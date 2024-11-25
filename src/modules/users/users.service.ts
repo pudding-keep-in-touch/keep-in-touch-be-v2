@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 
 import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
-import { UserRepository } from '@modules/users/repository/user.repository';
+import { UserRepository } from '@repositories/user.repository';
 
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { LoginType } from './users.constants';
@@ -38,7 +38,7 @@ export class UsersService {
    * @returns
    */
   async getNicknameById(userId: string): Promise<ResponseGetUserNicknameDto> {
-    const user = await this.userRepository.getUserById(userId);
+    const user = await this.userRepository.findUserById(userId);
     if (user === null) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
@@ -52,7 +52,7 @@ export class UsersService {
    * @returns
    */
   async getUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.getUserByEmail(email);
+    return this.userRepository.findUserByEmail(email);
   }
 
   /**
@@ -62,6 +62,6 @@ export class UsersService {
    * @returns
    */
   async getUserById(id: string): Promise<User | null> {
-    return this.userRepository.getUserById(id);
+    return this.userRepository.findUserById(id);
   }
 }

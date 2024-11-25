@@ -19,11 +19,11 @@ export class UserRepository extends Repository<User> {
   }
 
   // 유저 이메일 기준으로 조회
-  async getUserByEmail(email: string): Promise<User | null> {
+  async findUserByEmail(email: string): Promise<User | null> {
     return await this.findOne({ where: { email } });
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async findUserById(id: string): Promise<User | null> {
     return this.findOne({ where: { userId: id } });
   }
 }
