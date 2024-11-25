@@ -12,6 +12,13 @@ export class MessagesService {
     private readonly emotionRepository: EmotionRepository,
   ) {}
 
+  /**
+   * emotionId가 있을 경우 감정 쪽지를 생성하고, questionId가 있을 경우 질문 쪽지를 생성합니다.
+   *
+   * @param createMessageDto receiverId, content, questionId, emotionId를 포함하는 DTO
+   * @param userId 보내는 사람 (로그인한 유저) id
+   * @returns 생성된 쪽지 id
+   */
   async createMessage(createMessageDto: CreateMessageDto, userId: string): Promise<ResponseCreateMessageDto> {
     const { receiverId, content, questionId, emotionId } = createMessageDto;
 
@@ -43,6 +50,13 @@ export class MessagesService {
     return { messageId };
   }
 
+  /**
+   * question 에 대한 쪽지를 생성합니다.
+   *
+   * @param messageData
+   * @param questionId
+   * @returns 생성된 쪽지 id
+   */
   private async createQuestionMessage(messageData: MessageBaseData, questionId: string): Promise<string> {
     const question = await this.questionRepository.findQuestionById(questionId);
     if (!question) {
@@ -55,6 +69,14 @@ export class MessagesService {
     return this.messageRepository.createQuestionMessage({ ...messageData, questionId });
   }
 
+  /**
+   * question 에 속하지 않는 자유 쪽지를 생성합니다.
+   * emotion 1 : 응원과 감사, 2: 솔직한 대화.
+   *
+   * @param messageData \
+   * @param emotionId
+   * @returns
+   */
   private async createEmotionMessage(messageData: MessageBaseData, emotionId: string): Promise<string> {
     const emotion = await this.emotionRepository.findEmotionById(emotionId);
     if (!emotion) {
