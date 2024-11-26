@@ -103,7 +103,7 @@ describe('Messages API test', () => {
     });
 
     // 1, 2 외의 emotionId를 전송하는 경우
-    it('없는 emotion에 쪽지 보내면 Not Found', () => {
+    it('존재하지 않는 감정에 쪽지 전송 실패', () => {
       const createMessageDto: CreateMessageDto = {
         receiverId: targetUserId,
         content: '테스트 메시지입니다.',

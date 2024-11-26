@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { MessageStatistic } from '@entities/message-statistic.entity';
 import { Message } from '@entities/message.entity';
-import { createEmotionMessageParam, createQuestionMessageParam } from '@modules/messages/types/messages.type';
+import { CreateEmotionMessageParam, CreateQuestionMessageParam } from '@modules/messages/types/messages.type';
 @CustomEntityRepository(Message)
 export class MessageRepository extends Repository<Message> {
   /**
@@ -12,7 +12,7 @@ export class MessageRepository extends Repository<Message> {
    * @param message senderId, receiverId, questionId, content
    * @returns 생성된 쪽지의 id
    */
-  async createQuestionMessage(message: createQuestionMessageParam): Promise<string> {
+  async createQuestionMessage(message: CreateQuestionMessageParam): Promise<string> {
     return this.createMessage(message);
   }
 
@@ -22,7 +22,7 @@ export class MessageRepository extends Repository<Message> {
    * @param message senderId, receiverId, emotionId, content
    * @returns
    */
-  async createEmotionMessage(message: createEmotionMessageParam): Promise<string> {
+  async createEmotionMessage(message: CreateEmotionMessageParam): Promise<string> {
     return this.createMessage(message);
   }
 
@@ -32,7 +32,7 @@ export class MessageRepository extends Repository<Message> {
    * @param param senderId, receiverId, content와 함께 questionId 또는 emotionId
    * @returns 생성된 쪽지의 id
    */
-  private async createMessage(message: createQuestionMessageParam | createEmotionMessageParam): Promise<string> {
+  private async createMessage(message: CreateQuestionMessageParam | CreateEmotionMessageParam): Promise<string> {
     const { senderId, receiverId } = message;
 
     const messageId = await this.manager.transaction(async (manager) => {
