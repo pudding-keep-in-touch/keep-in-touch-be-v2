@@ -25,4 +25,8 @@ export class QuestionRepository extends Repository<Question> {
   async countQuestionsByUserId(userId: string): Promise<number> {
     return this.count({ where: { userId } });
   }
+
+  async findQuestionById(questionId: string): Promise<Question | null> {
+    return this.findOne({ where: { questionId } });
+  }
 }

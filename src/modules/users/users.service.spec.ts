@@ -1,8 +1,10 @@
-import { GoogleUser } from '@common/types/google-user.type';
-import { User } from '@entities/user.entity';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserRepository } from './repository/user.repository';
+
+import { GoogleUser } from '@common/types/google-user.type';
+import { User } from '@entities/user.entity';
+import { UserRepository } from '@repositories/user.repository';
+
 import { LoginType } from './users.constants';
 import { UsersService } from './users.service';
 
@@ -17,9 +19,9 @@ describe('UsersService', () => {
         {
           provide: UserRepository,
           useValue: {
-            getUserByEmail: jest.fn(),
+            findUserByEmail: jest.fn(),
             insert: jest.fn(),
-            getUserById: jest.fn(),
+            findUserById: jest.fn(),
             createUser: jest.fn(),
           },
         },
@@ -37,13 +39,13 @@ describe('UsersService', () => {
         displayName: 'John Doe',
       };
 
-      jest.spyOn(repository, 'getUserByEmail').mockResolvedValue(null);
+      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(null);
       jest.spyOn(repository, 'insert').mockResolvedValue({ identifiers: [{ id: '1' }], generatedMaps: [], raw: [] });
       jest.spyOn(repository, 'createUser').mockResolvedValue('1');
 
       const result = await service.createOrGetGoogleUser(googleUser);
 
-      expect(repository.getUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(repository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
       expect(repository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
       expect(result).toEqual({ userId: '1', email: 'test@example.com' });
     });
@@ -61,7 +63,7 @@ describe('UsersService', () => {
         loginType: LoginType.KAKAO,
       } as User;
 
-      jest.spyOn(repository, 'getUserByEmail').mockResolvedValue(existingUser);
+      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(existingUser);
 
       await expect(service.createOrGetGoogleUser(googleUser)).rejects.toThrow(ConflictException);
     });
@@ -77,18 +79,18 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'getUserById').mockResolvedValue(user);
+      jest.spyOn(repository, 'findUserById').mockResolvedValue(user);
 
       const result = await service.getNicknameById(userId);
 
       expect(result).toEqual({ userId: '1', nickname: 'John Doe' });
-      expect(repository.getUserById).toHaveBeenCalledWith(userId);
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
     });
 
     it('user id가 없으면 Not Found exception', async () => {
       const userId = '1';
 
-      jest.spyOn(repository, 'getUserById').mockResolvedValue(null);
+      jest.spyOn(repository, 'findUserById').mockResolvedValue(null);
 
       await expect(service.getNicknameById(userId)).rejects.toThrow(NotFoundException);
     });
@@ -104,18 +106,18 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'getUserByEmail').mockResolvedValue(user);
+      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(user);
 
       const result = await service.getUserByEmail(email);
 
       expect(result).toEqual(user);
-      expect(repository.getUserByEmail).toHaveBeenCalledWith(email);
+      expect(repository.findUserByEmail).toHaveBeenCalledWith(email);
     });
 
     it('유저가 없으면 null 반환', async () => {
       const email = 'test@example.com';
 
-      jest.spyOn(repository, 'getUserByEmail').mockResolvedValue(null);
+      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(null);
       const result = await service.getUserByEmail(email);
 
       expect(result).toBeNull();
@@ -132,18 +134,18 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'getUserById').mockResolvedValue(user);
+      jest.spyOn(repository, 'findUserById').mockResolvedValue(user);
 
       const result = await service.getUserById(userId);
 
       expect(result).toEqual(user);
-      expect(repository.getUserById).toHaveBeenCalledWith(userId);
+      expect(repository.findUserById).toHaveBeenCalledWith(userId);
     });
 
     it('유저가 없으면 null 반환', async () => {
       const userId = '1';
 
-      jest.spyOn(repository, 'getUserById').mockResolvedValue(null);
+      jest.spyOn(repository, 'findUserById').mockResolvedValue(null);
       const result = await service.getUserById(userId);
 
       expect(result).toBeNull();

@@ -1,7 +1,8 @@
+import { Question } from '@entities/question.entity';
 import { ConflictException, Injectable } from '@nestjs/common';
+import { QuestionRepository } from '@repositories/question.repository';
 import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
-import { QuestionRepository } from './repository/question.repository';
 
 @Injectable()
 export class QuestionsService {
@@ -21,5 +22,9 @@ export class QuestionsService {
       isHidden: isHidden,
     });
     return { questionId };
+  }
+
+  async getQuestionById(id: string): Promise<Question | null> {
+    return this.questionRepository.findQuestionById(id);
   }
 }

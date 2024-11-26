@@ -1,14 +1,10 @@
-import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
-import { CustomLogger } from '@logger/custom-logger.service';
 import { QUESTION_COUNT_LIMIT } from '@modules/questions/constants/question.constant';
 import { CreateQuestionDto } from '@modules/questions/dto/create-question.dto';
-import { ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
-import { AppModule } from './../src/app.module';
+
+import { createTestingApp } from './helpers/create-testing-app.helper';
 
 describe('Questions API test', () => {
   let app: INestApplication;
@@ -17,50 +13,11 @@ describe('Questions API test', () => {
   const testUserId = '1'; // 테스트용 유저 ID
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(JwtAuthGuard)
-      .useValue({
-        canActivate: (context: ExecutionContext) => {
-          const request = context.switchToHttp().getRequest();
-          request.user = {
-            userId: '1',
-            email: 'test@example.com',
-          };
-          return true; // 모든 요청을 허용
-        },
-      })
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-    dataSource = moduleFixture.get(DataSource);
-
-    const logger = app.get(CustomLogger);
-    app.useLogger(logger);
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
-    app.useGlobalFilters(new AllExceptionsFilter(logger));
-    app.useGlobalInterceptors(new LoggingInterceptor(logger));
-
+    // 1, 2 번 유저 생성
+    const testApp = await createTestingApp();
+    app = testApp.app;
+    dataSource = testApp.dataSource;
     await app.init();
-
-    const userRepository = dataSource.getRepository('users');
-    const existingUser = await userRepository.findOneBy({ userId: testUserId });
-
-    if (!existingUser) {
-      await userRepository.insert({
-        userId: testUserId,
-        email: 'test@example.com',
-        nickname: 'TestUser',
-        loginType: 1,
-      });
-    }
 
     const questionRepository = dataSource.getRepository('questions');
     await questionRepository.delete({ userId: testUserId });
@@ -68,6 +25,11 @@ describe('Questions API test', () => {
 
   beforeEach(() => {
     createdQuestionIds = []; // 테스트 시작 전 초기화
+  });
+
+  afterAll(async () => {
+    await dataSource.destroy(); // 데이터베이스 연결 종료
+    await app.close(); // 애플리케이션 종료
   });
 
   afterEach(async () => {
