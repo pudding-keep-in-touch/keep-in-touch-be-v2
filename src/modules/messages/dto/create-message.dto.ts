@@ -1,6 +1,6 @@
 import { IsBigIntIdString } from '@common/decorators/is-bigint-id-string.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsIn, IsOptional, IsString, Length } from 'class-validator';
 import { MESSAGE_CONTENT_MAX, MESSAGE_CONTENT_MIN } from '../constants/messages.constant';
 
 export class CreateMessageDto {
@@ -36,7 +36,8 @@ export class CreateMessageDto {
     required: false,
   })
   @IsOptional()
-  @IsBigIntIdString()
+  @IsIn(['1', '2'])
+  //@IsBigIntIdString() - 감정id가 고정된 값이므로 사용하지 않음. 추후 변경될 수 있음
   emotionId?: string;
 }
 
