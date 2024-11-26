@@ -25,10 +25,10 @@ export class IsBigIntIdStringConstraint implements ValidatorConstraintInterface 
  * @returns
  */
 export function IsBigIntIdString(validationOptions?: ValidationOptions) {
-  return (object: unknown, propertyName: string) => {
+  return (obj: object, propertyName: string) => {
     registerDecorator({
       name: 'isBigIntIdString',
-      target: object.constructor,
+      target: obj.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: IsBigIntIdStringConstraint,

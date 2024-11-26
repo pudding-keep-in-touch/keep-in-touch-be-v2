@@ -28,23 +28,34 @@ const responseMap: Record<any, any> = {
   [HttpStatus.OK]: ApiOkResponse,
 };
 
-export const ResponseDtoType = <T extends Type<unknown>>(t: T, status: HttpStatus) =>
-  applyDecorators(
-    ApiExtraModels(BaseResponseDto, t),
+export const ResponseDtoType = <T extends Type<unknown> | [Type<unknown>]>(t: T, status: HttpStatus) => {
+  const isArray = Array.isArray(t);
+  const types = isArray ? t : [t]; // responseType이 배열이면 그대로 사용, 아니면 배열로 감쌈
+  const extraModels = types.map((type) => ApiExtraModels(type)); // 모든 타입에 대해 ApiExtraModels 추가
+
+  return applyDecorators(
+    ApiExtraModels(BaseResponseDto, ...types), // BaseResponseDto와 모든 타입을 추가
     responseMap[status]({
       schema: {
-        title: `ResponseDtoTypeOf${t.name}`,
+        title: `ResponseDtoTypeOf${types.map((type) => type.name).join('And')}`,
         allOf: [
           { $ref: getSchemaPath(BaseResponseDto) },
           {
             properties: {
-              data: { $ref: getSchemaPath(t) },
+              data: isArray
+                ? {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(types[0]) }, // 배열의 아이템 타입 지정
+                  }
+                : { $ref: getSchemaPath(types[0]) }, // 단일 객체 타입
             },
           },
         ],
       },
     }),
+    ...extraModels,
   );
+};
 
 export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) => {
   const methodDecorators: MethodDecorator[] = [];
@@ -83,7 +94,7 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (!isEmpty(body)) methodDecorators.push(ApiBody(body));
 
-  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
+  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType as any, responseStatus));
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };

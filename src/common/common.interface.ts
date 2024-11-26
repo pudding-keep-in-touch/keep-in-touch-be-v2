@@ -9,7 +9,7 @@ export interface SwaggerDocInterface {
   // 설명(상세)
   description: string;
   // 응답하는 형태(response-dto)
-  responseType?: Type;
+  responseType?: Type | Type[];
 
   responseStatus?: HttpStatus;
 
