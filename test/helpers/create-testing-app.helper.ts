@@ -76,35 +76,35 @@ export const createTestingApp = async (
   const existingUser = await userRepository.findOneBy({ userId: loginUser.userId });
   const existingTargetUser = await userRepository.findOneBy({ userId: targetUser.userId });
 
-  if (!existingUser) {
-    await userRepository.insert(loginUser);
-  }
-  if (!existingTargetUser) {
-    await userRepository.insert(targetUser);
-  }
+  await dataSource.manager.transaction(async (manager) => {
+    if (!existingUser) {
+      await manager.insert(User, loginUser);
+    }
+    if (!existingTargetUser) {
+      await manager.insert(User, targetUser);
+    }
 
-  // create or update message statistics
-  const mstRepository = dataSource.getRepository(MessageStatistic);
-
-  await mstRepository.upsert(
-    [
-      {
-        userId: loginUser.userId,
-        receivedMessageCount: 0,
-        sentMessageCount: 0,
-        unreadMessageCount: 0,
-        unreadReactionCount: 0,
-      },
-      {
-        userId: targetUser.userId,
-        receivedMessageCount: 0,
-        sentMessageCount: 0,
-        unreadMessageCount: 0,
-        unreadReactionCount: 0,
-      },
-    ],
-    ['userId'], // conflict key
-  );
+    await manager.upsert(
+      MessageStatistic,
+      [
+        {
+          userId: loginUser.userId,
+          receivedMessageCount: 0,
+          sentMessageCount: 0,
+          unreadMessageCount: 0,
+          unreadReactionCount: 0,
+        },
+        {
+          userId: targetUser.userId,
+          receivedMessageCount: 0,
+          sentMessageCount: 0,
+          unreadMessageCount: 0,
+          unreadReactionCount: 0,
+        },
+      ],
+      ['userId'],
+    );
+  });
 
   return { app, dataSource };
 };

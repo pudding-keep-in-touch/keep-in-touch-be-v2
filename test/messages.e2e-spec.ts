@@ -1,13 +1,7 @@
-import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
 import { Emotion } from '@entities/emotion.entity';
 import { Question } from '@entities/question.entity';
-import { CustomLogger } from '@logger/custom-logger.service';
 import { CreateMessageDto } from '@modules/messages/dto/create-message.dto';
-import { ExecutionContext, HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from 'src/app.module';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { createTestingApp } from './helpers/create-testing-app.helper';
@@ -113,10 +107,57 @@ describe('Messages API test', () => {
       return request(app.getHttpServer())
         .post('/messages')
         .send(createMessageDto)
-        .expect(HttpStatus.NOT_FOUND)
+        .expect(HttpStatus.BAD_REQUEST)
         .expect((response) => {
           expect(response.body).toHaveProperty('message');
         });
+    });
+    it('emotionId, questionId 둘 다 제공되면 실패', () => {
+      const createMessageDto: CreateMessageDto = {
+        receiverId: targetUserId,
+        content: '테스트 메시지입니다.',
+        emotionId: '1',
+        questionId: targetQuestionIds[0],
+      };
+
+      return request(app.getHttpServer()).post('/messages').send(createMessageDto).expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('emotionId, questionId가 모두 누락되면 실패', () => {
+      const createMessageDto: Partial<CreateMessageDto> = {
+        receiverId: targetUserId,
+        content: 'id 누락케이스',
+      };
+
+      return request(app.getHttpServer())
+        .post('/messages')
+        .send(createMessageDto as CreateMessageDto)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('content가 누락되면 실패', () => {
+      const createMessageDto: Partial<CreateMessageDto> = {
+        receiverId: targetUserId,
+        emotionId: '1',
+      };
+
+      return request(app.getHttpServer())
+        .post('/messages')
+        .send({
+          receiverId: targetUserId,
+          emotionId: '1',
+        })
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('receiverId가 bigint 형식이 아니면 실패', () => {
+      const createMessageDto: CreateMessageDto = {
+        receiverId: 'string',
+        content: '테스트 메시지입니다.',
+        emotionId: '1',
+      };
+
+      return request(app.getHttpServer()).post('/messages').send(createMessageDto).expect(HttpStatus.BAD_REQUEST);
     });
   });
 });
