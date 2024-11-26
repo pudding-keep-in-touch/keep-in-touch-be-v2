@@ -37,7 +37,7 @@ export class AuthController {
   async googleLoginCallback(@Req() req: any, @Res() res: Response): Promise<void> {
     const { accessToken, userId } = await this.authService.googleLogin(req.user);
 
-    const redirectUrl = `${this.configService.get<string>('REDIRECT_URL')}/auth/callback?accessToken=${accessToken}&userId=${userId}`;
+    const redirectUrl = `${this.configService.get<string>('REDIRECT_URL')}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
     res.redirect(redirectUrl);
   }
 }
