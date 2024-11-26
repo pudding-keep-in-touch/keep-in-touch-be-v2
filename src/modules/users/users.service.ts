@@ -4,12 +4,17 @@ import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
+import { QuestionRepository } from '@repositories/question.repository';
+import { ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { LoginType } from './users.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly questionRepository: QuestionRepository,
+  ) {}
 
   /**
    * 구글 사용자 로그인 혹은 회원가입
@@ -29,6 +34,17 @@ export class UsersService {
 
     const userId = await this.userRepository.createUser(googleUser.email, googleUser.displayName, LoginType.GOOGLE);
     return { userId, email: googleUser.email };
+  }
+
+  /**
+   * user 본인이 작성한 질문 조회
+   *
+   * @param userId
+   * @returns ResponseGetMyQuestionsDto: questionId, content, isHidden, createdAt의 배열
+   */
+  async getMyQuestions(userId: string): Promise<ResponseGetMyQuestionsDto> {
+    const questions = await this.questionRepository.findQuestionsByUserId(userId);
+    return questions;
   }
 
   /**
