@@ -71,7 +71,6 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
     query = [],
     body = {},
   } = swaggerDocInterface;
-  //객체인지 배열인지 구분하여 처리
   const headerOptions = Array.isArray(headers) ? headers : [headers];
 
   if (jwt) methodDecorators.push(ApiBearerAuth('jwt'));
@@ -94,7 +93,7 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (!isEmpty(body)) methodDecorators.push(ApiBody(body));
 
-  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType as any, responseStatus));
+  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };
