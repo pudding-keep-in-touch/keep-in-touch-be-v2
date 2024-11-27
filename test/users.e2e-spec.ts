@@ -34,7 +34,7 @@ describe('Users API test', () => {
     }
 
     const questionRepository = dataSource.getRepository(Question);
-    questionRepository.delete({ userId: loginUserId });
+    await questionRepository.delete({ userId: loginUserId });
 
     const result = await questionRepository.insert(insertQuestions);
     targetQuestionIds = result.identifiers.map((item) => item.questionId);
@@ -68,10 +68,13 @@ describe('Users API test', () => {
         });
     });
 
-    it('유저가 작성한 질문이 없을 때 data에 빈 배열 응답', () => {
-      dataSource.getRepository(Question).delete({ userId: loginUserId });
+    it('유저가 작성한 질문이 없을 때 data에 빈 배열 응답', async () => {
+      await dataSource.getRepository(Question).delete({ userId: loginUserId });
 
-      const res = request(app.getHttpServer())
+      const questionsAfterDelete = await dataSource.getRepository(Question).find({ where: { userId: loginUserId } });
+      expect(questionsAfterDelete.length).toBe(0); // 데이터 삭제 확인
+
+      const res = await request(app.getHttpServer())
         .get(`/users/${loginUserId}/questions`)
         .expect(HttpStatus.OK)
         .expect((response) => {
@@ -84,7 +87,7 @@ describe('Users API test', () => {
           expect(body.data.length).toBe(0);
         });
 
-      dataSource.getRepository(Question).insert(insertQuestions);
+      await dataSource.getRepository(Question).insert(insertQuestions);
       return res;
     });
 
