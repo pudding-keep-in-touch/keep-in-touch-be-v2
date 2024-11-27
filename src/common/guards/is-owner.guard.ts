@@ -8,7 +8,7 @@ export class IsOwnerGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request: RequestUser = context.switchToHttp().getRequest();
-    if (request.user === undefined) {
+    if (!request.user?.userId) {
       return false;
     }
     // 403 Forbidden
