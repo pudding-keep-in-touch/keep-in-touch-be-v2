@@ -35,6 +35,7 @@ export class QuestionRepository extends Repository<Question> {
     return this.find({
       select: ['questionId', 'content', 'isHidden', 'createdAt'],
       where: { userId },
+      order: { createdAt: 'DESC' },
     });
   }
 }
