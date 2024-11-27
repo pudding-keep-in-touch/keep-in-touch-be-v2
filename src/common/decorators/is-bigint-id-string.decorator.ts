@@ -22,7 +22,7 @@ export class IsBigIntIdStringConstraint implements ValidatorConstraintInterface 
  * class validator에서 사용할 BigInt string 유효성 검사 데코레이터
  *
  * @param validationOptions
- * @returns
+ * @returns {Function}
  */
 export function IsBigIntIdString(validationOptions?: ValidationOptions) {
   return (obj: object, propertyName: string) => {

@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
  * 공통 question 속성 정의
  * questionId, content, isHidden, createdAt
  */
-export class BaseQuestionDto implements Pick<BaseQuestionDto, 'questionId' | 'content' | 'isHidden' | 'createdAt'> {
+export class BaseQuestionDto {
   @ApiProperty({
     description: '질문 id',
     example: '1',
