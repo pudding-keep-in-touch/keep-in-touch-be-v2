@@ -26,6 +26,24 @@ export class MessageRepository extends Repository<Message> {
     return this.createMessage(message);
   }
 
+  // TODO: join 개선
+  /**
+   * messageId에 해당하는 쪽지의 상세 정보를 조회합니다.
+   *
+   * @param messageId select 할 message의 id
+   * @returns
+   */
+  async findMessageDetailById(messageId: string): Promise<Message | null> {
+    return this.createQueryBuilder('message')
+      .innerJoinAndSelect('message.receiver', 'receiver')
+      .leftJoinAndSelect('message.question', 'question')
+      .leftJoinAndSelect('message.emotion', 'emotion')
+      .leftJoinAndSelect('message.reactions', 'reaction')
+      .leftJoinAndSelect('reaction.reactionTemplate', 'template')
+      .where('message.messageId = :messageId', { messageId })
+      .getOne();
+  }
+
   /**
    * 쪽지를 생성하고 생성된 쪽지의 id를 반환합니다.
    *

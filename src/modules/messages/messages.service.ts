@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
-import { MessageBaseData } from './types/messages.type';
+import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
+import { MessageBaseData, MessageDetailParam } from './types/messages.type';
 
 @Injectable()
 export class MessagesService {
@@ -48,6 +49,26 @@ export class MessagesService {
     }
 
     return { messageId };
+  }
+
+  async getMessageDetail({
+    userId,
+    messageId,
+  }: MessageDetailParam): Promise<SentMessageDetailDto | ReceivedMessageDetailDto> {
+    const message = await this.messageRepository.findMessageDetailById(messageId);
+    if (!message) {
+      throw new NotFoundException('쪽지가 존재하지 않습니다.');
+    }
+    let dto: any;
+
+    if (message.senderId === userId) {
+      dto = SentMessageDetailDto.from(message);
+    } else if (message.receiverId === userId) {
+      dto = ReceivedMessageDetailDto.from(message);
+    } else {
+      throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
+    }
+    return dto;
   }
 
   /**

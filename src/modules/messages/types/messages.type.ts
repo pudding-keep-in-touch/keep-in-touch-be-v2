@@ -15,3 +15,10 @@ export type CreateEmotionMessageParam = MessageBaseData & {
   emotionId: string;
   questionId?: never;
 };
+
+export type MessageType = 'sent' | 'received';
+
+export type MessageDetailParam = {
+  messageId: string;
+  userId: string;
+};

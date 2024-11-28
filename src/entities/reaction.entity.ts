@@ -22,9 +22,6 @@ export class Reaction {
   @Column({ name: 'reaction_template_id', type: 'integer' })
   reactionTemplateId: number;
 
-  @Column({ name: 'read_at', type: 'timestamp', nullable: true })
-  readAt: Date;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
