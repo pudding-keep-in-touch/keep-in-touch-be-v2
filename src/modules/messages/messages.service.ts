@@ -75,7 +75,6 @@ export class MessagesService {
     } else {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
-
     return dto;
   }
 

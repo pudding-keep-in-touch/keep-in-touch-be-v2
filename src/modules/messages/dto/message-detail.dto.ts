@@ -39,7 +39,7 @@ export class ReceivedMessageDetailDto extends MessageDetailDto {
       receiverId: receiver.userId,
       receiverNickname: receiver.nickname,
       content,
-      emotion: emotion ? { emotionId: emotion.emotionId, name: emotion.name, emoji: emotion.emoji } : undefined,
+      emotion: emotion ? { emotionId: String(emotion.emotionId), name: emotion.name, emoji: emotion.emoji } : undefined,
       question: question ? { questionId: question.questionId, content: question.content } : undefined,
       reactions: reactions.map((reaction) => ({
         reactionId: reaction.reactionId,
@@ -62,7 +62,7 @@ export class SentMessageDetailDto extends MessageDetailDto {
       receiverId: receiver.userId,
       receiverNickname: receiver.nickname,
       content,
-      emotion: emotion ? { emotionId: emotion.emotionId, name: emotion.name, emoji: emotion.emoji } : undefined,
+      emotion: emotion ? { emotionId: String(emotion.emotionId), name: emotion.name, emoji: emotion.emoji } : undefined,
       question: question ? { questionId: question.questionId, content: question.content } : undefined,
       reactions: reactions.map((reaction) => ({
         reactionId: reaction.reactionId,
