@@ -1,5 +1,7 @@
 import { Emotion } from '@entities/emotion.entity';
+import { Message } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { User } from '@entities/user.entity';
 import { CreateMessageDto } from '@modules/messages/dto/create-message.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
@@ -12,6 +14,8 @@ describe('Messages API test', () => {
   const loginUserId = '1'; // 테스트용 유저 ID
   const targetUserId = '2'; // 테스트용 유저 ID
   let targetQuestionIds: string[];
+  let createdMessageId: string;
+  let createdQuestionMessageId: string;
 
   beforeAll(async () => {
     const testApp = await createTestingApp();
@@ -38,6 +42,24 @@ describe('Messages API test', () => {
       ]);
       targetQuestionIds = result.identifiers.map((item) => item.questionId);
     }
+
+    const messageRepository = dataSource.getRepository(Message);
+
+    const emotionMessage = await messageRepository.save({
+      senderId: loginUserId,
+      receiverId: targetUserId,
+      content: '감정 메시지 테스트',
+      emotionId: '1',
+    });
+    createdMessageId = emotionMessage.messageId;
+
+    const questionMessage = await messageRepository.save({
+      senderId: targetUserId,
+      receiverId: loginUserId,
+      content: '질문 메시지 테스트',
+      questionId: targetQuestionIds[0],
+    });
+    createdQuestionMessageId = questionMessage.messageId;
   });
 
   afterAll(async () => {
@@ -158,6 +180,68 @@ describe('Messages API test', () => {
       };
 
       return request(app.getHttpServer()).post('/messages').send(createMessageDto).expect(HttpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe('GET /messages/:messageId', () => {
+    it('보낸 메시지 상세 조회 성공', () => {
+      return request(app.getHttpServer())
+        .get(`/messages/${createdMessageId}`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('messageId');
+          expect(response.body.data).toHaveProperty('type', 'sent');
+          expect(response.body.data).toHaveProperty('content');
+          expect(response.body.data).toHaveProperty('emotion');
+          expect(response.body.data.emotion).toHaveProperty('emotionId', '1');
+          expect(response.body.data.emotion).toHaveProperty('name', '응원과 감사');
+          expect(response.body.data.emotion).toHaveProperty('emoji', '🌟');
+        });
+    });
+
+    it('받은 메시지 상세 조회 성공', () => {
+      return request(app.getHttpServer())
+        .get(`/messages/${createdQuestionMessageId}`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('messageId');
+          expect(response.body.data).toHaveProperty('type', 'received');
+          expect(response.body.data).toHaveProperty('content');
+          expect(response.body.data).toHaveProperty('question');
+          expect(response.body.data.question).toHaveProperty('content');
+        });
+    });
+
+    it('존재하지 않는 메시지 조회시 404', () => {
+      return request(app.getHttpServer())
+        .get('/messages/999999')
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message', '쪽지가 존재하지 않습니다.');
+        });
+    });
+
+    it('권한이 없는 메시지 조회시 403', async () => {
+      // Create a message between other users
+      const messageRepository = dataSource.getRepository(Message);
+      const userRepository = dataSource.getRepository(User);
+      await userRepository.save([{ userId: '3', nickname: '테스트3', email: 'hello', loginType: 1 }]);
+
+      const unauthorizedMessage = await messageRepository.save({
+        senderId: '3', // Different user
+        receiverId: '2', // Different user
+        content: '권한 없는 메시지',
+        emotionId: '1',
+      });
+
+      return request(app.getHttpServer())
+        .get(`/messages/${unauthorizedMessage.messageId}`)
+        .expect(HttpStatus.FORBIDDEN)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message', '쪽지를 볼 권한이 없습니다.');
+        });
     });
   });
 });
