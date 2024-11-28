@@ -28,10 +28,10 @@ export class Question {
   @Column({ name: 'user_id', type: 'bigint' })
   userId: string;
 
-  @Column({ length: QUESTION_CONTENT_MAX }) // 140
+  @Column({ type: 'varchar', length: QUESTION_CONTENT_MAX }) // 140
   content: string;
 
-  @Column({ name: 'is_hidden', default: false })
+  @Column({ name: 'is_hidden', type: 'boolean', default: false })
   isHidden: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })

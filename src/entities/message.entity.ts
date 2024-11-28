@@ -27,7 +27,7 @@ export class Message {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'message_id' })
   messageId: string;
 
-  @Column({ length: MESSAGE_CONTENT_MAX })
+  @Column({ type: 'varchar', length: MESSAGE_CONTENT_MAX })
   content: string;
 
   @Column({ type: 'smallint', default: MessageStatus.NORMAL })
@@ -39,7 +39,11 @@ export class Message {
   @Column({ name: 'receiver_id', type: 'bigint' })
   receiverId: string;
 
-  @Column({ name: 'emotion_id', type: 'integer', nullable: true })
+  @Column({
+    name: 'emotion_id',
+    type: 'integer',
+    nullable: true,
+  })
   emotionId: string | null;
 
   @Column({ name: 'question_id', type: 'bigint', nullable: true })

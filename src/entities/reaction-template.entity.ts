@@ -14,10 +14,10 @@ export class ReactionTemplate {
   @PrimaryGeneratedColumn({ name: 'reaction_template_id', type: 'integer' })
   reactionTemplateId: string;
 
-  @Column({ length: 10 })
+  @Column({ type: 'varchar', length: 10 })
   emoji: string;
 
-  @Column({ length: 50 })
+  @Column({ type: 'varchar', length: 50 })
   content: string;
 
   @Column({ type: 'smallint' })

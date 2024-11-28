@@ -24,19 +24,19 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
   userId: string;
 
-  @Column({ length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   password: string | null;
 
-  @Column({ length: 20 })
+  @Column({ type: 'varchar', length: 20 })
   nickname: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   age: number | null;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   gender: string | null;
 
   @Column({ name: 'login_type', type: 'smallint' })
