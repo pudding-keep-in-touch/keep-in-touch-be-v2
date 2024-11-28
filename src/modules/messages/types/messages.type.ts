@@ -18,6 +18,8 @@ export type CreateEmotionMessageParam = MessageBaseData & {
 
 export type MessageType = 'sent' | 'received';
 
+export type MessageStatusString = 'normal' | 'hidden' | 'reported';
+
 export type MessageDetailParam = {
   messageId: string;
   userId: string;

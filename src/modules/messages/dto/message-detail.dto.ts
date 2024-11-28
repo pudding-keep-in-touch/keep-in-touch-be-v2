@@ -1,5 +1,7 @@
-import { Message, MessageStatus } from '@entities/message.entity';
+import { Message } from '@entities/message.entity';
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { getMessageStatusString } from '../helpers/message-status.helper';
 import { MessageType } from '../types/messages.type';
 import { BaseMessageDto } from './base-message.dto';
 
@@ -7,6 +9,7 @@ import { BaseMessageDto } from './base-message.dto';
  * @brief 쪽지 상세 조회 DTO
  */
 class MessageDetailDto extends BaseMessageDto {
+  @ApiProperty({ enum: ['received', 'sent'] })
   type: MessageType;
   question?: {
     questionId: string;
@@ -26,7 +29,7 @@ class MessageDetailDto extends BaseMessageDto {
 }
 
 export class ReceivedMessageDetailDto extends MessageDetailDto {
-  status: MessageStatus;
+  status: 'normal' | 'hidden' | 'reported';
 
   static from(message: Message): ReceivedMessageDetailDto {
     const { messageId, receiver, content, question, emotion, reactions, status, createdAt } = message;
@@ -44,7 +47,7 @@ export class ReceivedMessageDetailDto extends MessageDetailDto {
         type: reaction.reactionTemplate.type,
         emoji: reaction.reactionTemplate.emoji,
       })),
-      status,
+      status: getMessageStatusString(status),
       createdAt,
     };
   }
