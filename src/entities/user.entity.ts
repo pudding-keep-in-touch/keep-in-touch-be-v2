@@ -28,16 +28,16 @@ export class User {
   email: string;
 
   @Column({ length: 255, nullable: true })
-  password: string;
+  password: string | null;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ length: 20 })
   nickname: string;
 
   @Column({ nullable: true })
-  age: number;
+  age: number | null;
 
   @Column({ length: 10, nullable: true })
-  gender: string;
+  gender: string | null;
 
   @Column({ name: 'login_type', type: 'smallint' })
   loginType: LoginType;
@@ -49,7 +49,7 @@ export class User {
   updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt: Date;
+  deletedAt: Date | null;
 
   @OneToMany(
     () => Question,

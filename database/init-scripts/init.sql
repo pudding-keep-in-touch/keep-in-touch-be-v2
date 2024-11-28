@@ -7,7 +7,7 @@ ALTER DATABASE new_keep SET search_path TO keepintouch_dev;
 CREATE SEQUENCE users_user_id_seq
     INCREMENT BY 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    AXVALUE 9223372036854775807
     START WITH 1
     CACHE 1
     NO CYCLE;
@@ -57,7 +57,7 @@ CREATE TABLE users (
     user_id bigint NOT NULL DEFAULT nextval('users_user_id_seq'::regclass),
     email character varying(255) NOT NULL,
     password character varying(255),
-    nickname character varying(20),
+    nickname character varying(20) NOT NULL,
     age integer,
     gender character varying(10),
     login_type smallint NOT NULL,

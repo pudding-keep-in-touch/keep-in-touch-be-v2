@@ -40,10 +40,10 @@ export class Message {
   receiverId: string;
 
   @Column({ name: 'emotion_id', type: 'integer', nullable: true })
-  emotionId: string;
+  emotionId: string | null;
 
   @Column({ name: 'question_id', type: 'bigint', nullable: true })
-  questionId: string;
+  questionId: string | null;
 
   @Column({ name: 'read_at', type: 'timestamp', nullable: true })
   readAt: Date;
@@ -56,7 +56,7 @@ export class Message {
   updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt: Date;
+  deletedAt: Date | null;
 
   @ManyToOne(
     () => User,
@@ -78,7 +78,7 @@ export class Message {
     { nullable: true },
   )
   @JoinColumn({ name: 'emotion_id' })
-  emotion: Emotion;
+  emotion: Emotion | null;
 
   @ManyToOne(
     () => Question,
@@ -86,7 +86,7 @@ export class Message {
     { nullable: true },
   )
   @JoinColumn({ name: 'question_id' })
-  question: Question;
+  question: Question | null;
 
   @OneToMany(
     () => Reaction,
