@@ -1,11 +1,15 @@
 import { Emotion } from '@entities/emotion.entity';
+import { Message, MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { Reaction } from '@entities/reaction.entity';
 import { User } from '@entities/user.entity';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
+import { MessageDetailParam } from './types/messages.type';
 
 describe('MessagesService', () => {
   let service: MessagesService;
@@ -23,6 +27,7 @@ describe('MessagesService', () => {
           useValue: {
             createQuestionMessage: jest.fn(),
             createEmotionMessage: jest.fn(),
+            findMessageDetailById: jest.fn(),
           },
         },
         {
@@ -180,6 +185,120 @@ describe('MessagesService', () => {
 
     await expect(service.createMessage(createMessageDto, userId)).rejects.toThrow(BadRequestException);
   });
-
   //!SECTION
+
+  describe('getMessageDetail', () => {
+    // SECTION: getMessageDetail success case
+    it('보낸 쪽지의 상세 정보를 조회할 수 있어야 한다', async () => {
+      const messageDetailParam: MessageDetailParam = {
+        userId: '1',
+        messageId: '5',
+      };
+
+      const message = {
+        messageId: '5',
+        senderId: '1',
+        receiverId: '2',
+        receiver: {
+          userId: '2',
+          nickname: 'KimUser',
+        } as User,
+        questionId: '1',
+        question: {
+          questionId: '1',
+          content: 'test question',
+        } as Question,
+        reactions: [],
+        content: 'test content',
+        createdAt: new Date(),
+        status: MessageStatus.NORMAL,
+      };
+
+      jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as any);
+
+      const result = await service.getMessageDetail(messageDetailParam);
+
+      expect(result).toEqual({
+        type: 'sent',
+        messageId: message.messageId,
+        receiverId: message.receiverId,
+        receiverNickname: message.receiver.nickname,
+        reactions: [],
+        question: { questionId: message.question.questionId, content: message.question.content },
+        content: message.content,
+        createdAt: message.createdAt,
+      } as SentMessageDetailDto);
+    });
+
+    it('받은 쪽지의 상세 정보를 조회할 수 있어야 한다', async () => {
+      const messageDetailParam: MessageDetailParam = {
+        userId: '2',
+        messageId: '5',
+      };
+      const message = {
+        messageId: '5',
+        senderId: '1',
+        receiverId: '2',
+        receiver: {
+          userId: '2',
+          nickname: 'KimReceiver',
+        } as User,
+        questionId: '1',
+        question: {
+          questionId: '1',
+          content: 'test question',
+        } as Question,
+        reactions: [],
+        content: 'test content',
+        status: MessageStatus.NORMAL,
+        createdAt: new Date(),
+      };
+
+      jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as any);
+
+      const result = await service.getMessageDetail(messageDetailParam);
+      expect(result).toEqual({
+        type: 'received',
+        messageId: message.messageId,
+        receiverId: message.receiverId,
+        receiverNickname: message.receiver.nickname,
+        question: { questionId: message.question?.questionId, content: message.question?.content },
+        content: message.content,
+        createdAt: message.createdAt,
+        status: 'normal',
+        reactions: [],
+      });
+    });
+  });
+  // !SECTION
+
+  // SECTION: getMessageDetail failure case
+  it('메세지가 존재하지 않으면 NotFoundException', async () => {
+    const messageDetailParam: MessageDetailParam = {
+      userId: '1',
+      messageId: '5',
+    };
+
+    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(null);
+
+    await expect(service.getMessageDetail(messageDetailParam)).rejects.toThrow(NotFoundException);
+  });
+
+  it('메세지를 볼 권한이 없으면 ForbiddenException', async () => {
+    const messageDetailParam: MessageDetailParam = {
+      userId: '3',
+      messageId: '5',
+    };
+
+    const message = {
+      senderId: '1',
+      receiverId: '2',
+      content: 'content',
+    };
+
+    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as Message);
+
+    await expect(service.getMessageDetail(messageDetailParam)).rejects.toThrow(ForbiddenException);
+  });
+  // !SECTION
 });
