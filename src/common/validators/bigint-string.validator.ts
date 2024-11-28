@@ -4,21 +4,33 @@ const MAX_BIGINT = '9223372036854775807';
 const MAX_BIGINT_LENGTH = 19;
 
 export const validateBigIntIdString = (value: string): boolean => {
-  return isNumericString(value) && !hasLeadingZero(value) && !exceedsMaxLength(value) && !exceedsMaxValue(value);
+  if (!isNumericString(value) || hasLeadingZero(value)) {
+    return false;
+  }
+
+  if (exceedsMaxLength(value)) {
+    return false;
+  }
+
+  if (value.length === MAX_BIGINT_LENGTH && exceedsMaxValue(value)) {
+    return false;
+  }
+
+  return true;
 };
 
 const isNumericString = (value: string): boolean => {
-  return isNumberString(value, { no_symbols: true }); // 숫자 문자열 확인
+  return isNumberString(value, { no_symbols: true });
 };
 
 const hasLeadingZero = (value: string): boolean => {
-  return value.startsWith('0'); // 선행 0 확인
+  return value.startsWith('0');
 };
 
 const exceedsMaxLength = (value: string): boolean => {
-  return value.length > MAX_BIGINT_LENGTH; // 길이 초과 확인
+  return value.length > MAX_BIGINT_LENGTH;
 };
 
 const exceedsMaxValue = (value: string): boolean => {
-  return value > MAX_BIGINT; // 최대값 초과 확인
+  return value > MAX_BIGINT;
 };
