@@ -5,12 +5,15 @@ import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
+import { Question } from '@entities/question.entity';
+import { QuestionRepository } from '@repositories/question.repository';
 import { LoginType } from './users.constants';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repository: UserRepository;
+  let userRepository: UserRepository;
+  let questionRepository: QuestionRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,11 +28,18 @@ describe('UsersService', () => {
             createUser: jest.fn(),
           },
         },
+        {
+          provide: QuestionRepository,
+          useValue: {
+            findQuestionsByUserId: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get<UserRepository>(UserRepository);
+    userRepository = module.get<UserRepository>(UserRepository);
+    questionRepository = module.get<QuestionRepository>(QuestionRepository);
   });
 
   describe('createOrGetGoogleUser', () => {
@@ -39,14 +49,16 @@ describe('UsersService', () => {
         displayName: 'John Doe',
       };
 
-      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(null);
-      jest.spyOn(repository, 'insert').mockResolvedValue({ identifiers: [{ id: '1' }], generatedMaps: [], raw: [] });
-      jest.spyOn(repository, 'createUser').mockResolvedValue('1');
+      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(null);
+      jest
+        .spyOn(userRepository, 'insert')
+        .mockResolvedValue({ identifiers: [{ id: '1' }], generatedMaps: [], raw: [] });
+      jest.spyOn(userRepository, 'createUser').mockResolvedValue('1');
 
       const result = await service.createOrGetGoogleUser(googleUser);
 
-      expect(repository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(repository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
+      expect(userRepository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(userRepository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
       expect(result).toEqual({ userId: '1', email: 'test@example.com' });
     });
 
@@ -63,7 +75,7 @@ describe('UsersService', () => {
         loginType: LoginType.KAKAO,
       } as User;
 
-      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(existingUser);
+      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(existingUser);
 
       await expect(service.createOrGetGoogleUser(googleUser)).rejects.toThrow(ConflictException);
     });
@@ -79,18 +91,18 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'findUserById').mockResolvedValue(user);
+      jest.spyOn(userRepository, 'findUserById').mockResolvedValue(user);
 
       const result = await service.getNicknameById(userId);
 
       expect(result).toEqual({ userId: '1', nickname: 'John Doe' });
-      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
     });
 
     it('user id가 없으면 Not Found exception', async () => {
       const userId = '1';
 
-      jest.spyOn(repository, 'findUserById').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findUserById').mockResolvedValue(null);
 
       await expect(service.getNicknameById(userId)).rejects.toThrow(NotFoundException);
     });
@@ -106,18 +118,18 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(user);
+      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(user);
 
       const result = await service.getUserByEmail(email);
 
       expect(result).toEqual(user);
-      expect(repository.findUserByEmail).toHaveBeenCalledWith(email);
+      expect(userRepository.findUserByEmail).toHaveBeenCalledWith(email);
     });
 
     it('유저가 없으면 null 반환', async () => {
       const email = 'test@example.com';
 
-      jest.spyOn(repository, 'findUserByEmail').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(null);
       const result = await service.getUserByEmail(email);
 
       expect(result).toBeNull();
@@ -134,21 +146,54 @@ describe('UsersService', () => {
         loginType: LoginType.GOOGLE,
       } as User;
 
-      jest.spyOn(repository, 'findUserById').mockResolvedValue(user);
+      jest.spyOn(userRepository, 'findUserById').mockResolvedValue(user);
 
       const result = await service.getUserById(userId);
 
       expect(result).toEqual(user);
-      expect(repository.findUserById).toHaveBeenCalledWith(userId);
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
     });
 
     it('유저가 없으면 null 반환', async () => {
       const userId = '1';
 
-      jest.spyOn(repository, 'findUserById').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findUserById').mockResolvedValue(null);
       const result = await service.getUserById(userId);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getMyQuestions', () => {
+    it('유저가 작성한 질문 조회', async () => {
+      const userId = '1';
+      const questions = [
+        {
+          questionId: '1',
+          content: '질문 내용',
+          isHidden: false,
+          createdAt: new Date(),
+        },
+        {
+          questionId: '2',
+          content: '질문 내용2',
+          isHidden: false,
+          createdAt: new Date(),
+        },
+        {
+          questionId: '3',
+          content: '질문 내용3',
+          isHidden: false,
+          createdAt: new Date(),
+        },
+      ] as Question[];
+
+      jest.spyOn(questionRepository, 'findQuestionsByUserId').mockResolvedValue(questions);
+
+      const result = await service.getMyQuestions(userId);
+
+      expect(result).toEqual(questions);
+      expect(questionRepository.findQuestionsByUserId).toHaveBeenCalledWith(userId);
     });
   });
 });

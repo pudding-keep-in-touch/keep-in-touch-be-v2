@@ -101,8 +101,10 @@ describe('Questions API test', () => {
         isHidden: false,
       };
 
+      const questionCount = await dataSource.getRepository('questions').count({ where: { userId: testUserId } });
+
       // 먼저 10개의 질문 생성
-      for (let i = 0; i < QUESTION_COUNT_LIMIT; i++) {
+      for (let i = 0; i < QUESTION_COUNT_LIMIT - questionCount; i++) {
         const response = await request(app.getHttpServer()).post('/questions').send(createQuestionDto).expect(201);
         createdQuestionIds.push(response.body.data.questionId);
       }

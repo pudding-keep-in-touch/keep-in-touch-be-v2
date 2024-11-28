@@ -29,4 +29,13 @@ export class QuestionRepository extends Repository<Question> {
   async findQuestionById(questionId: string): Promise<Question | null> {
     return this.findOne({ where: { questionId } });
   }
+
+  // NOTE: 최대 10개의 질문을 조회합니다.
+  async findQuestionsByUserId(userId: string): Promise<Question[]> {
+    return this.find({
+      select: ['questionId', 'content', 'isHidden', 'createdAt'],
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
