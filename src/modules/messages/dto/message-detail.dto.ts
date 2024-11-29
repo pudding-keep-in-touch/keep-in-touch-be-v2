@@ -7,7 +7,7 @@ import { BaseMessageDto } from './base-message.dto';
 /**
  * @brief 쪽지 상세 조회 DTO
  */
-class MessageDetailDto extends BaseMessageDto {
+abstract class MessageDetailDto extends BaseMessageDto {
   @ApiProperty({
     description: '쪽지 타입 (sent: 보낸 쪽지, received: 받은 쪽지)',
     example: 'received',
@@ -52,6 +52,25 @@ class MessageDetailDto extends BaseMessageDto {
     type: string; // 한글 변환
     emoji: string;
   }[];
+
+  static baseFrom(message: Message) {
+    const { messageId, receiver, content, question, emotion, reactions, createdAt } = message;
+    return {
+      messageId,
+      receiverId: receiver.userId,
+      receiverNickname: receiver.nickname,
+      content,
+      emotion: emotion ? { emotionId: String(emotion.emotionId), name: emotion.name, emoji: emotion.emoji } : undefined,
+      question: question ? { questionId: question.questionId, content: question.content } : undefined,
+      reactions: reactions.map((reaction) => ({
+        reactionId: reaction.reactionId,
+        content: reaction.reactionTemplate.content,
+        type: getReactionTypeKorean(reaction.reactionTemplate.type),
+        emoji: reaction.reactionTemplate.emoji,
+      })),
+      createdAt,
+    };
+  }
 }
 
 export class ReceivedMessageDetailDto extends MessageDetailDto {
@@ -62,45 +81,22 @@ export class ReceivedMessageDetailDto extends MessageDetailDto {
   status: MessageStatusString;
 
   static from(message: Message): ReceivedMessageDetailDto {
-    const { messageId, receiver, content, question, emotion, reactions, status, createdAt } = message;
+    const base = MessageDetailDto.baseFrom(message);
+    const status = getMessageStatusString(message.status);
     return {
-      messageId,
+      ...base,
       type: 'received',
-      receiverId: receiver.userId,
-      receiverNickname: receiver.nickname,
-      content,
-      emotion: emotion ? { emotionId: String(emotion.emotionId), name: emotion.name, emoji: emotion.emoji } : undefined,
-      question: question ? { questionId: question.questionId, content: question.content } : undefined,
-      reactions: reactions.map((reaction) => ({
-        reactionId: reaction.reactionId,
-        content: reaction.reactionTemplate.content,
-        type: getReactionTypeKorean(reaction.reactionTemplate.type),
-        emoji: reaction.reactionTemplate.emoji,
-      })),
-      status: getMessageStatusString(status),
-      createdAt,
+      status,
     };
   }
 }
 
 export class SentMessageDetailDto extends MessageDetailDto {
   static from(message: Message): SentMessageDetailDto {
-    const { messageId, receiver, content, question, emotion, reactions, createdAt } = message;
+    const base = MessageDetailDto.baseFrom(message);
     return {
-      messageId,
+      ...base,
       type: 'sent',
-      receiverId: receiver.userId,
-      receiverNickname: receiver.nickname,
-      content,
-      emotion: emotion ? { emotionId: String(emotion.emotionId), name: emotion.name, emoji: emotion.emoji } : undefined,
-      question: question ? { questionId: question.questionId, content: question.content } : undefined,
-      reactions: reactions.map((reaction) => ({
-        reactionId: reaction.reactionId,
-        content: reaction.reactionTemplate.content,
-        type: getReactionTypeKorean(reaction.reactionTemplate.type),
-        emoji: reaction.reactionTemplate.emoji,
-      })),
-      createdAt,
     };
   }
 }
