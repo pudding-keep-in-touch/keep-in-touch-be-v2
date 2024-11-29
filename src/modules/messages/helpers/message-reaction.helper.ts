@@ -4,7 +4,16 @@ import { ReactionTemplateType } from '@entities/reaction-template.entity';
 import { MessageStatusString } from '../types/messages.type';
 
 export function getMessageStatusString(status: MessageStatus): MessageStatusString {
-  return MessageStatus[status].toLowerCase() as MessageStatusString;
+  switch (status) {
+    case MessageStatus.NORMAL:
+      return 'normal';
+    case MessageStatus.HIDDEN:
+      return 'hidden';
+    case MessageStatus.REPORTED:
+      return 'reported';
+    default:
+      throw new Error(`Invalid message status: ${status}`);
+  }
 }
 
 export function getReactionTypeKorean(type: ReactionTemplateType) {

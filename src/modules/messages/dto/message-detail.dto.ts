@@ -1,6 +1,6 @@
 import { Message } from '@entities/message.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { getMessageStatusString, getReactionTypeKorean } from '../helpers/message-status.helper';
+import { getMessageStatusString, getReactionTypeKorean } from '../helpers/message-reaction.helper';
 import { MessageStatusString, MessageType } from '../types/messages.type';
 import { BaseMessageDto } from './base-message.dto';
 
