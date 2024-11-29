@@ -1,13 +1,12 @@
 import { Emotion } from '@entities/emotion.entity';
 import { Message, MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
-import { Reaction } from '@entities/reaction.entity';
 import { User } from '@entities/user.entity';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
+import { SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
 import { MessageDetailParam } from './types/messages.type';
 
@@ -291,9 +290,11 @@ describe('MessagesService', () => {
     };
 
     const message = {
+      messageId: '5',
       senderId: '1',
       receiverId: '2',
       content: 'content',
+      status: MessageStatus.NORMAL,
     };
 
     jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as Message);

@@ -82,7 +82,9 @@ export class UsersService {
     return this.userRepository.findUserById(id);
   }
 
-  private generateNickname(minNumber = 1000, maxNumber = 9999): string {
+  private generateNickname(): string {
+    const minNumber = 1000;
+    const maxNumber = 9999;
     const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
     return `퐁${randomNumber}`;
   }

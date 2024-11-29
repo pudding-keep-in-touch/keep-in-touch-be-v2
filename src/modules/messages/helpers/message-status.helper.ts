@@ -17,5 +17,7 @@ export function getReactionTypeKorean(type: ReactionTemplateType) {
       return '응원';
     case ReactionTemplateType.RECONCILIATION:
       return '화해';
+    default:
+      throw new Error('Invalid reaction type');
   }
 }
