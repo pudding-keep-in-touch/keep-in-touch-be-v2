@@ -53,7 +53,7 @@ abstract class MessageDetailDto extends BaseMessageDto {
     emoji: string;
   }[];
 
-  static baseFrom(message: Message) {
+  static baseFrom(message: Message): Omit<MessageDetailDto, 'type'> {
     const { messageId, receiver, content, question, emotion, reactions, createdAt } = message;
     return {
       messageId,
