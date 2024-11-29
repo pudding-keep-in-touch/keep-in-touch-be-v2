@@ -33,7 +33,7 @@ export class User {
   @Column({ type: 'varchar', length: 20 })
   nickname: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   age: number | null;
 
   @Column({ type: 'varchar', length: 10, nullable: true })

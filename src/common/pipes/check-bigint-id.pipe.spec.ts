@@ -39,7 +39,7 @@ describe('CheckBigIntIdPipe', () => {
     expect(() => pipe.transform('9223372036854775808')).toThrow(BadRequestException);
   });
 
-  it('999999', () => {
+  it('string 비교했을 때 더 큰 값이어도 실제로는 작은 값이면 통과', () => {
     expect(pipe.transform('999999')).toBe('999999');
   });
 });
