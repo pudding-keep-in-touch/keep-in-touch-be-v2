@@ -57,7 +57,7 @@ CREATE TABLE users (
     user_id bigint NOT NULL DEFAULT nextval('users_user_id_seq'::regclass),
     email character varying(255) NOT NULL,
     password character varying(255),
-    nickname character varying(20),
+    nickname character varying(20) NOT NULL,
     age integer,
     gender character varying(10),
     login_type smallint NOT NULL,

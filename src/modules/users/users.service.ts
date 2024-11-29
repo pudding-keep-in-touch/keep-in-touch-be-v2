@@ -31,8 +31,9 @@ export class UsersService {
       }
       return { userId: user.userId, email: user.email };
     }
+    const nickname = googleUser.displayName || this.generateNickname();
 
-    const userId = await this.userRepository.createUser(googleUser.email, googleUser.displayName, LoginType.GOOGLE);
+    const userId = await this.userRepository.createUser(googleUser.email, nickname, LoginType.GOOGLE);
     return { userId, email: googleUser.email };
   }
 
@@ -79,5 +80,12 @@ export class UsersService {
    */
   async getUserById(id: string): Promise<User | null> {
     return this.userRepository.findUserById(id);
+  }
+
+  private generateNickname(): string {
+    const minNumber = 1000;
+    const maxNumber = 9999;
+    const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+    return `퐁${randomNumber}`;
   }
 }

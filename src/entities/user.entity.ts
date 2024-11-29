@@ -24,20 +24,20 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
   userId: string;
 
-  @Column({ length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ length: 255, nullable: true })
-  password: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  password: string | null;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20 })
   nickname: string;
 
-  @Column({ nullable: true })
-  age: number;
+  @Column({ type: 'integer', nullable: true })
+  age: number | null;
 
-  @Column({ length: 10, nullable: true })
-  gender: string;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  gender: string | null;
 
   @Column({ name: 'login_type', type: 'smallint' })
   loginType: LoginType;
@@ -49,7 +49,7 @@ export class User {
   updatedAt: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt: Date;
+  deletedAt: Date | null;
 
   @OneToMany(
     () => Question,

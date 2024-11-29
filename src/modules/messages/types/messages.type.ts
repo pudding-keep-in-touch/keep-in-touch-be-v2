@@ -15,3 +15,14 @@ export type CreateEmotionMessageParam = MessageBaseData & {
   emotionId: string;
   questionId?: never;
 };
+
+export type MessageType = 'sent' | 'received';
+
+export type MessageStatusString = 'normal' | 'hidden' | 'reported';
+
+export type ReactionTypeKorean = '감사' | '사과' | '응원' | '화해';
+
+export type MessageDetailParam = {
+  messageId: string;
+  userId: string;
+};

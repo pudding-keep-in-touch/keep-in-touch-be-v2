@@ -8,15 +8,15 @@ export class MessageStatistic {
   @JoinColumn({ name: 'user_id' })
   userId: string;
 
-  @Column({ name: 'received_message_count', default: 0 })
+  @Column({ name: 'received_message_count', type: 'integer', default: 0 })
   receivedMessageCount: number;
 
-  @Column({ name: 'sent_message_count', default: 0 })
+  @Column({ name: 'sent_message_count', type: 'integer', default: 0 })
   sentMessageCount: number;
 
-  @Column({ name: 'unread_message_count', default: 0 })
+  @Column({ name: 'unread_message_count', type: 'integer', default: 0 })
   unreadMessageCount: number;
 
-  @Column({ name: 'unread_reaction_count', default: 0 })
+  @Column({ name: 'unread_reaction_count', type: 'integer', default: 0 })
   unreadReactionCount: number;
 }

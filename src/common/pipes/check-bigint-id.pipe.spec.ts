@@ -1,3 +1,4 @@
+import { validateBigIntIdString } from '@common/validators/bigint-string.validator';
 import { BadRequestException } from '@nestjs/common';
 import { CheckBigIntIdPipe } from './check-bigint-id.pipe';
 
@@ -36,5 +37,9 @@ describe('CheckBigIntIdPipe', () => {
 
   it('bigint max값보다 큰 값이 들어오면 error ', () => {
     expect(() => pipe.transform('9223372036854775808')).toThrow(BadRequestException);
+  });
+
+  it('string 비교했을 때 더 큰 값이어도 실제로는 작은 값이면 통과', () => {
+    expect(pipe.transform('999999')).toBe('999999');
   });
 });

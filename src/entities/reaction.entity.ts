@@ -22,6 +22,15 @@ export class Reaction {
   @Column({ name: 'reaction_template_id', type: 'integer' })
   reactionTemplateId: number;
 
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt: Date | null;
+
   @ManyToOne(
     () => Message,
     (message) => message.reactions,
@@ -35,13 +44,4 @@ export class Reaction {
   )
   @JoinColumn({ name: 'reaction_template_id' })
   reactionTemplate: ReactionTemplate;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-  updatedAt: Date;
-
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt: Date;
 }

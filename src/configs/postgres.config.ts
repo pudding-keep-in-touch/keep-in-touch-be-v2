@@ -14,6 +14,6 @@ export async function postgreSqlConfig(configService: ConfigService): Promise<Ty
     schema: configService.get('POSTGRES_SCHEMA'),
     synchronize: false,
     autoLoadEntities: true,
-    logging: configService.get('APP_ENV') === 'local',
+    logging: configService.get('APP_ENV') === 'local' || configService.get('APP_ENV') === 'test',
   };
 }

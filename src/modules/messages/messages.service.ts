@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
-import { MessageBaseData } from './types/messages.type';
+import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
+import { MessageBaseData, MessageDetailParam } from './types/messages.type';
 
 @Injectable()
 export class MessagesService {
@@ -48,6 +49,33 @@ export class MessagesService {
     }
 
     return { messageId };
+  }
+
+  /**
+   * 메세지 상세 정보를 조회합니다.
+   *
+   * @param MessageDetailParam messageId, userId를 포함하는 parameter
+   * @returns 받은 쪽지인 경우 ReceivedMessageDetailDto, 보낸 쪽지인 경우 SentMessageDetailDto
+   */
+  async getMessageDetail({
+    userId,
+    messageId,
+  }: MessageDetailParam): Promise<SentMessageDetailDto | ReceivedMessageDetailDto> {
+    const message = await this.messageRepository.findMessageDetailById(messageId);
+
+    if (!message) {
+      throw new NotFoundException('쪽지가 존재하지 않습니다.');
+    }
+    let dto: SentMessageDetailDto | ReceivedMessageDetailDto;
+
+    if (message.senderId === userId) {
+      dto = SentMessageDetailDto.from(message);
+    } else if (message.receiverId === userId) {
+      dto = ReceivedMessageDetailDto.from(message);
+    } else {
+      throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
+    }
+    return dto;
   }
 
   /**
