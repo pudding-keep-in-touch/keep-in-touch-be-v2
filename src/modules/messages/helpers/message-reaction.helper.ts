@@ -1,7 +1,7 @@
 // src/modules/messages/helpers/message-status.helper.ts
 import { MessageStatus } from '@entities/message.entity';
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
-import { MessageStatusString } from '../types/messages.type';
+import { MessageStatusString, ReactionTypeKorean } from '../types/messages.type';
 
 export function getMessageStatusString(status: MessageStatus): MessageStatusString {
   switch (status) {
@@ -16,7 +16,7 @@ export function getMessageStatusString(status: MessageStatus): MessageStatusStri
   }
 }
 
-export function getReactionTypeKorean(type: ReactionTemplateType) {
+export function getReactionTypeKorean(type: ReactionTemplateType): ReactionTypeKorean {
   switch (type) {
     case ReactionTemplateType.THANKS:
       return '감사';
