@@ -1,35 +1,65 @@
 import { Message } from '@entities/message.entity';
-import { ReactionTemplateType } from '@entities/reaction-template.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { getMessageStatusString } from '../helpers/message-status.helper';
-import { MessageType } from '../types/messages.type';
+import { getMessageStatusString, getReactionTypeKorean } from '../helpers/message-status.helper';
+import { MessageStatusString, MessageType } from '../types/messages.type';
 import { BaseMessageDto } from './base-message.dto';
 
 /**
  * @brief 쪽지 상세 조회 DTO
  */
 class MessageDetailDto extends BaseMessageDto {
-  @ApiProperty({ enum: ['received', 'sent'] })
+  @ApiProperty({
+    description: '쪽지 타입 (sent: 보낸 쪽지, received: 받은 쪽지)',
+    example: 'received',
+  })
   type: MessageType;
+
+  @ApiProperty({
+    description: '쪽지에 대한 보내진 질문 정보',
+    required: false,
+    example: { questionId: '1', content: '너의 장점은 솔직하다는 거야.' },
+  })
   question?: {
     questionId: string;
     content: string;
   };
+
+  //@ApiProperty({
+  //  description: '쪽지에 대한 감정 정보',
+  //  required: false,
+  //})
   emotion?: {
     emotionId: string;
     name: string;
     emoji: string;
   };
+
+  @ApiProperty({
+    description: '쪽지에 대한 반응 정보',
+    required: false,
+    example: [
+      {
+        reactionId: '1',
+        content: '고마워',
+        type: '감사',
+        emoji: '😊',
+      },
+    ],
+  })
   reactions: {
     reactionId: string;
     content: string;
-    type: ReactionTemplateType; // 1, 2
+    type: string; // 한글 변환
     emoji: string;
   }[];
 }
 
 export class ReceivedMessageDetailDto extends MessageDetailDto {
-  status: 'normal' | 'hidden' | 'reported';
+  @ApiProperty({
+    description: '쪽지 처리 상태 (normal: 일반, hidden: 숨김, reported: 신고)',
+    example: 'normal',
+  })
+  status: MessageStatusString;
 
   static from(message: Message): ReceivedMessageDetailDto {
     const { messageId, receiver, content, question, emotion, reactions, status, createdAt } = message;
@@ -44,7 +74,7 @@ export class ReceivedMessageDetailDto extends MessageDetailDto {
       reactions: reactions.map((reaction) => ({
         reactionId: reaction.reactionId,
         content: reaction.reactionTemplate.content,
-        type: reaction.reactionTemplate.type,
+        type: getReactionTypeKorean(reaction.reactionTemplate.type),
         emoji: reaction.reactionTemplate.emoji,
       })),
       status: getMessageStatusString(status),
@@ -67,7 +97,7 @@ export class SentMessageDetailDto extends MessageDetailDto {
       reactions: reactions.map((reaction) => ({
         reactionId: reaction.reactionId,
         content: reaction.reactionTemplate.content,
-        type: reaction.reactionTemplate.type,
+        type: getReactionTypeKorean(reaction.reactionTemplate.type),
         emoji: reaction.reactionTemplate.emoji,
       })),
       createdAt,

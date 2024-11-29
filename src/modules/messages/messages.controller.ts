@@ -5,6 +5,7 @@ import { User } from '@entities/user.entity';
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
+import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
 
 @ApiTags('messages')
@@ -30,6 +31,7 @@ export class MessagesController {
   @GenerateSwaggerApiDoc({
     summary: '쪽지 상세 조회',
     description: '쪽지 상세를 조회합니다.',
+    responseType: [ReceivedMessageDetailDto, SentMessageDetailDto],
   })
   @Get(':messageId')
   async getMessageDetail(@Param('messageId', CheckBigIntIdPipe) messageId: string, @UserAuth() user: User) {

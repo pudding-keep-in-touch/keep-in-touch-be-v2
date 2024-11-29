@@ -1,4 +1,4 @@
-import { HttpStatus, Type } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ApiBodyOptions, ApiHeaderOptions, ApiParamOptions, ApiQueryOptions } from '@nestjs/swagger';
 
 export interface SwaggerDocInterface {
@@ -9,7 +9,7 @@ export interface SwaggerDocInterface {
   // 설명(상세)
   description: string;
   // 응답하는 형태(response-dto)
-  responseType?: Type<unknown> | [Type<unknown>];
+  responseType?: any;
 
   responseStatus?: HttpStatus;
 
