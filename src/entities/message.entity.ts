@@ -8,11 +8,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Emotion } from './emotion.entity';
 import { Question } from './question.entity';
+import { ReactionInfo } from './reaction-info.entity';
 import { Reaction } from './reaction.entity';
 import { User } from './user.entity';
 
@@ -97,4 +99,11 @@ export class Message {
     (reaction) => reaction.message,
   )
   reactions: Reaction[];
+
+  @OneToOne(
+    () => ReactionInfo,
+    (reactionInfo) => reactionInfo.message,
+  )
+  @JoinColumn({ name: 'message_id' })
+  reactionInfo: ReactionInfo;
 }
