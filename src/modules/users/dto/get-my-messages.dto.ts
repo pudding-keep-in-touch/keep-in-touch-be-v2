@@ -3,7 +3,7 @@ import { getMessageStatusString } from '@modules/messages/helpers/message-reacti
 import { MessageOrder, MessageStatusString, MessageType } from '@modules/messages/types/messages.type';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsIn, IsOptional, Max, Min } from 'class-validator';
+import { IsDateString, IsIn, IsOptional, Max, Min } from 'class-validator';
 import { BaseMessageDto } from '../../messages/dto/base-message.dto';
 
 /**
@@ -15,10 +15,9 @@ import { BaseMessageDto } from '../../messages/dto/base-message.dto';
 export class GetMyMessagesQuery {
   @ApiProperty({
     description: '받은 쪽지, 보낸 쪽지 구분 (received/sent)',
-    example: MessageType.RECEIVED,
-    enum: MessageType,
+    example: 'received',
   })
-  @IsEnum(MessageType)
+  @IsIn(['received', 'sent'])
   type: MessageType; // received/sent
 
   // IsDate?
@@ -49,7 +48,7 @@ export class GetMyMessagesQuery {
   })
   @IsOptional()
   @IsIn(['desc', 'asc'])
-  order: MessageOrder = MessageOrder.DESC;
+  order: MessageOrder = 'desc';
 }
 
 // message type
@@ -104,7 +103,10 @@ export class SentMessageDto extends BaseMessageDto {
       receiverNickname: message.receiver.nickname,
       content: message.content,
       createdAt: message.createdAt,
-      reactionInfo: message.reactionInfo,
+      reactionInfo: message.reactionInfo && {
+        createdAt: message.reactionInfo.createdAt,
+        readAt: message.reactionInfo.readAt,
+      },
     };
   }
 }

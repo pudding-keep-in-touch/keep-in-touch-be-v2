@@ -16,15 +16,9 @@ export type CreateEmotionMessageParam = MessageBaseData & {
   questionId?: never;
 };
 
-export enum MessageType {
-  RECEIVED = 'received',
-  SENT = 'sent',
-}
+export type MessageType = 'received' | 'sent';
 
-export enum MessageOrder {
-  DESC = 'desc',
-  ASC = 'asc',
-}
+export type MessageOrder = 'desc' | 'asc';
 
 export type MessageStatusString = 'normal' | 'hidden' | 'reported';
 
