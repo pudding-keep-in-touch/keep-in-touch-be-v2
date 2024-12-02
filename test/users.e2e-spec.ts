@@ -1,5 +1,7 @@
 import { Emotion } from '@entities/emotion.entity';
+import { Message } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { GetMySentMessagesDto } from '@modules/users/dto/get-my-messages.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
@@ -96,6 +98,109 @@ describe('Users API test', () => {
         .get(`/users/${targetUserId}/questions`)
         .set('userId', loginUserId)
         .expect(HttpStatus.FORBIDDEN);
+    });
+  });
+
+  describe('GET /users/:userId/messages', () => {
+    const query = {
+      type: 'sent',
+      limit: 10,
+      order: 'desc',
+    };
+
+    it('유저가 보낸 쪽지 조회', () => {
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          const { body } = response;
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(body.data.messageList).toBeInstanceOf(Array);
+          const messageList = body.data.messageList as GetMySentMessagesDto[];
+          // check all type
+
+          for (const message of messageList) {
+            expect(message).toHaveProperty('messageId');
+            expect(message).toHaveProperty('receiverId');
+            expect(message).toHaveProperty('receiverNickname');
+            expect(message).toHaveProperty('content');
+            expect(message).toHaveProperty('createdAt');
+            expect(message).toHaveProperty('reactionInfo');
+          }
+        });
+    });
+
+    it('유저가 받은 쪽지 조회', () => {
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=received&limit=${query.limit}&order=${query.order}`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          const { body } = response;
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(body.data.messageList).toBeInstanceOf(Array);
+          const messageList = body.data.messageList as GetMySentMessagesDto[];
+          // check all type
+
+          for (const message of messageList) {
+            expect(message).toHaveProperty('messageId');
+            expect(message).toHaveProperty('receiverId');
+            expect(message).toHaveProperty('receiverNickname');
+            expect(message).toHaveProperty('content');
+            expect(message).toHaveProperty('createdAt');
+            expect(message).toHaveProperty('status');
+            expect(message).toHaveProperty('readAt');
+          }
+        });
+    });
+
+    it('로그인한 유저와 조회 대상 유저가 다를 때 403 에러', () => {
+      return request(app.getHttpServer())
+        .get(`/users/${targetUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
+        .set('userId', loginUserId)
+        .expect(HttpStatus.FORBIDDEN);
+    });
+
+    it('query 에 올바르지 않은 값이 들어왔을 때 400 에러', () => {
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=invalid&limit=invalid&order=invalid`)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('query 에 limit 값이 30을 초과했을 때 400 에러', () => {
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=${query.type}&limit=31&order=${query.order}`)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('cursor가 없을 때 가장 최근 메시지 조회', async () => {
+      const recentMessage = await dataSource.getRepository(Message).findOne({
+        where: {
+          senderId: loginUserId,
+        },
+        order: { createdAt: 'DESC' },
+      });
+
+      console.log(recentMessage);
+
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=${query.type}&order=${query.order}`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          const { body } = response;
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(body.data.messageList).toBeInstanceOf(Array);
+          console.log(body.data.messageList);
+          expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+        });
     });
   });
 });
