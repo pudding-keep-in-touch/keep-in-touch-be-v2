@@ -38,15 +38,30 @@ export class MessageRepository extends Repository<Message> {
    * @param messageId select 할 message의 id
    * @returns
    */
-  async findMessageDetailById(messageId: string): Promise<Message | null> {
-    return this.createQueryBuilder('message')
-      .innerJoinAndSelect('message.receiver', 'receiver')
-      .leftJoinAndSelect('message.question', 'question')
-      .leftJoinAndSelect('message.emotion', 'emotion')
-      .leftJoinAndSelect('message.reactions', 'reaction')
-      .leftJoinAndSelect('reaction.reactionTemplate', 'template')
-      .where('message.messageId = :messageId', { messageId })
-      .getOne();
+  async findMessageDetailById(messageId: string, userId: string): Promise<Message | null> {
+    return this.manager.transaction(async (manager) => {
+      // Repository 대신 EntityManager 사용
+      const message = await manager.findOne(Message, {
+        where: { messageId },
+        relations: ['receiver', 'question', 'emotion', 'reactions', 'reactions.reactionTemplate'],
+      });
+
+      if (!message) {
+        return null;
+      }
+      // 읽음 처리
+      if (message.receiverId === userId && message.readAt === null) {
+        await manager.update(Message, { messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
+        await manager.update(
+          MessageStatistic,
+          { userId: userId },
+          {
+            unreadMessageCount: () => 'unreadMessageCount - 1',
+          },
+        );
+      }
+      return message;
+    });
   }
 
   /**
