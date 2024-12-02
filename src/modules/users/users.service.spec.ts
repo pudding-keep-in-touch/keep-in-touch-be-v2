@@ -5,15 +5,38 @@ import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
+import { MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
+import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
+import { GetMyMessagesQuery, GetMyReceivedMessagedDto, GetMySentMessagesDto } from './dto/get-my-messages.dto';
 import { LoginType } from './users.constants';
 import { UsersService } from './users.service';
+
+export const createMockMessage = (overrides = {}) => ({
+  messageId: '1',
+  content: '메시지 내용',
+  status: MessageStatus.NORMAL,
+  receiver: {
+    userId: '2',
+    nickname: 'Alice',
+  },
+  sender: {
+    userId: '1',
+    nickname: 'Bob',
+  },
+  createdAt: new Date(),
+  readAt: new Date(),
+  ...overrides,
+});
 
 describe('UsersService', () => {
   let service: UsersService;
   let userRepository: UserRepository;
   let questionRepository: QuestionRepository;
+  let messageRepository: MessageRepository;
+  let messageStatisticRepository: MessageStatisticRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,12 +57,26 @@ describe('UsersService', () => {
             findQuestionsByUserId: jest.fn(),
           },
         },
+        {
+          provide: MessageRepository,
+          useValue: {
+            findMessagesByUserId: jest.fn(),
+          },
+        },
+        {
+          provide: MessageStatisticRepository,
+          useValue: {
+            findOneOrFail: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     userRepository = module.get<UserRepository>(UserRepository);
     questionRepository = module.get<QuestionRepository>(QuestionRepository);
+    messageRepository = module.get<MessageRepository>(MessageRepository);
+    messageStatisticRepository = module.get<MessageStatisticRepository>(MessageStatisticRepository);
   });
 
   describe('createOrGetGoogleUser', () => {
@@ -194,6 +231,92 @@ describe('UsersService', () => {
 
       expect(result).toEqual(questions);
       expect(questionRepository.findQuestionsByUserId).toHaveBeenCalledWith(userId);
+    });
+  });
+
+  describe('getMyMessages', () => {
+    it('유저가 보낸 메시지 조회', async () => {
+      const userId = '1';
+      const query: GetMyMessagesQuery = {
+        type: 'sent',
+        limit: 10,
+        order: 'asc',
+      };
+      const messages = [
+        createMockMessage({
+          messageId: '1',
+          reactionInfo: null,
+        }),
+        createMockMessage({
+          messageId: '2',
+          reactionInfo: {
+            createdAt: new Date(),
+            readAt: new Date(),
+          },
+        }),
+      ] as any;
+
+      jest.spyOn(messageRepository, 'findMessagesByUserId').mockResolvedValue(messages);
+      jest.spyOn(messageStatisticRepository, 'findOneOrFail').mockResolvedValue({
+        sentMessageCount: 2,
+      } as any);
+
+      const result = await service.getMyMessages(userId, query);
+
+      expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'sent', {
+        limit: 10,
+        order: 'ASC',
+      });
+
+      expect(messageStatisticRepository.findOneOrFail).toHaveBeenCalledWith({
+        select: ['sentMessageCount'],
+        where: { userId: userId },
+      });
+
+      expect(result).toEqual(
+        GetMySentMessagesDto.from(messages, {
+          sentMessageCount: 2,
+          nextCursor: messages[messages.length - 1].createdAt,
+        }),
+      );
+    });
+
+    it('유저가 받은 메시지 조회', async () => {
+      const userId = '1';
+      const query: GetMyMessagesQuery = {
+        type: 'received',
+        limit: 10,
+        order: 'asc',
+      };
+      const messages = [
+        createMockMessage({ messageId: '1' }),
+        createMockMessage({ messageId: '2', status: MessageStatus.HIDDEN }),
+      ];
+
+      jest.spyOn(messageRepository, 'findMessagesByUserId').mockResolvedValue(messages as any);
+      jest.spyOn(messageStatisticRepository, 'findOneOrFail').mockResolvedValue({
+        receivedMessageCount: 2,
+        unreadMessageCount: 1,
+      } as any);
+
+      const result = await service.getMyMessages(userId, query);
+
+      expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'received', {
+        limit: 10,
+        order: 'ASC',
+      });
+      expect(messageStatisticRepository.findOneOrFail).toHaveBeenCalledWith({
+        select: ['receivedMessageCount', 'unreadMessageCount'],
+        where: { userId: userId },
+      });
+
+      expect(result).toEqual(
+        GetMyReceivedMessagedDto.from(messages as any, {
+          receivedMessageCount: 2,
+          unreadMessageCount: 1,
+          nextCursor: messages[messages.length - 1].createdAt,
+        }),
+      );
     });
   });
 });
