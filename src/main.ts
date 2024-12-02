@@ -9,9 +9,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  process.env.TZ = 'UTC'; // FIXME: 서버시간을 강제로 UTC로 설정
+  // 이유: KST 인 호스트에서 실행되면 timestamp without timezone으로 저장된 모든 데이터가 실제보다 9시간 빠르게 조회됨
+  // pagination 등에서 엄청난 데이터 불일치가 발생함.
+  // 서버를 UTC로 설정해서 해결 가능.
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-
   const logger = app.get(CustomLogger);
   app.useLogger(logger);
   // 환경 변수 로드

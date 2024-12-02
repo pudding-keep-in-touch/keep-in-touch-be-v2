@@ -1,9 +1,14 @@
 import { Repository } from 'typeorm';
 
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
+import { PaginationOption } from '@common/types/pagination-option.type';
 import { MessageStatistic } from '@entities/message-statistic.entity';
 import { Message } from '@entities/message.entity';
-import { CreateEmotionMessageParam, CreateQuestionMessageParam } from '@modules/messages/types/messages.type';
+import {
+  CreateEmotionMessageParam,
+  CreateQuestionMessageParam,
+  MessageType,
+} from '@modules/messages/types/messages.type';
 @CustomEntityRepository(Message)
 export class MessageRepository extends Repository<Message> {
   /**
@@ -42,6 +47,40 @@ export class MessageRepository extends Repository<Message> {
       .leftJoinAndSelect('reaction.reactionTemplate', 'template')
       .where('message.messageId = :messageId', { messageId })
       .getOne();
+  }
+
+  /**
+   *
+   *
+   * @param userId 조회할 유저의 id (senderId 또는 receiverId)
+   * @param options cursor, limit, order
+   * @param type sent or received
+   * @returns
+   */
+  async findMessagesByUserId(userId: string, type: MessageType, options: PaginationOption): Promise<Message[]> {
+    const { cursor, limit, order } = options;
+
+    /**
+     * type에 따라 receiverId 또는 senderId로 조회합니다.
+     * cursor가 주어진 경우 cursor 이전의 데이터를 조회합니다.
+     * limit만큼 조회하고, order에 따라 정렬합니다.
+     */
+    const query = this.createQueryBuilder('message')
+      .innerJoin('message.receiver', 'receiver')
+      .addSelect(['receiver.nickname', 'receiver.userId'])
+      .andWhere(cursor ? 'message.createdAt < :cursor' : '1=1', { cursor })
+      .orderBy('message.createdAt', order)
+      .take(limit);
+
+    if (type === 'sent') {
+      query.leftJoin('message.reactionInfo', 'reactionInfo');
+      query.addSelect(['reactionInfo.readAt', 'reactionInfo.createdAt']);
+      query.where('message.senderId = :userId', { userId });
+    } else {
+      query.where('message.receiverId = :userId', { userId });
+    }
+
+    return query.getMany();
   }
 
   /**

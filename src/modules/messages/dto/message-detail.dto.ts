@@ -85,7 +85,7 @@ export class ReceivedMessageDetailDto extends MessageDetailDto {
     const status = getMessageStatusString(message.status);
     return {
       ...base,
-      type: 'received',
+      type: MessageType.RECEIVED,
       status,
     };
   }
@@ -96,7 +96,7 @@ export class SentMessageDetailDto extends MessageDetailDto {
     const base = MessageDetailDto.baseFrom(message);
     return {
       ...base,
-      type: 'sent',
+      type: MessageType.SENT,
     };
   }
 }
