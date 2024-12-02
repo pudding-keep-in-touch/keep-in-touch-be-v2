@@ -112,6 +112,27 @@ export class SentMessageDto extends BaseMessageDto {
 }
 
 export class GetMySentMessagesDto {
+  @ApiProperty({
+    description: '유저가 보낸 총 메세지 개수',
+    example: 30,
+  })
+  sentMessageCount: number;
+
+  @ApiProperty({
+    description: '다음 페이지 cursor, 없을 경우 null',
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+    example: '2024-11-29T16:03:19.378Z',
+  })
+  nextCursor: Date | null;
+
+  @ApiProperty({
+    description: '유저가 보낸 메세지 리스트',
+    type: [SentMessageDto],
+  })
+  messageList: SentMessageDto[];
+
   static from(messages: Message[], meta: { sentMessageCount: number; nextCursor: Date | null }) {
     return {
       sentMessageCount: meta.sentMessageCount,
@@ -122,6 +143,28 @@ export class GetMySentMessagesDto {
 }
 
 export class GetMyReceivedMessagedDto {
+  @ApiProperty({
+    description: '유저가 받은 총 메세지 개수',
+    example: 30,
+  })
+  receivedMessageCount: number;
+
+  @ApiProperty({
+    description: '유저가 받은 읽지 않은 메세지 개수',
+    example: 3,
+  })
+  unreadMessageCount: number;
+
+  @ApiProperty({
+    description: '다음 페이지 cursor, 없을 경우 null',
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+    example: '2024-11-29T16:03:19.378Z',
+  })
+  nextCursor: Date | null;
+  messageList: ReceivedMessageDto[];
+
   static from(
     messages: Message[],
     meta: { receivedMessageCount: number; unreadMessageCount: number; nextCursor: Date | null },

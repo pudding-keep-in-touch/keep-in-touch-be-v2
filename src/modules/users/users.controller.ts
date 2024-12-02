@@ -6,7 +6,7 @@ import { CheckBigIntIdPipe } from '@common/pipes/check-bigint-id.pipe';
 import { BaseQuestionDto } from '@modules/questions/dto/base-question.dto';
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { GetMyMessagesQuery } from './dto/get-my-messages.dto';
+import { GetMyMessagesQuery, GetMySentMessagesDto } from './dto/get-my-messages.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { UsersService } from './users.service';
 
@@ -31,6 +31,7 @@ export class UsersController {
   @GenerateSwaggerApiDoc({
     summary: '유저가 작성한 쪽지 조회',
     description: '유저 id 기준 작성한 쪽지 조회, 로그인한 유저 id와 일치하지 않으면 조회 불가. ',
+    responseType: GetMySentMessagesDto,
   })
   @UseGuards(IsOwnerGuard)
   async getMyMessages(@Param('userId', CheckBigIntIdPipe) userId: string, @Query() query: GetMyMessagesQuery) {
