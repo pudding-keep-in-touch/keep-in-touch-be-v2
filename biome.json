@@ -46,7 +46,8 @@
         "useImportType": "off",
         "noArguments": "error",
         "noVar": "error",
-        "useConst": "error"
+        "useConst": "error",
+        "noInferrableTypes": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",
