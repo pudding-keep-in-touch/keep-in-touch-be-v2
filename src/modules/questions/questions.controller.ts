@@ -35,6 +35,7 @@ export class QuestionsController {
   @GenerateSwaggerApiDoc({
     summary: '질문 숨김 / 해제',
     description: '질문을 숨기거나 숨김 해제 합니다.',
+    responseType: ResponseUpdateQuestionHiddenDto,
   })
   async updateQuestionHidden(
     @Body() { isHidden }: UpdateQuestionHiddenDto,
