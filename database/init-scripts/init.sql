@@ -145,11 +145,24 @@ COMMENT ON TABLE message_statistics IS '전체 쪽지, 안읽은 쪽지의 개�
 
 -- Emotions table
 CREATE TABLE emotions (
+    emotion_id integer NOT NULL DEFAULT nextval('emotions_emotion_id_seq'::regclass),
     name character varying(50) NOT NULL,
     emoji character varying(10) NOT NULL,
-    emotion_id integer NOT NULL DEFAULT nextval('emotions_emotion_id_seq'::regclass),
     CONSTRAINT emotions_pkey PRIMARY KEY (emotion_id)
 );
+
+-- Reaction info table
+CREATE TABLE reaction_info (
+		message_id bigint NOT NULL,
+		read_at timestamp(6),
+		created_at timestamp(6) NOT NULL,
+		CONSTRAINT reaction_info_pkey PRIMARY KEY (message_id),
+		CONSTRAINT reaction_info_message_id_uq UNIQUE (message_id)
+);
+
+COMMENT ON TABLE keepintouch_dev.reaction_info IS E'reaction 생성, 읽음 일자';
+
+
 
 -- Foreign key constraints
 ALTER TABLE questions
@@ -192,6 +205,10 @@ ALTER TABLE message_statistics
     FOREIGN KEY (user_id) REFERENCES users(user_id)
     ON DELETE CASCADE;
 
+ALTER TABLE reaction_info
+		ADD CONSTRAINT reaction_info_message_id_fkey
+		FOREIGN KEY (message_id) REFERENCES messages (message_id)
+	  ON DELETE CASCADE;
 
 -- Insert data into reaction_templates
 INSERT INTO reaction_templates (emoji, type, content)

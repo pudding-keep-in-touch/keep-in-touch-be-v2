@@ -61,21 +61,20 @@ export class MessagesService {
     userId,
     messageId,
   }: MessageDetailParam): Promise<SentMessageDetailDto | ReceivedMessageDetailDto> {
-    const message = await this.messageRepository.findMessageDetailById(messageId);
+    const message = await this.messageRepository.findMessageDetailById(messageId, userId);
 
     if (!message) {
       throw new NotFoundException('쪽지가 존재하지 않습니다.');
     }
-    let dto: SentMessageDetailDto | ReceivedMessageDetailDto;
-
-    if (message.senderId === userId) {
-      dto = SentMessageDetailDto.from(message);
-    } else if (message.receiverId === userId) {
-      dto = ReceivedMessageDetailDto.from(message);
-    } else {
+    if (message.senderId !== userId && message.receiverId !== userId) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
     }
-    return dto;
+
+    // DTO 변환
+    if (message.senderId === userId) {
+      return SentMessageDetailDto.from(message);
+    }
+    return ReceivedMessageDetailDto.from(message);
   }
 
   /**

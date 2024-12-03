@@ -16,7 +16,9 @@ export type CreateEmotionMessageParam = MessageBaseData & {
   questionId?: never;
 };
 
-export type MessageType = 'sent' | 'received';
+export type MessageType = 'received' | 'sent';
+
+export type MessageOrder = 'desc' | 'asc';
 
 export type MessageStatusString = 'normal' | 'hidden' | 'reported';
 

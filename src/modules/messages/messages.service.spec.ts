@@ -27,6 +27,9 @@ describe('MessagesService', () => {
             createQuestionMessage: jest.fn(),
             createEmotionMessage: jest.fn(),
             findMessageDetailById: jest.fn(),
+            manager: {
+              transaction: jest.fn(),
+            },
           },
         },
         {
@@ -297,7 +300,7 @@ describe('MessagesService', () => {
       status: MessageStatus.NORMAL,
     };
 
-    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as Message);
+    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as any);
 
     await expect(service.getMessageDetail(messageDetailParam)).rejects.toThrow(ForbiddenException);
   });

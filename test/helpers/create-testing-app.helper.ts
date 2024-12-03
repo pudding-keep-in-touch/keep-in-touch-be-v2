@@ -1,7 +1,6 @@
 import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
-import { MessageStatistic } from '@entities/message-statistic.entity';
 import { User } from '@entities/user.entity';
 import { CustomLogger } from '@logger/custom-logger.service';
 import { ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
@@ -84,26 +83,26 @@ export const createTestingApp = async (
       await manager.insert(User, targetUser);
     }
 
-    await manager.upsert(
-      MessageStatistic,
-      [
-        {
-          userId: loginUser.userId,
-          receivedMessageCount: 0,
-          sentMessageCount: 0,
-          unreadMessageCount: 0,
-          unreadReactionCount: 0,
-        },
-        {
-          userId: targetUser.userId,
-          receivedMessageCount: 0,
-          sentMessageCount: 0,
-          unreadMessageCount: 0,
-          unreadReactionCount: 0,
-        },
-      ],
-      ['userId'],
-    );
+    //await manager.upsert(
+    //  MessageStatistic,
+    //  [
+    //    {
+    //      userId: loginUser.userId,
+    //      receivedMessageCount: 0,
+    //      sentMessageCount: 0,
+    //      unreadMessageCount: 0,
+    //      unreadReactionCount: 0,
+    //    },
+    //    {
+    //      userId: targetUser.userId,
+    //      receivedMessageCount: 0,
+    //      sentMessageCount: 0,
+    //      unreadMessageCount: 0,
+    //      unreadReactionCount: 0,
+    //    },
+    //  ],
+    //  ['userId'],
+    //);
   });
 
   return { app, dataSource };
