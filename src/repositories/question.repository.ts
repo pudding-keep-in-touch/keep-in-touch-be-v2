@@ -38,4 +38,11 @@ export class QuestionRepository extends Repository<Question> {
       order: { createdAt: 'DESC' },
     });
   }
+
+  async updateQuestionHidden(questionId: string, isHidden: boolean): Promise<void> {
+    const result = await this.update({ questionId }, { isHidden });
+    if (result.affected === 0) {
+      throw new Error('Failed to update question hidden');
+    }
+  }
 }

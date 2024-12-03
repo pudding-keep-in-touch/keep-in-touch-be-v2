@@ -2,13 +2,16 @@ import { QUESTION_COUNT_LIMIT } from '@modules/questions/constants/question.cons
 import { CreateQuestionDto } from '@modules/questions/dto/create-question.dto';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
+import { Question } from '@entities/question.entity';
+import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { createTestingApp } from './helpers/create-testing-app.helper';
 
 describe('Questions API test', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let questionRepository: Repository<Question>;
   let createdQuestionIds: string[] = []; // 생성된 questionId 추적용
   const testUserId = '1'; // 테스트용 유저 ID
 
@@ -17,10 +20,20 @@ describe('Questions API test', () => {
     const testApp = await createTestingApp();
     app = testApp.app;
     dataSource = testApp.dataSource;
+    questionRepository = dataSource.getRepository(Question);
     await app.init();
 
-    const questionRepository = dataSource.getRepository('questions');
     await questionRepository.delete({ userId: testUserId });
+
+    let question = await questionRepository.findOne({ where: { userId: testUserId } });
+    if (!question) {
+      question = questionRepository.create({
+        content: '테스트 질문입니다.',
+        isHidden: false,
+        userId: testUserId,
+      });
+      await questionRepository.save(question);
+    }
   });
 
   beforeEach(() => {
@@ -37,7 +50,7 @@ describe('Questions API test', () => {
       await dataSource
         .createQueryBuilder()
         .delete()
-        .from('questions')
+        .from(Question)
         .where('questionId IN (:...ids)', { ids: createdQuestionIds })
         .execute();
     }
@@ -101,7 +114,7 @@ describe('Questions API test', () => {
         isHidden: false,
       };
 
-      const questionCount = await dataSource.getRepository('questions').count({ where: { userId: testUserId } });
+      const questionCount = await questionRepository.count({ where: { userId: testUserId } });
 
       // 먼저 10개의 질문 생성
       for (let i = 0; i < QUESTION_COUNT_LIMIT - questionCount; i++) {
@@ -121,6 +134,96 @@ describe('Questions API test', () => {
             data: null,
           });
         });
+    });
+  });
+
+  describe('PATCH /questions/:questionId', () => {
+    it('user가 작성한 question의 숨김 처리 가능', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const question = await questionRepository.findOne({ where: { userId: testUserId } });
+      if (!question) {
+        throw new Error('테스트용 질문이 없습니다.');
+      }
+      const questionId = question.questionId;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toEqual({ questionId, isHidden: true });
+    });
+
+    it('없는 question id일 경우 Not Found', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const questionId = '1';
+      if (await questionRepository.findOne({ where: { questionId } })) {
+        await questionRepository.delete({ questionId });
+      }
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('잘못된 입력값이면 400', async () => {
+      const updateQuestionHiddenDto = {
+        isHidden: 'xxx', // boolean이 아닌 문자열
+      };
+      const question = await questionRepository.findOne({ where: { userId: testUserId } });
+      if (!question) {
+        throw new Error('테스트용 질문이 없습니다.');
+      }
+      const questionId = question.questionId;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('다른 유저의 질문일 경우 403', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      let question = await questionRepository.findOne({ where: { userId: '2' } });
+      if (!question) {
+        question = questionRepository.create({
+          content: '테스트 질문입니다.',
+          isHidden: false,
+          userId: '2',
+        });
+        await questionRepository.save(question);
+      }
+      const questionId = question.questionId;
+
+      createdQuestionIds.push(questionId);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('잘못된 questionId로 요청 시 400 에러', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const questionId = '-9';
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(400);
     });
   });
 });
