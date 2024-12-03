@@ -4,7 +4,8 @@ import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
-import { OrderOption, PaginationOption } from '@common/types/pagination-option.type';
+import { getOrderUpperCase } from '@common/helpers/pagination-option.helper';
+import { PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
 //import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
@@ -65,7 +66,7 @@ export class UsersService {
     const paginationOptions: PaginationOption = {
       cursor: query.cursor,
       limit: query.limit,
-      order: query.order.toUpperCase() as OrderOption,
+      order: getOrderUpperCase(query.order),
     };
 
     const messages = await this.messageRepository.findMessagesByUserId(userId, type, paginationOptions);
@@ -135,7 +136,7 @@ export class UsersService {
   private async getReceivedMetaData(userId: string, messages: Message[]) {
     // NOTE: message 테이블을 가져와 세는 방식으로 변경.
     const allMessage = await this.messageRepository.find({
-      select: ['readAt'],
+      select: ['readAt', 'messageId'], // NOTE: readAt만 select하면 typeorm이 null인 값은 거른다... (대체왜ㅠㅠ)
       where: { receiverId: userId },
     });
     const receivedMessageCount = allMessage.length;
