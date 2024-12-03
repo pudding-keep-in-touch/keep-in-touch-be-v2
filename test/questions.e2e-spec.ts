@@ -4,6 +4,8 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { Question } from '@entities/question.entity';
+import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { createTestingApp } from './helpers/create-testing-app.helper';
 
 describe('Questions API test', () => {
@@ -21,6 +23,15 @@ describe('Questions API test', () => {
 
     const questionRepository = dataSource.getRepository('questions');
     await questionRepository.delete({ userId: testUserId });
+
+    let question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+    if (!question) {
+      question = await dataSource.manager.save(Question, {
+        content: '테스트 질문입니다.',
+        isHidden: false,
+        userId: testUserId,
+      });
+    }
   });
 
   beforeEach(() => {
@@ -121,6 +132,95 @@ describe('Questions API test', () => {
             data: null,
           });
         });
+    });
+  });
+
+  describe('PATCH /questions/:questionId', () => {
+    it('user가 작성한 question의 숨김 처리 가능', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+      if (!question) {
+        throw new Error('테스트용 질문이 없습니다.');
+      }
+      const questionId = question.questionId;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toEqual({ questionId, isHidden: true });
+    });
+
+    it('없는 question id일 경우 Not Found', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const questionId = '1';
+      if (await dataSource.manager.findOne(Question, { where: { questionId } })) {
+        await dataSource.manager.delete(Question, { questionId });
+      }
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('잘못된 입력값이면 400', async () => {
+      const updateQuestionHiddenDto = {
+        isHidden: 'xxx', // boolean이 아닌 문자열
+      };
+      const question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+      if (!question) {
+        throw new Error('테스트용 질문이 없습니다.');
+      }
+      const questionId = question.questionId;
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('다른 유저의 질문일 경우 403', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      let question = await dataSource.manager.findOne(Question, { where: { userId: '2' } });
+      if (!question) {
+        question = await dataSource.manager.save(Question, {
+          content: '테스트 질문입니다.',
+          isHidden: false,
+          userId: '2',
+        });
+      }
+      const questionId = question.questionId;
+
+      createdQuestionIds.push(questionId);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('잘못된 questionId로 요청 시 400 에러', async () => {
+      const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
+        isHidden: true,
+      };
+      const questionId = '-9';
+
+      const response = await request(app.getHttpServer())
+        .patch(`/questions/${questionId}`)
+        .send(updateQuestionHiddenDto);
+
+      expect(response.status).toBe(400);
     });
   });
 });
