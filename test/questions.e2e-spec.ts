@@ -2,7 +2,7 @@ import { QUESTION_COUNT_LIMIT } from '@modules/questions/constants/question.cons
 import { CreateQuestionDto } from '@modules/questions/dto/create-question.dto';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Question } from '@entities/question.entity';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
@@ -11,6 +11,7 @@ import { createTestingApp } from './helpers/create-testing-app.helper';
 describe('Questions API test', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let questionRepository: Repository<Question>;
   let createdQuestionIds: string[] = []; // 생성된 questionId 추적용
   const testUserId = '1'; // 테스트용 유저 ID
 
@@ -19,18 +20,19 @@ describe('Questions API test', () => {
     const testApp = await createTestingApp();
     app = testApp.app;
     dataSource = testApp.dataSource;
+    questionRepository = dataSource.getRepository(Question);
     await app.init();
 
-    const questionRepository = dataSource.getRepository('questions');
     await questionRepository.delete({ userId: testUserId });
 
-    let question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+    let question = await questionRepository.findOne({ where: { userId: testUserId } });
     if (!question) {
-      question = await dataSource.manager.save(Question, {
+      question = questionRepository.create({
         content: '테스트 질문입니다.',
         isHidden: false,
         userId: testUserId,
       });
+      await questionRepository.save(question);
     }
   });
 
@@ -48,7 +50,7 @@ describe('Questions API test', () => {
       await dataSource
         .createQueryBuilder()
         .delete()
-        .from('questions')
+        .from(Question)
         .where('questionId IN (:...ids)', { ids: createdQuestionIds })
         .execute();
     }
@@ -112,7 +114,7 @@ describe('Questions API test', () => {
         isHidden: false,
       };
 
-      const questionCount = await dataSource.getRepository('questions').count({ where: { userId: testUserId } });
+      const questionCount = await questionRepository.count({ where: { userId: testUserId } });
 
       // 먼저 10개의 질문 생성
       for (let i = 0; i < QUESTION_COUNT_LIMIT - questionCount; i++) {
@@ -140,7 +142,7 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      const question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+      const question = await questionRepository.findOne({ where: { userId: testUserId } });
       if (!question) {
         throw new Error('테스트용 질문이 없습니다.');
       }
@@ -159,8 +161,8 @@ describe('Questions API test', () => {
         isHidden: true,
       };
       const questionId = '1';
-      if (await dataSource.manager.findOne(Question, { where: { questionId } })) {
-        await dataSource.manager.delete(Question, { questionId });
+      if (await questionRepository.findOne({ where: { questionId } })) {
+        await questionRepository.delete({ questionId });
       }
 
       const response = await request(app.getHttpServer())
@@ -174,7 +176,7 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto = {
         isHidden: 'xxx', // boolean이 아닌 문자열
       };
-      const question = await dataSource.manager.findOne(Question, { where: { userId: testUserId } });
+      const question = await questionRepository.findOne({ where: { userId: testUserId } });
       if (!question) {
         throw new Error('테스트용 질문이 없습니다.');
       }
@@ -191,13 +193,14 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      let question = await dataSource.manager.findOne(Question, { where: { userId: '2' } });
+      let question = await questionRepository.findOne({ where: { userId: '2' } });
       if (!question) {
-        question = await dataSource.manager.save(Question, {
+        question = questionRepository.create({
           content: '테스트 질문입니다.',
           isHidden: false,
           userId: '2',
         });
+        await questionRepository.save(question);
       }
       const questionId = question.questionId;
 
