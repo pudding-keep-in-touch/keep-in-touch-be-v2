@@ -44,7 +44,6 @@ async function bootstrap() {
     .setTitle(`${configService.get('APP_NAME')}_${configService.get('APP_ENV')}`)
     .setDescription('API description')
     .setVersion('2.0')
-    // .addTag('your-tag')
     .addBearerAuth(
       {
         type: 'http',

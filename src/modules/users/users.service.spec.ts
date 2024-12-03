@@ -61,6 +61,8 @@ describe('UsersService', () => {
           provide: MessageRepository,
           useValue: {
             findMessagesByUserId: jest.fn(),
+            countBy: jest.fn(),
+            find: jest.fn(),
           },
         },
         {
@@ -260,17 +262,13 @@ describe('UsersService', () => {
       jest.spyOn(messageStatisticRepository, 'findOneOrFail').mockResolvedValue({
         sentMessageCount: 2,
       } as any);
+      jest.spyOn(messageRepository, 'countBy').mockResolvedValue(2);
 
       const result = await service.getMyMessages(userId, query);
 
       expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'sent', {
         limit: 10,
         order: 'ASC',
-      });
-
-      expect(messageStatisticRepository.findOneOrFail).toHaveBeenCalledWith({
-        select: ['sentMessageCount'],
-        where: { userId: userId },
       });
 
       expect(result).toEqual(
@@ -290,7 +288,7 @@ describe('UsersService', () => {
       };
       const messages = [
         createMockMessage({ messageId: '1' }),
-        createMockMessage({ messageId: '2', status: MessageStatus.HIDDEN }),
+        createMockMessage({ messageId: '2', status: MessageStatus.HIDDEN, readAt: new Date() }),
       ];
 
       jest.spyOn(messageRepository, 'findMessagesByUserId').mockResolvedValue(messages as any);
@@ -298,16 +296,17 @@ describe('UsersService', () => {
         receivedMessageCount: 2,
         unreadMessageCount: 1,
       } as any);
-
+      jest.spyOn(messageRepository, 'find').mockResolvedValue([
+        {
+          readAt: new Date(),
+        },
+        { readAt: null },
+      ] as any);
       const result = await service.getMyMessages(userId, query);
 
       expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'received', {
         limit: 10,
         order: 'ASC',
-      });
-      expect(messageStatisticRepository.findOneOrFail).toHaveBeenCalledWith({
-        select: ['receivedMessageCount', 'unreadMessageCount'],
-        where: { userId: userId },
       });
 
       expect(result).toEqual(

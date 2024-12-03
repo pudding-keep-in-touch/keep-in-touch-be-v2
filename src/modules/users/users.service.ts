@@ -6,7 +6,7 @@ import { UserRepository } from '@repositories/user.repository';
 
 import { OrderOption, PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
-import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
+//import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
@@ -25,7 +25,7 @@ export class UsersService {
     private readonly userRepository: UserRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly messageRepository: MessageRepository,
-    private readonly messageStatisticRepository: MessageStatisticRepository,
+    //private readonly messageStatisticRepository: MessageStatisticRepository,
   ) {}
 
   /**
@@ -121,20 +121,30 @@ export class UsersService {
   }
 
   private async getSentMetaData(userId: string, messages: Message[]) {
-    // TODO: reaction info get
-    const { sentMessageCount } = await this.messageStatisticRepository.findOneOrFail({
-      select: ['sentMessageCount'],
-      where: { userId: userId },
-    });
+    //// TODO: reaction info get
+    //const { sentMessageCount } = await this.messageStatisticRepository.findOneOrFail({
+    //  select: ['sentMessageCount'],
+    //  where: { userId: userId },
+    //});
+
+    const sentMessageCount = await this.messageRepository.countBy({ senderId: userId });
     const nextCursor = messages.length > 0 ? messages[messages.length - 1].createdAt : null;
     return { sentMessageCount, nextCursor };
   }
 
   private async getReceivedMetaData(userId: string, messages: Message[]) {
-    const { receivedMessageCount, unreadMessageCount } = await this.messageStatisticRepository.findOneOrFail({
-      select: ['receivedMessageCount', 'unreadMessageCount'],
-      where: { userId: userId },
+    // NOTE: message 테이블을 가져와 세는 방식으로 변경.
+    const allMessage = await this.messageRepository.find({
+      select: ['readAt'],
+      where: { receiverId: userId },
     });
+    const receivedMessageCount = allMessage.length;
+    const unreadMessageCount = allMessage.filter((message) => message.readAt === null).length;
+
+    //const { receivedMessageCount, unreadMessageCount } = await this.messageStatisticRepository.findOneOrFail({
+    //  select: ['receivedMessageCount', 'unreadMessageCount'],
+    //  where: { userId: userId },
+    //});
     const nextCursor = messages.length > 0 ? messages[messages.length - 1].createdAt : null;
     return { receivedMessageCount, unreadMessageCount, nextCursor };
   }
