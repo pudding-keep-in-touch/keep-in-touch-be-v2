@@ -70,14 +70,18 @@ export class UsersService {
     };
 
     const messages = await this.messageRepository.findMessagesByUserId(userId, type, paginationOptions);
+    // limit + 1개가 조회되었다면 다음 페이지가 존재
+    const hasNextPage = messages.length > query.limit; // NOTE: limit + 1개가 조회되었다면 다음 페이지가 존재
 
+    // 실제로 반환할 때는 limit 개수만큼만 반환
+    const result = hasNextPage ? messages.slice(0, query.limit) : messages;
     if (type === 'sent') {
-      const meta = await this.getSentMetaData(userId, messages);
-      return GetMySentMessagesDto.from(messages, meta);
+      const meta = await this.getSentMetaData(userId, messages, hasNextPage);
+      return GetMySentMessagesDto.from(result, meta);
     }
 
-    const meta = await this.getReceivedMetaData(userId, messages);
-    return GetMyReceivedMessagedDto.from(messages, meta);
+    const meta = await this.getReceivedMetaData(userId, messages, hasNextPage);
+    return GetMyReceivedMessagedDto.from(result, meta);
   }
 
   /**
@@ -121,7 +125,7 @@ export class UsersService {
     return `퐁${randomNumber}`;
   }
 
-  private async getSentMetaData(userId: string, messages: Message[]) {
+  private async getSentMetaData(userId: string, messages: Message[], hasNextPage: boolean) {
     //// TODO: reaction info get
     //const { sentMessageCount } = await this.messageStatisticRepository.findOneOrFail({
     //  select: ['sentMessageCount'],
@@ -129,11 +133,11 @@ export class UsersService {
     //});
 
     const sentMessageCount = await this.messageRepository.countBy({ senderId: userId });
-    const nextCursor = messages.length > 0 ? messages[messages.length - 1].createdAt : null;
+    const nextCursor = hasNextPage && messages.length > 0 ? messages[messages.length - 1].createdAt : null;
     return { sentMessageCount, nextCursor };
   }
 
-  private async getReceivedMetaData(userId: string, messages: Message[]) {
+  private async getReceivedMetaData(userId: string, messages: Message[], hasNextPage: boolean) {
     // NOTE: message 테이블을 가져와 세는 방식으로 변경.
     const allMessage = await this.messageRepository.find({
       select: ['readAt', 'messageId'], // NOTE: readAt만 select하면 typeorm이 null인 값은 거른다... (대체왜ㅠㅠ)
@@ -146,7 +150,9 @@ export class UsersService {
     //  select: ['receivedMessageCount', 'unreadMessageCount'],
     //  where: { userId: userId },
     //});
-    const nextCursor = messages.length > 0 ? messages[messages.length - 1].createdAt : null;
+    // 다음에 가져와야 하는 날짜 설정: 마지막 메시지의 생성 시간 + 1ms
+    const nextCursor =
+      hasNextPage && messages.length > 1 ? new Date(messages[messages.length - 1].createdAt.getTime() + 1) : null;
     return { receivedMessageCount, unreadMessageCount, nextCursor };
   }
 }
