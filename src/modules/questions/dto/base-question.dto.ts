@@ -18,12 +18,6 @@ export class BaseQuestionDto {
   content: string;
 
   @ApiProperty({
-    description: '숨김 여부',
-    example: false,
-  })
-  isHidden: boolean;
-
-  @ApiProperty({
     description: '생성일',
     example: '2024-11-26T00:00:00',
   })
