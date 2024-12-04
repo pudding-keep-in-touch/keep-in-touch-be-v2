@@ -274,7 +274,7 @@ describe('UsersService', () => {
       expect(result).toEqual(
         GetMySentMessagesDto.from(messages, {
           sentMessageCount: 2,
-          nextCursor: messages[messages.length - 1].createdAt,
+          nextCursor: null,
         }),
       );
     });
@@ -313,7 +313,7 @@ describe('UsersService', () => {
         GetMyReceivedMessagedDto.from(messages as any, {
           receivedMessageCount: 2,
           unreadMessageCount: 1,
-          nextCursor: messages[messages.length - 1].createdAt,
+          nextCursor: null,
         }),
       );
     });

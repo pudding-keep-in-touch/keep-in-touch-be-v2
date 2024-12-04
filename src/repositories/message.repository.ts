@@ -84,18 +84,18 @@ export class MessageRepository extends Repository<Message> {
     const query = this.createQueryBuilder('message')
       .innerJoin('message.receiver', 'receiver')
       .addSelect(['receiver.nickname', 'receiver.userId'])
-      .andWhere(cursor ? 'message.createdAt < :cursor' : '1=1', { cursor })
+      .where(cursor ? 'message.createdAt < :cursor' : '1=1', { cursor })
       .orderBy('message.createdAt', order)
-      .take(limit);
+      .addOrderBy('message.messageId', order) // timestamp 같을 때를 위한 보조 정렬 추가
+      .take(limit + 1); // limit + 1을 해서 다음 페이지가 있는지 확인합니다.
 
     if (type === 'sent') {
       query.leftJoin('message.reactionInfo', 'reactionInfo');
       query.addSelect(['reactionInfo.readAt', 'reactionInfo.createdAt']);
-      query.where('message.senderId = :userId', { userId });
+      query.andWhere('message.senderId = :userId', { userId });
     } else {
-      query.where('message.receiverId = :userId', { userId });
+      query.andWhere('message.receiverId = :userId', { userId });
     }
-
     return query.getMany();
   }
 
