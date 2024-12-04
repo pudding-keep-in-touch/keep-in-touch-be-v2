@@ -39,6 +39,14 @@ export class QuestionRepository extends Repository<Question> {
     });
   }
 
+  async findSharedQuestionsByUserId(sharedUserId: string): Promise<Question[]> {
+    return this.find({
+      select: ['questionId', 'userId', 'content', 'createdAt'],
+      where: { userId: sharedUserId, isHidden: false }, // 숨겨지지 않은 질문만 조회
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async updateQuestionHidden(questionId: string, isHidden: boolean): Promise<void> {
     const result = await this.update({ questionId }, { isHidden });
     if (result.affected === 0) {
