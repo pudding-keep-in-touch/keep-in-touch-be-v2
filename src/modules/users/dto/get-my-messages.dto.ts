@@ -178,4 +178,4 @@ export class GetMyReceivedMessagedDto {
   }
 }
 
-export type GetMyMessagesResponseDto = GetMyReceivedMessagedDto | GetMySentMessagesDto;
+export type ResponseGetMyMessagesDto = GetMyReceivedMessagedDto | GetMySentMessagesDto;

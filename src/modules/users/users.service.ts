@@ -12,9 +12,9 @@ import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
   GetMyMessagesQuery,
-  GetMyMessagesResponseDto,
   GetMyReceivedMessagedDto,
   GetMySentMessagesDto,
+  ResponseGetMyMessagesDto,
 } from './dto/get-my-messages.dto';
 import { ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
@@ -61,7 +61,7 @@ export class UsersService {
     return questions;
   }
 
-  async getMyMessages(userId: string, query: GetMyMessagesQuery): Promise<GetMyMessagesResponseDto> {
+  async getMyMessages(userId: string, query: GetMyMessagesQuery): Promise<ResponseGetMyMessagesDto> {
     const { type } = query;
     const paginationOptions: PaginationOption = {
       cursor: query.cursor,
