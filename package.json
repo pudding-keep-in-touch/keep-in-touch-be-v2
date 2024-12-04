@@ -21,9 +21,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
-    "test:e2e:cache:clear": "jest --clearCache"
+    "test:debug": "TZ=UTC node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "TZ=UTC jest --config ./test/jest-e2e.json --runInBand",
+    "test:e2e:cache:clear": "TZ=UTC jest --clearCache"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.7",
