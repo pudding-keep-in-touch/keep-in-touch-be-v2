@@ -108,99 +108,298 @@ describe('Users API test', () => {
       order: 'desc',
     };
 
-    it('유저가 보낸 쪽지 조회', () => {
-      return request(app.getHttpServer())
-        .get(`/users/${loginUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
-        .expect(HttpStatus.OK)
-        .expect((response) => {
-          const { body } = response;
-          expect(response.body).toHaveProperty('data');
-          expect(response.body).toHaveProperty('message');
-          expect(response.body).toHaveProperty('status');
+    describe('유저가 보낸 쪽지 조회', () => {
+      it('유저가 보낸 쪽지 조회', () => {
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
 
-          expect(body.data.messageList).toBeInstanceOf(Array);
-          const messageList = body.data.messageList as GetMySentMessagesDto[];
-          // check all type
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            const messageList = body.data.messageList as GetMySentMessagesDto[];
+            // check all type
 
-          for (const message of messageList) {
-            expect(message).toHaveProperty('messageId');
-            expect(message).toHaveProperty('receiverId');
-            expect(message).toHaveProperty('receiverNickname');
-            expect(message).toHaveProperty('content');
-            expect(message).toHaveProperty('createdAt');
-            expect(message).toHaveProperty('reactionInfo');
-          }
-        });
-    });
-
-    it('유저가 받은 쪽지 조회', () => {
-      return request(app.getHttpServer())
-        .get(`/users/${loginUserId}/messages?type=received&limit=${query.limit}&order=${query.order}`)
-        .expect(HttpStatus.OK)
-        .expect((response) => {
-          const { body } = response;
-          expect(response.body).toHaveProperty('data');
-          expect(response.body).toHaveProperty('message');
-          expect(response.body).toHaveProperty('status');
-
-          expect(body.data.messageList).toBeInstanceOf(Array);
-          const messageList = body.data.messageList as GetMySentMessagesDto[];
-          // check all type
-
-          for (const message of messageList) {
-            expect(message).toHaveProperty('messageId');
-            expect(message).toHaveProperty('receiverId');
-            expect(message).toHaveProperty('receiverNickname');
-            expect(message).toHaveProperty('content');
-            expect(message).toHaveProperty('createdAt');
-            expect(message).toHaveProperty('status');
-            expect(message).toHaveProperty('readAt');
-          }
-        });
-    });
-
-    it('로그인한 유저와 조회 대상 유저가 다를 때 403 에러', () => {
-      return request(app.getHttpServer())
-        .get(`/users/${targetUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
-        .set('userId', loginUserId)
-        .expect(HttpStatus.FORBIDDEN);
-    });
-
-    it('query 에 올바르지 않은 값이 들어왔을 때 400 에러', () => {
-      return request(app.getHttpServer())
-        .get(`/users/${loginUserId}/messages?type=invalid&limit=invalid&order=invalid`)
-        .expect(HttpStatus.BAD_REQUEST);
-    });
-
-    it('query 에 limit 값이 30을 초과했을 때 400 에러', () => {
-      return request(app.getHttpServer())
-        .get(`/users/${loginUserId}/messages?type=${query.type}&limit=31&order=${query.order}`)
-        .expect(HttpStatus.BAD_REQUEST);
-    });
-
-    it('cursor가 없을 때 가장 최근 메시지 조회', async () => {
-      const recentMessage = await dataSource.getRepository(Message).findOne({
-        where: {
-          senderId: loginUserId,
-        },
-        order: { createdAt: 'DESC' },
+            for (const message of messageList) {
+              expect(message).toHaveProperty('messageId');
+              expect(message).toHaveProperty('receiverId');
+              expect(message).toHaveProperty('receiverNickname');
+              expect(message).toHaveProperty('content');
+              expect(message).toHaveProperty('createdAt');
+              expect(message).toHaveProperty('reactionInfo');
+            }
+          });
       });
 
-      console.log(recentMessage);
+      it('로그인한 유저와 조회 대상 유저가 다를 때 403 에러', () => {
+        return request(app.getHttpServer())
+          .get(`/users/${targetUserId}/messages?type=${query.type}&limit=${query.limit}&order=${query.order}`)
+          .set('userId', loginUserId)
+          .expect(HttpStatus.FORBIDDEN);
+      });
 
-      return request(app.getHttpServer())
-        .get(`/users/${loginUserId}/messages?type=${query.type}&order=${query.order}`)
-        .expect(HttpStatus.OK)
-        .expect((response) => {
-          const { body } = response;
-          expect(response.body).toHaveProperty('data');
-          expect(response.body).toHaveProperty('message');
-          expect(response.body).toHaveProperty('status');
+      it('query 에 올바르지 않은 값이 들어왔을 때 400 에러', () => {
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=invalid&limit=invalid&order=invalid`)
+          .expect(HttpStatus.BAD_REQUEST);
+      });
 
-          expect(body.data.messageList).toBeInstanceOf(Array);
-          console.log(body.data.messageList);
-          expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+      it('query 에 limit 값이 30을 초과했을 때 400 에러', () => {
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=${query.type}&limit=31&order=${query.order}`)
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('(sent)cursor가 없을 때 가장 최근 메시지 조회', async () => {
+        const recentMessage = await dataSource.getRepository(Message).findOne({
+          where: {
+            senderId: loginUserId,
+          },
+          order: { createdAt: 'DESC' },
         });
+
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=${query.type}&order=${query.order}`)
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+          });
+      });
+
+      it('(sent)cursor가 있을 때 cursor 이전의 메시지 조회', async () => {
+        const recentMessage = await dataSource.getRepository(Message).findOne({
+          where: {
+            senderId: loginUserId,
+          },
+          order: { createdAt: 'DESC' },
+        });
+
+        return request(app.getHttpServer())
+          .get(
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${recentMessage?.createdAt.toISOString()}`,
+          )
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList[0].messageId).not.toBe(recentMessage?.messageId);
+          });
+      });
+
+      it('(sent)마지막 페이지일 때 nextCursor가 null', async () => {
+        const messages = await dataSource.getRepository(Message).find({
+          where: {
+            senderId: loginUserId,
+          },
+          order: { createdAt: 'ASC' },
+          take: 2, // 과거 메시지 2개만 조회
+        });
+
+        return request(app.getHttpServer())
+          .get(
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${messages[messages.length - 1].createdAt.toISOString()}`,
+          )
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList.length).toBe(1);
+            expect(body.data.nextCursor).toBeNull();
+          });
+      });
+
+      it('(sent)여러번 요청했을 때 정상적인 값이 오는지 확인', async () => {
+        const totalMessages = await dataSource
+          .getRepository(Message)
+          .find({ where: { senderId: loginUserId }, order: { createdAt: 'DESC' } });
+        const total = totalMessages.length;
+        let msgList: any[] = [];
+
+        const limit = 30;
+        let totalResCount = 0;
+        let cursor = undefined;
+        for (; cursor !== null; ) {
+          await request(app.getHttpServer())
+            .get(
+              `/users/${loginUserId}/messages?type=${query.type}&${cursor ? `cursor=${cursor}&` : ''}&limit=${limit}&order=${query.order}`,
+            )
+            .expect(HttpStatus.OK)
+            .expect((response) => {
+              const { body } = response;
+              expect(response.body).toHaveProperty('data');
+              expect(response.body).toHaveProperty('message');
+              expect(response.body).toHaveProperty('status');
+
+              expect(body.data.messageList).toBeInstanceOf(Array);
+              expect(body.data.messageList.length).toBeLessThanOrEqual(limit);
+              cursor = body.data.nextCursor;
+              totalResCount += body.data.messageList.length;
+              msgList.push(...body.data.messageList);
+            });
+        }
+        const remainingMessages = totalMessages.filter(
+          (msg) => !msgList.some((receivedMsg) => receivedMsg.messageId === msg.messageId),
+        );
+        expect(totalResCount).toBe(total);
+      });
+    });
+
+    describe('유저가 받은 쪽지 조회', () => {
+      const query = {
+        type: 'received',
+        limit: 10,
+        order: 'desc',
+      };
+
+      it('유저가 받은 쪽지 조회', () => {
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=received&limit=${query.limit}&order=${query.order}`)
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            const messageList = body.data.messageList as GetMySentMessagesDto[];
+            // check all type
+
+            for (const message of messageList) {
+              expect(message).toHaveProperty('messageId');
+              expect(message).toHaveProperty('receiverId');
+              expect(message).toHaveProperty('receiverNickname');
+              expect(message).toHaveProperty('content');
+              expect(message).toHaveProperty('createdAt');
+              expect(message).toHaveProperty('status');
+              expect(message).toHaveProperty('readAt');
+            }
+          });
+      });
+
+      it('cursor가 없을 때 가장 최근 메시지 조회', async () => {
+        const recentMessage = await dataSource.getRepository(Message).findOne({
+          where: {
+            receiverId: loginUserId,
+          },
+          order: { createdAt: 'DESC' },
+        });
+
+        return request(app.getHttpServer())
+          .get(`/users/${loginUserId}/messages?type=${query.type}&order=${query.order}`)
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+          });
+      });
+
+      it('cursor가 있을 때 cursor 이전의 메시지 조회', async () => {
+        const recentMessage = await dataSource.getRepository(Message).findOne({
+          where: {
+            receiverId: loginUserId,
+          },
+          order: { createdAt: 'DESC' },
+        });
+
+        return request(app.getHttpServer())
+          .get(
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${recentMessage?.createdAt.toISOString()}`,
+          )
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList[0].messageId).not.toBe(recentMessage?.messageId);
+          });
+      });
+
+      it('마지막 페이지일 때 nextCursor가 null', async () => {
+        const messages = await dataSource.getRepository(Message).find({
+          where: {
+            receiverId: loginUserId,
+          },
+          order: { createdAt: 'ASC' },
+          take: 2, // 과거 메시지 2개만 조회
+        });
+
+        return request(app.getHttpServer())
+          .get(
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${messages[messages.length - 1].createdAt.toISOString()}`,
+          )
+          .expect(HttpStatus.OK)
+          .expect((response) => {
+            const { body } = response;
+            expect(response.body).toHaveProperty('data');
+            expect(response.body).toHaveProperty('message');
+            expect(response.body).toHaveProperty('status');
+
+            expect(body.data.messageList).toBeInstanceOf(Array);
+            expect(body.data.messageList.length).toBe(1);
+            expect(body.data.nextCursor).toBeNull();
+          });
+      });
+
+      it('여러번 요청했을 때 정상적인 값이 오는지 확인', async () => {
+        const totalMessages = await dataSource
+          .getRepository(Message)
+          .find({ where: { receiverId: loginUserId }, order: { createdAt: 'DESC' } });
+        const total = totalMessages.length;
+        let msgList: any[] = [];
+
+        const limit = query.limit;
+        let totalResCount = 0;
+        let cursor = undefined;
+        for (; cursor !== null; ) {
+          await request(app.getHttpServer())
+            .get(
+              `/users/${loginUserId}/messages?type=${query.type}&${cursor ? `cursor=${cursor}&` : ''}&limit=${limit}&order=${query.order}`,
+            )
+            .expect(HttpStatus.OK)
+            .expect((response) => {
+              const { body } = response;
+              expect(response.body).toHaveProperty('data');
+              expect(response.body).toHaveProperty('message');
+              expect(response.body).toHaveProperty('status');
+
+              expect(body.data.messageList).toBeInstanceOf(Array);
+              expect(body.data.messageList.length).toBeLessThanOrEqual(limit);
+              cursor = body.data.nextCursor;
+              totalResCount += body.data.messageList.length;
+              msgList.push(...body.data.messageList);
+            });
+        }
+        const remainingMessages = totalMessages.filter(
+          (msg) => !msgList.some((receivedMsg) => receivedMsg.messageId === msg.messageId),
+        );
+        expect(totalResCount).toBe(total);
+      });
     });
   });
 });
