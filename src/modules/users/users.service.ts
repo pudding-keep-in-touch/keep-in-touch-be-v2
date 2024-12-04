@@ -133,7 +133,7 @@ export class UsersService {
     //});
 
     const sentMessageCount = await this.messageRepository.countBy({ senderId: userId });
-    const nextCursor = hasNextPage && messages.length > 0 ? messages[messages.length - 1].createdAt : null;
+    const nextCursor = this.getNextCursor(messages, hasNextPage);
     return { sentMessageCount, nextCursor };
   }
 
@@ -150,9 +150,12 @@ export class UsersService {
     //  select: ['receivedMessageCount', 'unreadMessageCount'],
     //  where: { userId: userId },
     //});
-    // 다음에 가져와야 하는 날짜 설정: 마지막 메시지의 생성 시간 + 1ms
-    const nextCursor =
-      hasNextPage && messages.length > 1 ? new Date(messages[messages.length - 1].createdAt.getTime() + 1) : null;
+    const nextCursor = this.getNextCursor(messages, hasNextPage);
     return { receivedMessageCount, unreadMessageCount, nextCursor };
+  }
+
+  private getNextCursor(messages: Message[], hasNextPage: boolean) {
+    // 다음에 가져와야 하는 날짜 설정: 마지막 메시지의 생성 시간 + 1ms
+    return hasNextPage && messages.length > 1 ? new Date(messages[messages.length - 1].createdAt.getTime() + 1) : null;
   }
 }
