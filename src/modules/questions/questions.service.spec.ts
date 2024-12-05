@@ -209,5 +209,43 @@ describe('QuestionsService', () => {
         expect(repository.findSharedQuestionsByUserId).toHaveBeenCalledWith(sharedUserId);
       });
     });
+    describe('getSharedQuestionDetail', () => {
+      it('should be defined', () => {
+        expect(service.getSharedQuestionDetail).toBeDefined();
+      });
+
+      it('질문 상세 조회', async () => {
+        const questionId = '1';
+        const question = {
+          questionId: '1',
+          userId: '1',
+          content: 'test content',
+          createdAt: new Date(),
+          isHidden: false,
+        } as any;
+
+        jest.spyOn(repository, 'findQuestionById').mockResolvedValue(question);
+
+        const result = await service.getSharedQuestionDetail(questionId);
+
+        expect(result).toEqual({
+          questionId: '1',
+          userId: '1',
+          content: 'test content',
+          createdAt: question.createdAt,
+          isHidden: false,
+        });
+        expect(repository.findQuestionById).toHaveBeenCalledWith(questionId);
+      });
+
+      it('questionId와 일치하는 질문이 없을 때 Not Found Exception', async () => {
+        const questionId = '1';
+
+        jest.spyOn(repository, 'findQuestionById').mockResolvedValue(null);
+
+        await expect(service.getSharedQuestionDetail(questionId)).rejects.toThrow(NotFoundException);
+        expect(repository.findQuestionById).toHaveBeenCalledWith(questionId);
+      });
+    });
   });
 });
