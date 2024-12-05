@@ -8,6 +8,7 @@ import { User } from '@entities/user.entity';
 import { BaseResponseDto } from '@common/common.dto';
 import { CheckBigIntIdPipe } from '@common/pipes/check-bigint-id.pipe';
 import { CreateQuestionDto, ResponseCreateQuestionDto } from './dto/create-question.dto';
+import { ResponseGetSharedQuestionDetailDto } from './dto/get-shared-question-detail.dto';
 import { SharedQuestionDto } from './dto/get-shared-questions.dto';
 import { ResponseUpdateQuestionHiddenDto, UpdateQuestionHiddenDto } from './dto/update-question-hidden';
 import { QuestionsService } from './questions.service';
@@ -35,14 +36,27 @@ export class QuestionsController {
   @NotUserAuth()
   @Get()
   @GenerateSwaggerApiDoc({
-    summary: '공유한 질문 조회',
-    description: '사용자가 공유한 질문을 조회합니다.',
+    summary: '공유한 질문 조회 (인증 필요 없음)',
+    description: '사용자가 공유한 질문을 조회합니다. 질문 작성자가 숨긴 질문은 조회할 수 없습니다.',
     responseType: [SharedQuestionDto],
     jwt: false,
   })
   async getSharedQuestions(@Query('userId', CheckBigIntIdPipe) sharedUserId: string) {
     const result = await this.questionsService.getSharedQuestions(sharedUserId);
     return response(result, '공유한 질문을 성공적으로 조회하였습니다.');
+  }
+
+  @NotUserAuth()
+  @Get(':questionId')
+  @GenerateSwaggerApiDoc({
+    summary: '공유한 질문 상세 조회 (인증 필요 없음)',
+    description: '질문 상세를 조회합니다. 숨긴 질문이어도 조회 가능합니다.',
+    responseType: ResponseGetSharedQuestionDetailDto,
+    jwt: false,
+  })
+  async getSharedQuestionDetail(@Param('questionId', CheckBigIntIdPipe) questionId: string) {
+    const result = await this.questionsService.getSharedQuestionDetail(questionId);
+    return response(result, '질문 상세 조회 성공');
   }
 
   @Patch(':questionId')
