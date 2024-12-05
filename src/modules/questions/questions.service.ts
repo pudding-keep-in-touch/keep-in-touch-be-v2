@@ -3,6 +3,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { QuestionRepository } from '@repositories/question.repository';
 import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
+import { ResponseGetSharedQuestionsDto, SharedQuestionDto } from './dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenParam } from './types/question.types';
 
 @Injectable()
@@ -25,8 +26,23 @@ export class QuestionsService {
     return { questionId };
   }
 
-  async getQuestionById(id: string): Promise<Question | null> {
-    return this.questionRepository.findQuestionById(id);
+  /**
+   * sharedUserId가 작성한 질문을 가져와 반환합니다.
+   *
+   * @param sharedUserId
+   * @returns
+   */
+  async getSharedQuestions(sharedUserId: string): Promise<ResponseGetSharedQuestionsDto> {
+    const questions = await this.questionRepository.findSharedQuestionsByUserId(sharedUserId);
+    // select 로 필요한 필드만 가져오지만, 타입 안정성을 위하여 mapping
+    return questions.map(
+      (question: Question): SharedQuestionDto => ({
+        questionId: question.questionId,
+        userId: question.userId,
+        content: question.content,
+        createdAt: question.createdAt,
+      }),
+    );
   }
 
   async updateQuestionHidden(param: UpdateQuestionHiddenParam) {

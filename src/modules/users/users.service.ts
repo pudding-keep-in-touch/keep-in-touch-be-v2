@@ -12,11 +12,11 @@ import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
   GetMyMessagesQuery,
-  GetMyMessagesResponseDto,
   GetMyReceivedMessagedDto,
   GetMySentMessagesDto,
+  ResponseGetMyMessagesDto,
 } from './dto/get-my-messages.dto';
-import { ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
+import { MyQuestionDto, ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { LoginType } from './users.constants';
 
@@ -58,10 +58,17 @@ export class UsersService {
    */
   async getMyQuestions(userId: string): Promise<ResponseGetMyQuestionsDto> {
     const questions = await this.questionRepository.findQuestionsByUserId(userId);
-    return questions;
+    return questions.map(
+      (question): MyQuestionDto => ({
+        questionId: question.questionId,
+        content: question.content,
+        isHidden: question.isHidden,
+        createdAt: question.createdAt,
+      }),
+    );
   }
 
-  async getMyMessages(userId: string, query: GetMyMessagesQuery): Promise<GetMyMessagesResponseDto> {
+  async getMyMessages(userId: string, query: GetMyMessagesQuery): Promise<ResponseGetMyMessagesDto> {
     const { type } = query;
     const paginationOptions: PaginationOption = {
       cursor: query.cursor,
