@@ -3,6 +3,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { QuestionRepository } from '@repositories/question.repository';
 import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
+import { ResponseGetSharedQuestionDetailDto } from './dto/get-shared-question-detail.dto';
 import { ResponseGetSharedQuestionsDto, SharedQuestionDto } from './dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenParam } from './types/question.types';
 
@@ -43,6 +44,21 @@ export class QuestionsService {
         createdAt: question.createdAt,
       }),
     );
+  }
+
+  async getSharedQuestionDetail(questionId: string): Promise<ResponseGetSharedQuestionDetailDto> {
+    const question = await this.questionRepository.findQuestionById(questionId);
+    if (question === null) {
+      throw new NotFoundException('질문을 찾을 수 없습니다.');
+    }
+
+    return {
+      questionId: question.questionId,
+      userId: question.userId,
+      content: question.content,
+      createdAt: question.createdAt,
+      isHidden: question.isHidden,
+    };
   }
 
   async updateQuestionHidden(param: UpdateQuestionHiddenParam) {
