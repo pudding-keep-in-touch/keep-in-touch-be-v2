@@ -58,16 +58,14 @@ export class UsersService {
    */
   async getMyQuestions(userId: string): Promise<ResponseGetMyQuestionsDto> {
     const questions = await this.questionRepository.findQuestionsByUserId(userId);
-    questions.map((question): MyQuestionDto => {
-      return {
+    return questions.map(
+      (question): MyQuestionDto => ({
         questionId: question.questionId,
         content: question.content,
         isHidden: question.isHidden,
         createdAt: question.createdAt,
-      };
-    });
-
-    return questions;
+      }),
+    );
   }
 
   async getMyMessages(userId: string, query: GetMyMessagesQuery): Promise<ResponseGetMyMessagesDto> {
