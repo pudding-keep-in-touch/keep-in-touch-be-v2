@@ -8,7 +8,7 @@ import { User } from '@entities/user.entity';
 import { BaseResponseDto } from '@common/common.dto';
 import { CheckBigIntIdPipe } from '@common/pipes/check-bigint-id.pipe';
 import { CreateQuestionDto, ResponseCreateQuestionDto } from './dto/create-question.dto';
-import { SharedQuestionDto } from './dto/get-shared-question.dto';
+import { SharedQuestionDto } from './dto/get-shared-questions.dto';
 import { ResponseUpdateQuestionHiddenDto, UpdateQuestionHiddenDto } from './dto/update-question-hidden';
 import { QuestionsService } from './questions.service';
 

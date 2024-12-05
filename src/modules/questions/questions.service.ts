@@ -3,7 +3,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { QuestionRepository } from '@repositories/question.repository';
 import { QUESTION_COUNT_LIMIT } from './constants/question.constant';
 import { CreateQuestionDto } from './dto/create-question.dto';
-import { ResponseGetSharedQuestionDto, SharedQuestionDto } from './dto/get-shared-question.dto';
+import { ResponseGetSharedQuestionsDto, SharedQuestionDto } from './dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenParam } from './types/question.types';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class QuestionsService {
    * @param sharedUserId
    * @returns
    */
-  async getSharedQuestions(sharedUserId: string): Promise<ResponseGetSharedQuestionDto> {
+  async getSharedQuestions(sharedUserId: string): Promise<ResponseGetSharedQuestionsDto> {
     const questions = await this.questionRepository.findSharedQuestionsByUserId(sharedUserId);
     // select 로 필요한 필드만 가져오지만, 타입 안정성을 위하여 mapping
     return questions.map(

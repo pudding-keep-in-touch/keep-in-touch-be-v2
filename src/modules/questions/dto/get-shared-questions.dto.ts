@@ -9,4 +9,4 @@ export class SharedQuestionDto extends BaseQuestionDto {
   userId: string;
 }
 
-export type ResponseGetSharedQuestionDto = SharedQuestionDto[];
+export type ResponseGetSharedQuestionsDto = SharedQuestionDto[];

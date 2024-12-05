@@ -5,7 +5,7 @@ import * as request from 'supertest';
 import { DataSource, Repository } from 'typeorm';
 
 import { Question } from '@entities/question.entity';
-import { SharedQuestionDto } from '@modules/questions/dto/get-shared-question.dto';
+import { SharedQuestionDto } from '@modules/questions/dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { createTestingApp } from './helpers/create-testing-app.helper';
 
