@@ -23,6 +23,7 @@ describe('QuestionsService', () => {
             createQuestion: jest.fn(),
             findQuestionById: jest.fn(),
             updateQuestionHidden: jest.fn(),
+            findSharedQuestionsByUserId: jest.fn(),
           },
         },
       ],
@@ -151,7 +152,62 @@ describe('QuestionsService', () => {
         await expect(service.updateQuestionHidden(param)).rejects.toThrow(ForbiddenException);
         expect(repository.findQuestionById).toHaveBeenCalledWith('1');
       });
+      // !SECTION failure case
     });
-    // !SECTION failure case
+
+    describe('getSharedQuestions', () => {
+      it('should be defined', () => {
+        expect(service.getSharedQuestions).toBeDefined();
+      });
+
+      it('sharedUserId가 작성한 질문을 반환', async () => {
+        const sharedUserId = '1';
+        const questions = [
+          {
+            questionId: '1',
+            userId: '1',
+            content: 'test content 1',
+            createdAt: new Date(),
+          },
+          {
+            questionId: '2',
+            userId: '1',
+            content: 'test content 2',
+            createdAt: new Date(),
+          },
+        ];
+
+        jest.spyOn(repository, 'findSharedQuestionsByUserId').mockResolvedValue(questions as any);
+
+        const result = await service.getSharedQuestions(sharedUserId);
+
+        expect(result).toEqual([
+          {
+            questionId: '1',
+            userId: '1',
+            content: 'test content 1',
+            createdAt: questions[0].createdAt,
+          },
+          {
+            questionId: '2',
+            userId: '1',
+            content: 'test content 2',
+            createdAt: questions[1].createdAt,
+          },
+        ]);
+        expect(repository.findSharedQuestionsByUserId).toHaveBeenCalledWith(sharedUserId);
+      });
+
+      it('sharedUserId가 작성한 질문이 없으면 빈 배열 반환', async () => {
+        const sharedUserId = '1';
+
+        jest.spyOn(repository, 'findSharedQuestionsByUserId').mockResolvedValue([]);
+
+        const result = await service.getSharedQuestions(sharedUserId);
+
+        expect(result).toEqual([]);
+        expect(repository.findSharedQuestionsByUserId).toHaveBeenCalledWith(sharedUserId);
+      });
+    });
   });
 });
