@@ -9,4 +9,4 @@ export class MyQuestionDto extends BaseQuestionDto {
   isHidden: boolean;
 }
 
-export type ResponseGetMyQuestionsDto = BaseQuestionDto[];
+export type ResponseGetMyQuestionsDto = MyQuestionDto[];

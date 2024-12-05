@@ -45,10 +45,6 @@ export class QuestionsService {
     );
   }
 
-  async getQuestionById(id: string): Promise<Question | null> {
-    return this.questionRepository.findQuestionById(id);
-  }
-
   async updateQuestionHidden(param: UpdateQuestionHiddenParam) {
     const { questionId, isHidden, userId } = param;
     const question = await this.questionRepository.findQuestionById(questionId);

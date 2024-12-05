@@ -16,7 +16,7 @@ import {
   GetMySentMessagesDto,
   ResponseGetMyMessagesDto,
 } from './dto/get-my-messages.dto';
-import { ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
+import { MyQuestionDto, ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
 import { LoginType } from './users.constants';
 
@@ -58,6 +58,15 @@ export class UsersService {
    */
   async getMyQuestions(userId: string): Promise<ResponseGetMyQuestionsDto> {
     const questions = await this.questionRepository.findQuestionsByUserId(userId);
+    questions.map((question): MyQuestionDto => {
+      return {
+        questionId: question.questionId,
+        content: question.content,
+        isHidden: question.isHidden,
+        createdAt: question.createdAt,
+      };
+    });
+
     return questions;
   }
 
