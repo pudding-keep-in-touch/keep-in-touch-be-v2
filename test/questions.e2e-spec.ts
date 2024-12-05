@@ -5,6 +5,7 @@ import * as request from 'supertest';
 import { DataSource, Repository } from 'typeorm';
 
 import { Question } from '@entities/question.entity';
+import { ResponseGetSharedQuestionDetailDto } from '@modules/questions/dto/get-shared-question-detail.dto';
 import { SharedQuestionDto } from '@modules/questions/dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { createTestingApp } from './helpers/create-testing-app.helper';
@@ -185,6 +186,64 @@ describe('Questions API test', () => {
     it('bigint 범위가 아닌 userId 값이 오면 400', () => {
       return request(app.getHttpServer())
         .get('/questions?userId=abc')
+        .expect(400)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(400);
+        });
+    });
+  });
+
+  describe('GET /questions/:questionId', () => {
+    it('questionId에 해당하는 질문 반환', async () => {
+      const question = await questionRepository.save({
+        content: '테스트 질문입니다.',
+        isHidden: false,
+        userId: testUserId,
+      });
+      createdQuestionIds.push(question.questionId);
+
+      return request(app.getHttpServer())
+        .get(`/questions/${question.questionId}`)
+        .expect(200)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(200);
+
+          const data: ResponseGetSharedQuestionDetailDto = response.body.data;
+          expect(data).toHaveProperty('userId');
+          expect(data).toHaveProperty('questionId');
+          expect(data).toHaveProperty('content');
+          expect(data).toHaveProperty('createdAt');
+          expect(data).toHaveProperty('isHidden');
+
+          expect(data.userId).toBe(testUserId);
+          expect(data.content).toBe('테스트 질문입니다.');
+        });
+    });
+
+    it('없는 questionId일 경우 404', async () => {
+      return request(app.getHttpServer())
+        .get('/questions/99999999999999999')
+        .expect(404)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(404);
+        });
+    });
+
+    it('bigint 범위가 아닌 questionId 값이 오면 400', () => {
+      return request(app.getHttpServer())
+        .get('/questions/+1234')
         .expect(400)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
