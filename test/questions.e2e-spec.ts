@@ -228,6 +228,37 @@ describe('Questions API test', () => {
         });
     });
 
+    it('숨김 처리된 질문이어도 값을 반환해야 한다.', async () => {
+      const question = await questionRepository.save({
+        content: '숨겨진 테스트 질문',
+        isHidden: true,
+        userId: testUserId,
+      });
+      createdQuestionIds.push(question.questionId);
+
+      return request(app.getHttpServer())
+        .get(`/questions/${question.questionId}`)
+        .expect(200)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(200);
+
+          const data: ResponseGetSharedQuestionDetailDto = response.body.data;
+          expect(data).toHaveProperty('userId');
+          expect(data).toHaveProperty('questionId');
+          expect(data).toHaveProperty('content');
+          expect(data).toHaveProperty('createdAt');
+          expect(data).toHaveProperty('isHidden');
+
+          expect(data.userId).toBe(testUserId);
+          expect(data.content).toBe('숨겨진 테스트 질문');
+          expect(data.isHidden).toBe(true);
+        });
+    });
+
     it('없는 questionId일 경우 404', async () => {
       return request(app.getHttpServer())
         .get('/questions/99999999999999999')
