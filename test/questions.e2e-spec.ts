@@ -5,6 +5,7 @@ import * as request from 'supertest';
 import { DataSource, Repository } from 'typeorm';
 
 import { Question } from '@entities/question.entity';
+import { SharedQuestionDto } from '@modules/questions/dto/get-shared-question.dto';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { createTestingApp } from './helpers/create-testing-app.helper';
 
@@ -24,19 +25,9 @@ describe('Questions API test', () => {
     await app.init();
 
     await questionRepository.delete({ userId: testUserId });
-
-    let question = await questionRepository.findOne({ where: { userId: testUserId } });
-    if (!question) {
-      question = questionRepository.create({
-        content: '테스트 질문입니다.',
-        isHidden: false,
-        userId: testUserId,
-      });
-      await questionRepository.save(question);
-    }
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     createdQuestionIds = []; // 테스트 시작 전 초기화
   });
 
@@ -137,16 +128,90 @@ describe('Questions API test', () => {
     });
   });
 
+  describe('GET /questions', () => {
+    it('userId에 해당하는, isHidden:false 질문 리스트 반환.', async () => {
+      const res = await questionRepository.insert([
+        {
+          content: '안숨겨진 질문',
+          isHidden: false,
+          userId: testUserId,
+        },
+        {
+          content: '숨겨진 질문',
+          isHidden: true,
+          userId: testUserId,
+        },
+      ]);
+      res.identifiers.forEach((id) => createdQuestionIds.push(id.questionId));
+
+      return request(app.getHttpServer())
+        .get(`/questions?userId=${testUserId}`)
+        .expect(200)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(200);
+          expect(response.body.data).toBeInstanceOf(Array);
+          //console.log(response.body.data);
+          expect(response.body.data.length).toBe(1);
+
+          // SharedQuestionDto 형식 검증
+          const data: SharedQuestionDto = response.body.data[0];
+          expect(data).toHaveProperty('userId');
+          expect(data).toHaveProperty('questionId');
+          expect(data).toHaveProperty('content');
+          expect(data).toHaveProperty('createdAt');
+
+          expect(data.userId).toBe(testUserId);
+          expect(data.content).toBe('안숨겨진 질문');
+        });
+    });
+
+    it('userId query parameter가 없으면 400', () => {
+      return request(app.getHttpServer())
+        .get('/questions')
+        .expect(400)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(400);
+        });
+    });
+
+    it('bigint 범위가 아닌 userId 값이 오면 400', () => {
+      return request(app.getHttpServer())
+        .get('/questions?userId=abc')
+        .expect(400)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(response.body.status).toBe(400);
+        });
+    });
+  });
+
   describe('PATCH /questions/:questionId', () => {
     it('user가 작성한 question의 숨김 처리 가능', async () => {
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      const question = await questionRepository.findOne({ where: { userId: testUserId } });
+      let question = await questionRepository.findOne({ where: { userId: testUserId } });
       if (!question) {
-        throw new Error('테스트용 질문이 없습니다.');
+        question = questionRepository.create({
+          content: '테스트 질문입니다.',
+          isHidden: false,
+          userId: testUserId,
+        });
+        await questionRepository.save(question);
       }
       const questionId = question.questionId;
+      createdQuestionIds.push(questionId);
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)
@@ -176,11 +241,17 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto = {
         isHidden: 'xxx', // boolean이 아닌 문자열
       };
-      const question = await questionRepository.findOne({ where: { userId: testUserId } });
+      let question = await questionRepository.findOne({ where: { userId: testUserId } });
       if (!question) {
-        throw new Error('테스트용 질문이 없습니다.');
+        question = questionRepository.create({
+          content: '테스트 질문입니다.',
+          isHidden: false,
+          userId: testUserId,
+        });
+        await questionRepository.save(question);
       }
       const questionId = question.questionId;
+      createdQuestionIds.push(questionId);
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)
