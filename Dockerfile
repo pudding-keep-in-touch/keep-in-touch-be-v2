@@ -1,20 +1,26 @@
-FROM node:22-slim
-
+FROM node:22-slim AS base
 WORKDIR /app
 
-RUN npm install -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-RUN apt-get update && apt-get install -y \
-    git \
-    vim \
-    && rm -rf /var/lib/apt/lists/*
+FROM base AS prod-deps
+COPY package.json .
+COPY pnpm-lock.yaml .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-COPY package.json pnpm-lock.yaml ./
-
-RUN pnpm install
-
+FROM base AS build
 COPY . .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
+FROM base
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+
+# node 사용자로 전환
+USER node
 EXPOSE 3000
-
-ENTRYPOINT ["pnpm", "run", "start:dev"]
+# 애플리케이션 실행
+CMD ["node", "dist/main"]
