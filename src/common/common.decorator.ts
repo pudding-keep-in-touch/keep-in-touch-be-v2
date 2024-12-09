@@ -37,7 +37,7 @@ export const ResponseDtoType = <T extends Type<unknown> | [Type<unknown>]>(t: T,
     ApiExtraModels(BaseResponseDto, ...types), // BaseResponseDto와 모든 타입을 추가
     responseMap[status]({
       schema: {
-        title: `ResponseDtoTypeOf${types.map((type) => type.name).join('And')}`,
+        title: types.map((type) => type.name).join('And'),
         allOf: [
           { $ref: getSchemaPath(BaseResponseDto) },
           {

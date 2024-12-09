@@ -10,7 +10,7 @@ export class UpdateMessageStatusDto {
     enum: MESSAGE_STATUS,
     required: true,
   })
-  @IsEnum(MESSAGE_STATUS, { message: 'status은 hidden, normal, reported 중 하나여야 합니다.' })
+  @IsEnum(MESSAGE_STATUS, { message: 'status는 hidden, normal, reported 중 하나여야 합니다.' })
   status: MessageStatusString;
 }
 

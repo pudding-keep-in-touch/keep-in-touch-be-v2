@@ -84,6 +84,12 @@ export class MessagesService {
     return ReceivedMessageDetailDto.from(message);
   }
 
+  /**
+   * 쪽지 상태를 변경합니다. 받은 쪽지인 경우만 가능.
+   *
+   * @param param messageId, userId, status를 포함하는 parameter
+   * @returns 변경된 쪽지 id와 status
+   */
   async updateMessageStatus(param: UpdateMessageStatusParam) {
     const { userId, messageId } = param;
     const status = toMessageStatusEnum(param.status);
@@ -126,7 +132,7 @@ export class MessagesService {
    * question 에 속하지 않는 자유 쪽지를 생성합니다.
    * emotion 1 : 응원과 감사, 2: 솔직한 대화.
    *
-   * @param messageData \
+   * @param messageData { senderId, receiverId, content }
    * @param emotionId
    * @returns
    */
