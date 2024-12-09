@@ -2,13 +2,18 @@ import { Emotion } from '@entities/emotion.entity';
 import { Message, MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
 import { User } from '@entities/user.entity';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
-import { MessageDetailParam } from './types/messages.type';
+import { MessageDetailParam, UpdateMessageStatusParam } from './types/messages.type';
 
 describe('MessagesService', () => {
   let service: MessagesService;
@@ -30,6 +35,8 @@ describe('MessagesService', () => {
             manager: {
               transaction: jest.fn(),
             },
+            findOne: jest.fn(),
+            update: jest.fn(),
           },
         },
         {
@@ -305,4 +312,72 @@ describe('MessagesService', () => {
     await expect(service.getMessageDetail(messageDetailParam)).rejects.toThrow(ForbiddenException);
   });
   // !SECTION
+  describe('updateMessageStatus', () => {
+    it('쪽지 상태를 성공적으로 업데이트해야 한다', async () => {
+      const updateMessageStatusParam: UpdateMessageStatusParam = {
+        userId: '2',
+        messageId: '5',
+        status: 'hidden',
+      };
+
+      const message = {
+        messageId: '5',
+        receiverId: '2',
+      };
+
+      jest.spyOn(messageRepository, 'findOne').mockResolvedValue(message as any);
+      jest.spyOn(messageRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+
+      const result = await service.updateMessageStatus(updateMessageStatusParam);
+
+      expect(result).toEqual({ messageId: '5', status: 'hidden' });
+    });
+
+    it('메세지가 존재하지 않으면 NotFoundException', async () => {
+      const updateMessageStatusParam: UpdateMessageStatusParam = {
+        userId: '2',
+        messageId: '5',
+        status: 'hidden',
+      };
+
+      jest.spyOn(messageRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMessageStatus(updateMessageStatusParam)).rejects.toThrow(NotFoundException);
+    });
+
+    it('받은사람과 userId가 다르면 ForbiddenException', async () => {
+      const updateMessageStatusParam: UpdateMessageStatusParam = {
+        userId: '3',
+        messageId: '5',
+        status: 'hidden',
+      };
+
+      const message = {
+        messageId: '5',
+        receiverId: '2',
+      };
+
+      jest.spyOn(messageRepository, 'findOne').mockResolvedValue(message as any);
+
+      await expect(service.updateMessageStatus(updateMessageStatusParam)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('쪽지 상태 변경 실패 시 InternalServerErrorException', async () => {
+      const updateMessageStatusParam: UpdateMessageStatusParam = {
+        userId: '2',
+        messageId: '5',
+        status: 'hidden',
+      };
+
+      const message = {
+        messageId: '5',
+        receiverId: '2',
+      };
+
+      jest.spyOn(messageRepository, 'findOne').mockResolvedValue(message as any);
+      jest.spyOn(messageRepository, 'update').mockResolvedValue({ affected: 0 } as any);
+
+      await expect(service.updateMessageStatus(updateMessageStatusParam)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
 });
