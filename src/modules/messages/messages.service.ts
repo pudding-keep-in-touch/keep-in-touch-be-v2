@@ -1,8 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
 import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
-import { MessageBaseData, MessageDetailParam } from './types/messages.type';
+import { toMessageStatusEnum } from './helpers/message-reaction.helper';
+import { MessageBaseData, MessageDetailParam, UpdateMessageStatusParam } from './types/messages.type';
 
 @Injectable()
 export class MessagesService {
@@ -75,6 +82,25 @@ export class MessagesService {
       return SentMessageDetailDto.from(message);
     }
     return ReceivedMessageDetailDto.from(message);
+  }
+
+  async updateMessageStatus(param: UpdateMessageStatusParam) {
+    const { userId, messageId } = param;
+    const status = toMessageStatusEnum(param.status);
+
+    const message = await this.messageRepository.findOne({ where: { messageId: messageId } });
+    if (message === null) {
+      throw new NotFoundException('쪽지가 존재하지 않습니다.');
+    }
+    if (message.receiverId !== userId) {
+      throw new ForbiddenException('쪽지를 수정할 권한이 없습니다.');
+    }
+
+    const result = await this.messageRepository.update({ messageId }, { status: status });
+    if (result.affected === 0) {
+      throw new InternalServerErrorException('쪽지 상태 변경 실패');
+    }
+    return { messageId, status: param.status };
   }
 
   /**

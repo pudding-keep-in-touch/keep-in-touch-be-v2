@@ -2,10 +2,16 @@ import { GenerateSwaggerApiDoc, UserAuth } from '@common/common.decorator';
 import { response } from '@common/helpers/common.helper';
 import { CheckBigIntIdPipe } from '@common/pipes/check-bigint-id.pipe';
 import { User } from '@entities/user.entity';
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { /*ApiBody, ApiExtraModels, , getSchemaPath*/ ApiTags } from '@nestjs/swagger';
+import {
+  //CreateEmotionMessageDto,
+  CreateMessageDto,
+  //CreateQuestionMessageDto,
+  ResponseCreateMessageDto,
+} from './dto/create-message.dto';
 import { ReceivedMessageDetailDto } from './dto/message-detail.dto';
+import { ResponseUpdateMessageStatusDto, UpdateMessageStatusDto } from './dto/update-message-status.dto';
 import { MessagesService } from './messages.service';
 
 @ApiTags('messages')
@@ -19,6 +25,20 @@ export class MessagesController {
     responseType: ResponseCreateMessageDto,
     responseStatus: HttpStatus.CREATED,
   })
+  //@ApiExtraModels(CreateEmotionMessageDto, CreateQuestionMessageDto)
+  //@ApiBody({
+  //  schema: {
+  //    title: 'CreateMessageDto',
+  //    oneOf: [{ $ref: getSchemaPath(CreateEmotionMessageDto) }, { $ref: getSchemaPath(CreateQuestionMessageDto) }],
+  //    discriminator: {
+  //      propertyName: 'emotionId', // emotionId의 존재여부로 구분
+  //      mapping: {
+  //        emotion: getSchemaPath(CreateEmotionMessageDto),
+  //        question: getSchemaPath(CreateQuestionMessageDto),
+  //      },
+  //    },
+  //  },
+  //})
   @Post()
   async createMessage(@Body() createMessageDto: CreateMessageDto, @UserAuth() user: User) {
     return response(
@@ -38,5 +58,20 @@ export class MessagesController {
     const { userId } = user;
     const result = await this.messagesService.getMessageDetail({ messageId, userId });
     return response(result, '쪽지 상세정보가 조회되었습니다.');
+  }
+
+  @GenerateSwaggerApiDoc({
+    summary: '쪽지 상태 변경',
+    description: '쪽지의 상태를 변경합니다.',
+    responseType: ResponseUpdateMessageStatusDto,
+  })
+  @Patch(':messageId')
+  async updateMessageStatus(
+    @Param('messageId', CheckBigIntIdPipe) messageId: string,
+    @Body() { status }: UpdateMessageStatusDto,
+    @UserAuth() user: User,
+  ) {
+    const result = await this.messagesService.updateMessageStatus({ messageId, userId: user.userId, status });
+    return response(result, '쪽지 상태가 변경되었습니다');
   }
 }

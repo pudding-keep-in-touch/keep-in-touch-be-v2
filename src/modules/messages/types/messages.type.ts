@@ -1,3 +1,5 @@
+import { MESSAGE_STATUS } from '../constants/messages.constant';
+
 export type MessageBaseData = {
   senderId: string;
   receiverId: string;
@@ -20,11 +22,17 @@ export type MessageType = 'received' | 'sent';
 
 export type MessageOrder = 'desc' | 'asc';
 
-export type MessageStatusString = 'normal' | 'hidden' | 'reported';
+export type MessageStatusString = (typeof MESSAGE_STATUS)[number];
 
 export type ReactionTypeKorean = '감사' | '사과' | '응원' | '화해';
 
 export type MessageDetailParam = {
   messageId: string;
   userId: string;
+};
+
+export type UpdateMessageStatusParam = {
+  messageId: string;
+  userId: string;
+  status: MessageStatusString;
 };
