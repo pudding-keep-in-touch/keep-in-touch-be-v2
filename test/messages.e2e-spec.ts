@@ -14,8 +14,8 @@ describe('Messages API test', () => {
   const loginUserId = '1'; // 테스트용 유저 ID
   const targetUserId = '2'; // 테스트용 유저 ID
   let targetQuestionIds: string[];
-  let createdMessageId: string;
-  let createdQuestionMessageId: string;
+  let loginToTargetMessageId: string;
+  let targetToLoginMessageId: string;
 
   beforeAll(async () => {
     const testApp = await createTestingApp();
@@ -45,21 +45,23 @@ describe('Messages API test', () => {
 
     const messageRepository = dataSource.getRepository(Message);
 
+    // NOTE: test용 메세지 두 개 (emotion, question) login -> target
     const emotionMessage = await messageRepository.save({
       senderId: loginUserId,
       receiverId: targetUserId,
       content: '감정 메시지 테스트',
       emotionId: '1',
     });
-    createdMessageId = emotionMessage.messageId;
+    loginToTargetMessageId = emotionMessage.messageId;
 
+    // target -> login
     const questionMessage = await messageRepository.save({
       senderId: targetUserId,
       receiverId: loginUserId,
       content: '질문 메시지 테스트',
       questionId: targetQuestionIds[0],
     });
-    createdQuestionMessageId = questionMessage.messageId;
+    targetToLoginMessageId = questionMessage.messageId;
   });
 
   afterAll(async () => {
@@ -186,7 +188,7 @@ describe('Messages API test', () => {
   describe('GET /messages/:messageId', () => {
     it('보낸 메시지 상세 조회 성공', () => {
       return request(app.getHttpServer())
-        .get(`/messages/${createdMessageId}`)
+        .get(`/messages/${loginToTargetMessageId}`)
         .expect(HttpStatus.OK)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
@@ -202,7 +204,7 @@ describe('Messages API test', () => {
 
     it('받은 메시지 상세 조회 성공', () => {
       return request(app.getHttpServer())
-        .get(`/messages/${createdQuestionMessageId}`)
+        .get(`/messages/${targetToLoginMessageId}`)
         .expect(HttpStatus.OK)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
@@ -241,6 +243,71 @@ describe('Messages API test', () => {
         .expect(HttpStatus.FORBIDDEN)
         .expect((response) => {
           expect(response.body).toHaveProperty('message', '쪽지를 볼 권한이 없습니다.');
+        });
+    });
+  });
+
+  describe('PATCH /messages/:messageId', () => {
+    it('쪽지 상태 변경 성공', () => {
+      return request(app.getHttpServer())
+        .patch(`/messages/${targetToLoginMessageId}`)
+        .send({ status: 'hidden' })
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('messageId', targetToLoginMessageId);
+          expect(response.body.data).toHaveProperty('status', 'hidden');
+        });
+    });
+
+    it('존재하지 않는 쪽지 상태 변경시 404', () => {
+      return request(app.getHttpServer())
+        .patch('/messages/999999')
+        .send({ status: 'hidden' })
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((response) => {
+          expect(response.body.status).toBe(HttpStatus.NOT_FOUND);
+        });
+    });
+
+    it('잘못된 status 값을 줄 경우 400', () => {
+      return request(app.getHttpServer())
+        .patch(`/messages/${targetToLoginMessageId}`)
+        .send({ status: 'invalid' })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('자신이 받은 쪽지가 아닌 경우 403', () => {
+      return request(app.getHttpServer())
+        .patch(`/messages/${loginToTargetMessageId}`)
+        .send({ status: 'hidden' })
+        .expect(HttpStatus.FORBIDDEN)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+          expect(response.body.status).toBe(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    it('status가 누락된 경우 400', () => {
+      return request(app.getHttpServer())
+        .patch(`/messages/${targetToLoginMessageId}`)
+        .send({})
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('message id가 bigint 형식이 아닌 경우 400', () => {
+      return request(app.getHttpServer())
+        .patch(`/messages/invalid`)
+        .send({ status: 'hidden' })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
         });
     });
   });
