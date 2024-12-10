@@ -1,5 +1,5 @@
 import { IsBigIntIdString } from '@common/decorators/is-bigint-id-string.decorator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, Length } from 'class-validator';
 import { MESSAGE_CONTENT_MAX, MESSAGE_CONTENT_MIN } from '../constants/messages.constant';
 
@@ -40,6 +40,10 @@ export class CreateMessageDto {
   //@IsBigIntIdString() - 감정id가 고정된 값이므로 사용하지 않음. 추후 변경될 수 있음
   emotionId?: string;
 }
+
+export class CreateEmotionMessageDto extends OmitType(CreateMessageDto, ['questionId']) {}
+
+export class CreateQuestionMessageDto extends OmitType(CreateMessageDto, ['emotionId']) {}
 
 export class ResponseCreateMessageDto {
   @ApiProperty({

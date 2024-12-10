@@ -3,17 +3,24 @@ import { MessageStatus } from '@entities/message.entity';
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
 import { MessageStatusString, ReactionTypeKorean } from '../types/messages.type';
 
-export function getMessageStatusString(status: MessageStatus): MessageStatusString {
-  switch (status) {
-    case MessageStatus.NORMAL:
-      return 'normal';
-    case MessageStatus.HIDDEN:
-      return 'hidden';
-    case MessageStatus.REPORTED:
-      return 'reported';
-    default:
-      throw new Error(`Invalid message status: ${status}`);
-  }
+const MESSAGE_STATUS_MAPPING = {
+  normal: MessageStatus.NORMAL,
+  hidden: MessageStatus.HIDDEN,
+  reported: MessageStatus.REPORTED,
+} as const;
+
+const REVERSE_STATUS_MAPPING = {
+  [MessageStatus.NORMAL]: 'normal',
+  [MessageStatus.HIDDEN]: 'hidden',
+  [MessageStatus.REPORTED]: 'reported',
+} as const;
+
+export function toMessageStatusEnum(status: MessageStatusString): MessageStatus {
+  return MESSAGE_STATUS_MAPPING[status];
+}
+
+export function toMessageStatusString(status: MessageStatus): MessageStatusString {
+  return REVERSE_STATUS_MAPPING[status];
 }
 
 export function getReactionTypeKorean(type: ReactionTemplateType): ReactionTypeKorean {

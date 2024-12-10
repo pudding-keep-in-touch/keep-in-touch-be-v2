@@ -1,5 +1,5 @@
 import { Message } from '@entities/message.entity';
-import { getMessageStatusString } from '@modules/messages/helpers/message-reaction.helper';
+import { toMessageStatusString } from '@modules/messages/helpers/message-reaction.helper';
 import { MessageOrder, MessageStatusString, MessageType } from '@modules/messages/types/messages.type';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -16,6 +16,7 @@ export class GetMyMessagesQuery {
   @ApiProperty({
     description: '받은 쪽지, 보낸 쪽지 구분 (received/sent)',
     example: 'received',
+    enum: ['received', 'sent'],
   })
   @IsIn(['received', 'sent'])
   type: MessageType; // received/sent
@@ -45,6 +46,8 @@ export class GetMyMessagesQuery {
     description: '정렬 (desc/asc), (default: desc)',
     required: false,
     example: 'desc',
+    default: 'desc',
+    enum: ['desc', 'asc'],
   })
   @IsOptional()
   @IsIn(['desc', 'asc'])
@@ -75,7 +78,7 @@ export class ReceivedMessageDto extends BaseMessageDto {
       receiverNickname: message.receiver.nickname,
       content: message.content,
       createdAt: message.createdAt,
-      status: getMessageStatusString(message.status),
+      status: toMessageStatusString(message.status),
       readAt: message.readAt,
     };
   }
