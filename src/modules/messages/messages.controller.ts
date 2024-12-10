@@ -72,6 +72,6 @@ export class MessagesController {
     @UserAuth() user: User,
   ) {
     const result = await this.messagesService.updateMessageStatus({ messageId, userId: user.userId, status });
-    return response(result, '쪽지 상태가 변경되었습니다');
+    return response(result, `쪽지 상태가 ${status}로 변경되었습니다`);
   }
 }
