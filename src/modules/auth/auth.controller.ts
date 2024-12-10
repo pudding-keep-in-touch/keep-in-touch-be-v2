@@ -10,34 +10,43 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 @ApiTags('auth')
-@UseGuards(AuthGuard('google'))
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
-  @NotUserAuth()
-  @Get('google/login')
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인',
     description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/google/login 으로 테스트 해주세요.',
   })
+  @NotUserAuth()
+  @Get('google/login')
+  @UseGuards(AuthGuard('google'))
   async googleLogin() {
     // Google 로그인 페이지로 리디렉션
   }
 
-  @NotUserAuth()
-  @Get('google/callback')
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
     description:
       'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/google/callback 으로 테스트 해주세요.',
   })
+  @NotUserAuth()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
   async googleLoginCallback(@Req() req: any, @Res() res: Response): Promise<void> {
     const { accessToken, userId } = await this.authService.googleLogin(req.user);
 
     const redirectUrl = `${this.configService.get<string>('REDIRECT_URL')}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
     res.redirect(redirectUrl);
   }
+
+  @NotUserAuth()
+  @Get('kakao/login')
+  @GenerateSwaggerApiDoc({
+    summary: '카카오 로그인',
+    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/kakao/login 으로 테스트 해주세요.',
+  })
+  async kakaoLogin() {}
 }
