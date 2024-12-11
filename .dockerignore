@@ -2,3 +2,14 @@
 *Dockerfile*
 node_modules
 dist
+
+npm-debug.log
+docker-compose*
+.dockerignore
+.gitignore
+README.md
+.vscode
+coverage
+dist
+logs
+*.log
