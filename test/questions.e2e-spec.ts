@@ -122,7 +122,7 @@ describe('Questions API test', () => {
         .expect((response) => {
           expect(response.body).toMatchObject({
             status: 409,
-            message: '질문은 10개까지만 생성할 수 있습니다.',
+            message: `질문은 ${QUESTION_COUNT_LIMIT}개까지만 생성할 수 있습니다.`,
             data: null,
           });
         });
