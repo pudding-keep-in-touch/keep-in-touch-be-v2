@@ -13,7 +13,7 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { isEmpty, isUndefined } from 'lodash';
+
 import { BaseResponseDto } from './common.dto';
 import { SwaggerDocInterface } from './common.interface';
 
@@ -91,9 +91,9 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (Array.isArray(tags)) methodDecorators.push(ApiTags(...tags));
 
-  if (!isEmpty(body)) methodDecorators.push(ApiBody(body));
+  if (body && typeof body === 'object' && Object.keys(body).length > 0) methodDecorators.push(ApiBody(body));
 
-  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
+  if (responseType !== undefined) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };
