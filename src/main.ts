@@ -49,8 +49,18 @@ async function bootstrap() {
       'jwt',
     )
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v2', app, document);
+
+  // 문서의 모든 API description을 순회하면서 플레이스홀더 치환
+  for (const path of Object.values(document.paths)) {
+    for (const method of Object.values(path)) {
+      if (method.description) {
+        method.description = method.description.replace('${APP_URL}', `${appConfigService.url}`);
+      }
+    }
+  }
 
   await app.listen(appConfigService.port || 3000);
 }
