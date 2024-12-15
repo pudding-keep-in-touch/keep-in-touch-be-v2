@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AppConfigService } from './app/app-config.service';
 import { GoogleConfigService } from './google/google-config.service';
@@ -18,7 +18,21 @@ import { validateEnv } from './validate-env.config';
       validationSchema: validateEnv,
     }),
   ],
-  providers: [AppConfigService, GoogleConfigService, KakaoConfigService, PostgresConfigService, JwtConfigService],
-  exports: [AppConfigService, GoogleConfigService, KakaoConfigService, PostgresConfigService, JwtConfigService],
+  providers: [
+    ConfigService,
+    AppConfigService,
+    GoogleConfigService,
+    KakaoConfigService,
+    PostgresConfigService,
+    JwtConfigService,
+  ],
+  exports: [
+    ConfigService,
+    AppConfigService,
+    GoogleConfigService,
+    KakaoConfigService,
+    PostgresConfigService,
+    JwtConfigService,
+  ],
 })
 export class RootConfigModule {}
