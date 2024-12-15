@@ -1,7 +1,6 @@
+import { AppConfigService } from '@configs/app/app-config.service';
 import { Injectable, LoggerService } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as winston from 'winston';
-//import * as DailyRotateFile from 'winston-daily-rotate-file';
 
 const { combine, timestamp, printf, colorize, align } = winston.format;
 
@@ -9,7 +8,7 @@ const { combine, timestamp, printf, colorize, align } = winston.format;
 export class CustomLogger implements LoggerService {
   private logger: winston.Logger;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly appConfigService: AppConfigService) {
     this.initializeLogger();
   }
 
@@ -27,38 +26,8 @@ export class CustomLogger implements LoggerService {
       }),
     );
 
-    //const serviceName = this.configService.get('APP_NAME');
-    //// 파일 로그를 위한 포맷
-    //const fileFormat = combine(
-    //  timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    //  printf(({ timestamp, level, message, context, trace, ...meta }) => {
-    //    const contextStr = context ? `[${context}] ` : '';
-    //    const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-    //    const traceStr = trace ? `\nStack Trace: ${trace}` : '';
-    //    return `${timestamp} ${level.toUpperCase()}: ${contextStr}${message}${metaStr}${traceStr}`;
-    //  }),
-    //);
-
-    //const fileRotateTransport = new DailyRotateFile({
-    //  filename: `logs/${serviceName}-%DATE%.log`,
-    //  datePattern: 'YYYY-MM-DD',
-    //  zippedArchive: true,
-    //  maxSize: '20m',
-    //  maxFiles: '14d',
-    //  format: fileFormat,
-    //});
-
-    //const errorWarnTransport = new DailyRotateFile({
-    //  filename: `logs/${serviceName}-errors-%DATE%.log`,
-    //  datePattern: 'YYYY-MM-DD',
-    //  zippedArchive: true,
-    //  maxSize: '20m',
-    //  maxFiles: '30d',
-    //  level: 'warn', // warn 레벨 이상(warn과 error)만 기록
-    //  format: fileFormat,
-    //});
     let level = 'info';
-    const environment = this.configService.get<string>('APP_ENV');
+    const environment = this.appConfigService.env;
     if (environment === 'local') {
       level = 'debug';
     }
@@ -69,8 +38,6 @@ export class CustomLogger implements LoggerService {
         new winston.transports.Console({
           format: consoleFormat,
         }),
-        //fileRotateTransport,
-        //errorWarnTransport,
       ],
     });
   }
