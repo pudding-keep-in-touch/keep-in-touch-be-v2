@@ -8,6 +8,6 @@ export const TYPEORM_CUSTOM_REPOSITORY = 'TYPEORM_CUSTOM_REPOSITORY';
  */
 export function CustomEntityRepository<T>(entity: new (...args: any[]) => T): ClassDecorator {
   // ban-type 대신 (entity: new (...args: any[]) => any) 생성자 타입을 지정해 class 허용
-  // SetMetadata는 key: value형태이고 TYPEORM_CUSTOM_REPOSITORY가 key가 되고 엔티티가 vaule가 된다.
+  // SetMetadata는 key: value형태이고 TYPEORM_CUSTOM_REPOSITORY가 key가 되고 엔티티가 value가 된다.
   return SetMetadata(TYPEORM_CUSTOM_REPOSITORY, entity);
 }

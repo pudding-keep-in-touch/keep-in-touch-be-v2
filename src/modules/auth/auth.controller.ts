@@ -21,7 +21,7 @@ export class AuthController {
 
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인',
-    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/google/login 으로 테스트 해주세요.',
+    description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/google/login 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
   @Get('google/login')
@@ -30,8 +30,7 @@ export class AuthController {
 
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
-    description:
-      'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/google/callback 으로 테스트 해주세요.',
+    description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/google/callback 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
   @Get('google/callback')
@@ -50,7 +49,7 @@ export class AuthController {
 
   @GenerateSwaggerApiDoc({
     summary: '카카오 로그인',
-    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/kakao/login 으로 테스트 해주세요.',
+    description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/kakao/login 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
   @UseGuards(KakaoOIDCGuard)
@@ -59,7 +58,7 @@ export class AuthController {
 
   @GenerateSwaggerApiDoc({
     summary: '카카오 로그인',
-    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/kakao/login 으로 테스트 해주세요.',
+    description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/kakao/callback 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
   @UseGuards(KakaoOIDCGuard)
