@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { MessageStatistic } from '@entities/message-statistic.entity';
-import { User } from '@entities/user.entity';
+import { LoginType, User } from '@entities/user.entity';
 
 @CustomEntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -37,6 +37,10 @@ export class UserRepository extends Repository<User> {
   // 유저 이메일 기준으로 조회
   async findUserByEmail(email: string): Promise<User | null> {
     return await this.findOne({ where: { email } });
+  }
+
+  async findUserByEmailWithLoginType(email: string, loginType: LoginType): Promise<User | null> {
+    return await this.findOne({ where: { email, loginType } });
   }
 
   async findUserById(id: string): Promise<User | null> {

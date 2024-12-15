@@ -1,12 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { GoogleUser } from '@common/types/google-user.type';
 import { User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
 import { getOrderUpperCase } from '@common/helpers/pagination-option.helper';
 import { PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
+import { UserProfile } from '@modules/auth/types/user-profile.type';
 //import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
@@ -35,19 +35,28 @@ export class UsersService {
    * @param googleUser
    * @returns
    */
-  async createOrGetGoogleUser(googleUser: GoogleUser): Promise<{ userId: string; email: string }> {
-    const user = await this.getUserByEmail(googleUser.email);
+  async createOrGetGoogleUser(googleUser: UserProfile): Promise<{ userId: string; email: string }> {
+    const user = await this.getUserByEmailAndLogin(googleUser.email, 'google');
 
     if (user !== null) {
-      if (user.loginType !== LoginType.GOOGLE) {
-        throw new ConflictException('이미 다른 로그인 방식으로 가입된 이메일입니다.');
-      }
       return { userId: user.userId, email: user.email };
     }
-    const nickname = googleUser.displayName || this.generateNickname();
+    const nickname = googleUser.nickname || this.generateNickname();
 
     const userId = await this.userRepository.createUser(googleUser.email, nickname, LoginType.GOOGLE);
     return { userId, email: googleUser.email };
+  }
+
+  async createOrGetKakaoUser(kakaoUser: UserProfile) {
+    const user = await this.getUserByEmailAndLogin(kakaoUser.email, 'kakao');
+
+    if (user !== null) {
+      return { userId: user.userId, email: user.email };
+    }
+    const nickname = kakaoUser.nickname || this.generateNickname();
+
+    const userId = await this.userRepository.createUser(kakaoUser.email, nickname, LoginType.KAKAO);
+    return { userId, email: kakaoUser.email };
   }
 
   /**
@@ -111,8 +120,14 @@ export class UsersService {
    * @param email (unique)
    * @returns
    */
-  async getUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findUserByEmail(email);
+  async getUserByEmailAndLogin(email: string, login: string): Promise<User | null> {
+    if (login === 'google') {
+      return this.userRepository.findUserByEmailWithLoginType(email, LoginType.GOOGLE);
+    }
+    if (login === 'kakao') {
+      return this.userRepository.findUserByEmailWithLoginType(email, LoginType.KAKAO);
+    }
+    throw new Error('Invalid login type');
   }
 
   /**

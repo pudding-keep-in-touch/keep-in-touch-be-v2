@@ -1,9 +1,8 @@
 import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
+import { AppConfigService } from '@configs/app/app-config.service';
 import { CustomLogger } from '@logger/custom-logger.service';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -14,19 +13,15 @@ async function bootstrap() {
   // pagination 등에서 엄청난 데이터 불일치가 발생함.
   // 서버를 UTC로 설정해서 해결 가능.
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
+  const appConfigService = app.get(AppConfigService);
   const logger = app.get(CustomLogger);
   app.useLogger(logger);
   // 환경 변수 로드
-  const environment = configService.get('APP_ENV') || 'development';
+  const environment = appConfigService || 'development';
   logger.log(`Application is running in ${environment} mode`, 'Bootstrap');
 
   //FIXME: 더 안전한 CORS 설정 필요
   app.enableCors();
-
-  ConfigModule.forRoot({
-    isGlobal: true,
-  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -41,7 +36,7 @@ async function bootstrap() {
 
   // swagger 설정
   const config = new DocumentBuilder()
-    .setTitle(`${configService.get('APP_NAME')}_${configService.get('APP_ENV')}`)
+    .setTitle(`${appConfigService.name}_${appConfigService.env}`)
     .setDescription('API description')
     .setVersion('2.0')
     .addBearerAuth(
@@ -57,6 +52,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v2', app, document);
 
-  await app.listen(configService.get('APP_PORT') || 3000);
+  await app.listen(appConfigService.port || 3000);
 }
 bootstrap();
