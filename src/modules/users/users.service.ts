@@ -1,13 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { User } from '@entities/user.entity';
+import { LoginType, User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
 import { getOrderUpperCase } from '@common/helpers/pagination-option.helper';
 import { PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
 import { UserProfile } from '@modules/auth/types/user-profile.type';
-//import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
@@ -18,7 +17,8 @@ import {
 } from './dto/get-my-messages.dto';
 import { MyQuestionDto, ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
-import { LoginType } from './users.constants';
+
+type UserCreationResult = { userId: string; email: string };
 
 @Injectable()
 export class UsersService {
@@ -26,37 +26,14 @@ export class UsersService {
     private readonly userRepository: UserRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly messageRepository: MessageRepository,
-    //private readonly messageStatisticRepository: MessageStatisticRepository,
   ) {}
 
-  /**
-   * 구글 사용자 로그인 혹은 회원가입
-   *
-   * @param googleUser
-   * @returns
-   */
-  async createOrGetGoogleUser(googleUser: UserProfile): Promise<{ userId: string; email: string }> {
-    const user = await this.getUserByEmailAndLogin(googleUser.email, 'google');
-
-    if (user !== null) {
-      return { userId: user.userId, email: user.email };
-    }
-    const nickname = googleUser.nickname || this.generateNickname();
-
-    const userId = await this.userRepository.createUser(googleUser.email, nickname, LoginType.GOOGLE);
-    return { userId, email: googleUser.email };
+  async createOrGetGoogleUser(googleUser: UserProfile): Promise<UserCreationResult> {
+    return this.findOrCreateSocialUser(googleUser, LoginType.GOOGLE);
   }
 
-  async createOrGetKakaoUser(kakaoUser: UserProfile) {
-    const user = await this.getUserByEmailAndLogin(kakaoUser.email, 'kakao');
-
-    if (user !== null) {
-      return { userId: user.userId, email: user.email };
-    }
-    const nickname = kakaoUser.nickname || this.generateNickname();
-
-    const userId = await this.userRepository.createUser(kakaoUser.email, nickname, LoginType.KAKAO);
-    return { userId, email: kakaoUser.email };
+  async createOrGetKakaoUser(kakaoUser: UserProfile): Promise<UserCreationResult> {
+    return this.findOrCreateSocialUser(kakaoUser, LoginType.KAKAO);
   }
 
   /**
@@ -115,22 +92,6 @@ export class UsersService {
   }
 
   /**
-   * email 기준으로 사용자 조회
-   *
-   * @param email (unique)
-   * @returns
-   */
-  async getUserByEmailAndLogin(email: string, login: string): Promise<User | null> {
-    if (login === 'google') {
-      return this.userRepository.findUserByEmailWithLoginType(email, LoginType.GOOGLE);
-    }
-    if (login === 'kakao') {
-      return this.userRepository.findUserByEmailWithLoginType(email, LoginType.KAKAO);
-    }
-    throw new Error('Invalid login type');
-  }
-
-  /**
    * id 기준으로 사용자 조회
    *
    * @param id
@@ -138,6 +99,22 @@ export class UsersService {
    */
   async getUserById(id: string): Promise<User | null> {
     return this.userRepository.findUserById(id);
+  }
+
+  private async findOrCreateSocialUser(userProfile: UserProfile, loginType: LoginType): Promise<UserCreationResult> {
+    const user = await this.userRepository.findUserByEmailWithLoginType(userProfile.email, loginType);
+
+    if (user) {
+      return { userId: user.userId, email: user.email };
+    }
+
+    const nickname = userProfile.nickname || this.generateNickname();
+    const userId = await this.userRepository.createUser({
+      email: userProfile.email,
+      nickname,
+      loginType,
+    });
+    return { userId, email: userProfile.email };
   }
 
   private generateNickname(): string {

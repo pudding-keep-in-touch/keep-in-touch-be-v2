@@ -26,7 +26,7 @@ export class AuthController {
   @NotUserAuth()
   @Get('google/login')
   @UseGuards(GoogleOIDCGuard)
-  async googleLogin(@Req() _req: Request, @Res() _res: Response) {}
+  async googleLogin() {}
 
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
@@ -54,7 +54,7 @@ export class AuthController {
   @NotUserAuth()
   @UseGuards(KakaoOIDCGuard)
   @Get('kakao/login')
-  async kakaoLogin(@Req() _req: Request, @Res() _res: Response) {}
+  async kakaoLogin() {}
 
   @GenerateSwaggerApiDoc({
     summary: '카카오 로그인',
@@ -68,6 +68,9 @@ export class AuthController {
     if (query.code === undefined) {
       throw new Error('code is not provided');
     }
-    res.redirect(this.appConfigService.clientUrl);
+    const { accessToken, userId } = await this.authService.kakaoLogin(req.user);
+    const redirectUrl = `${this.appConfigService.clientUrl}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
+
+    res.redirect(redirectUrl);
   }
 }

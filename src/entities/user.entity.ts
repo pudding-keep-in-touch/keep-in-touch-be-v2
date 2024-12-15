@@ -16,8 +16,7 @@ import { Question } from './question.entity';
 export enum LoginType {
   EMAIL = 1,
   GOOGLE = 2,
-  NAVER = 3,
-  KAKAO = 4,
+  KAKAO = 3,
 }
 
 @Entity({ name: 'users' })
