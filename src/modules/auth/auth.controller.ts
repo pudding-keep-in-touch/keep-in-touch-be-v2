@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -8,8 +8,9 @@ import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
 import { AppConfigService } from '@configs/app/app-config.service';
 import { AuthService } from './auth.service';
 
-import { GoogleOIDCGuard } from './guard/google-oidc.guard';
-import { KakaoOIDCGuard } from './guard/kakao-oidc.guard';
+import { UseOIDC } from './decorators/use-oidc.decorator';
+import { GoogleOIDCProvider } from './providers/google-oidc.provider';
+import { KakaoOIDCProvider } from './providers/kakao-oidc.provider';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -25,7 +26,7 @@ export class AuthController {
   })
   @NotUserAuth()
   @Get('google/login')
-  @UseGuards(GoogleOIDCGuard)
+  @UseOIDC(GoogleOIDCProvider)
   async googleLogin() {}
 
   @GenerateSwaggerApiDoc({
@@ -34,7 +35,7 @@ export class AuthController {
   })
   @NotUserAuth()
   @Get('google/callback')
-  @UseGuards(GoogleOIDCGuard)
+  @UseOIDC(GoogleOIDCProvider)
   async googleLoginCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
     const query = req.query;
 
@@ -52,8 +53,8 @@ export class AuthController {
     description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/kakao/login 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
-  @UseGuards(KakaoOIDCGuard)
   @Get('kakao/login')
+  @UseOIDC(KakaoOIDCProvider)
   async kakaoLogin() {}
 
   @GenerateSwaggerApiDoc({
@@ -61,8 +62,8 @@ export class AuthController {
     description: `Swagger에서 테스트 할 수 없습니다. ${process.env.APP_URL}/v2/auth/kakao/callback 으로 테스트 해주세요.`,
   })
   @NotUserAuth()
-  @UseGuards(KakaoOIDCGuard)
   @Get('kakao/callback')
+  @UseOIDC(KakaoOIDCProvider)
   async kakaoCallback(@Req() req: Request, @Res() res: Response) {
     const query = req.query;
     if (query.code === undefined) {

@@ -1,5 +1,4 @@
 import { CustomLogger } from '@logger/custom-logger.service';
-// oidc.provider.ts
 import { Injectable } from '@nestjs/common';
 import { IdTokenType } from '../types/id-token.type';
 import { OIDCConfig } from '../types/oidc.type';

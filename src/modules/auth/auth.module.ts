@@ -9,8 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 import { JwtConfigService } from '@configs/jwt/jwt-config.service';
-import { GoogleOIDCGuard } from './guard/google-oidc.guard';
-import { KakaoOIDCGuard } from './guard/kakao-oidc.guard';
+import { OIDCGuard } from './guards/oidc.guard';
 import { GoogleOIDCProvider } from './providers/google-oidc.provider';
 import { KakaoOIDCProvider } from './providers/kakao-oidc.provider';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -28,7 +27,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
     LoggerModule,
   ],
-  providers: [AuthService, JwtStrategy, GoogleOIDCProvider, KakaoOIDCProvider, GoogleOIDCGuard, KakaoOIDCGuard],
+  providers: [AuthService, JwtStrategy, GoogleOIDCProvider, KakaoOIDCProvider, OIDCGuard],
   controllers: [AuthController],
   exports: [AuthService],
 })
