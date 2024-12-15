@@ -6,14 +6,14 @@ export class GoogleConfigService {
   constructor(private readonly configService: ConfigService) {}
 
   get clientId() {
-    return this.configService.get<string>('google.clientId');
+    return this.configService.getOrThrow<string>('google.clientId');
   }
 
   get clientSecret() {
-    return this.configService.get<string>('google.clientSecret');
+    return this.configService.getOrThrow<string>('google.clientSecret');
   }
 
   get callbackUrl() {
-    return this.configService.get<string>('google.callbackUrl');
+    return this.configService.getOrThrow<string>('google.callbackUrl');
   }
 }
