@@ -21,7 +21,7 @@ export class GoogleOIDCProvider extends BaseOIDCProvider {
     super(config, logger);
   }
 
-  protected getUserInfo(decodedIdToken: GoogleIdTokenType): UserProfile {
+  protected getUserProfile(decodedIdToken: GoogleIdTokenType): UserProfile {
     if (!decodedIdToken.email) {
       throw new Error('Email is required, 이메일이 인증되지 않은 구글 계정입니다');
     }

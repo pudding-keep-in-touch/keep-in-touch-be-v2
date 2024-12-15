@@ -20,7 +20,7 @@ export class KakaoOIDCProvider extends BaseOIDCProvider {
     super(config, logger);
   }
 
-  protected getUserInfo(decodedIdToken: KakaoIdTokenType): UserProfile {
+  protected getUserProfile(decodedIdToken: KakaoIdTokenType): UserProfile {
     if (!decodedIdToken.email) {
       throw new Error('Email is required, 이메일이 인증되지 않은 카카오 계정입니다');
     }

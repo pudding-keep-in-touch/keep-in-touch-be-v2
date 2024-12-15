@@ -84,7 +84,7 @@ export abstract class BaseOIDCProvider {
       const decodedToken = this.parseJwt(idToken);
       this.verifyIdToken(decodedToken);
 
-      return this.getUserInfo(decodedToken);
+      return this.getUserProfile(decodedToken);
     } catch (error) {
       this.logger.error(`Failed to exchange code for tokens: ${error.message}`, error.stack);
 
@@ -99,7 +99,7 @@ export abstract class BaseOIDCProvider {
    */
   protected verifyIdToken(idToken: IdTokenType): void {
     try {
-      if (!idToken || !idToken.iss || !idToken.aud) {
+      if (!idToken || !idToken.iss || !idToken.aud || !idToken.sub || !idToken.exp || !idToken.iat) {
         throw new Error('Invalid ID token format.');
       }
 
@@ -109,6 +109,11 @@ export abstract class BaseOIDCProvider {
 
       if (idToken.aud !== this.config.clientId) {
         throw new Error(`Invalid token audience: ${idToken.aud}`);
+      }
+
+      // 현 시점에서 만료된 토큰은 사용하지 않는다.
+      if (idToken.exp < Math.floor(Date.now() / 1000)) {
+        throw new Error('ID token is expired.');
       }
     } catch (error) {
       throw new Error(`ID token verification failed: ${error.message}`);
@@ -124,5 +129,5 @@ export abstract class BaseOIDCProvider {
     }
   }
 
-  protected abstract getUserInfo(decodedIdToken: IdTokenType): UserProfile;
+  protected abstract getUserProfile(decodedIdToken: IdTokenType): UserProfile;
 }

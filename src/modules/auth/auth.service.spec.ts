@@ -1,7 +1,6 @@
 import { UsersService } from '@modules/users/users.service';
 
 import { JwtConfigService } from '@configs/jwt/jwt-config.service';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
