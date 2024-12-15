@@ -1,19 +1,22 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AuthGuard } from '@nestjs/passport';
+
 import { ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
 
+import { AppConfigService } from '@configs/app/app-config.service';
 import { AuthService } from './auth.service';
+
+import { GoogleOIDCGuard } from './guard/google-oidc.guard';
+import { KakaoOIDCGuard } from './guard/kakao-oidc.guard';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   @GenerateSwaggerApiDoc({
@@ -22,10 +25,8 @@ export class AuthController {
   })
   @NotUserAuth()
   @Get('google/login')
-  @UseGuards(AuthGuard('google'))
-  async googleLogin() {
-    // Google 로그인 페이지로 리디렉션
-  }
+  @UseGuards(GoogleOIDCGuard)
+  async googleLogin(@Req() _req: Request, @Res() _res: Response) {}
 
   @GenerateSwaggerApiDoc({
     summary: '구글 로그인 콜백',
@@ -34,19 +35,40 @@ export class AuthController {
   })
   @NotUserAuth()
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleLoginCallback(@Req() req: any, @Res() res: Response): Promise<void> {
-    const { accessToken, userId } = await this.authService.googleLogin(req.user);
+  @UseGuards(GoogleOIDCGuard)
+  async googleLoginCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const query = req.query;
 
-    const redirectUrl = `${this.configService.get<string>('REDIRECT_URL')}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
+    if (query.code === undefined) {
+      throw new Error('code is not provided');
+    }
+    const { accessToken, userId } = await this.authService.googleLogin(req.user);
+    const redirectUrl = `${this.appConfigService.clientUrl}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
+
     res.redirect(redirectUrl);
   }
 
-  @NotUserAuth()
-  @Get('kakao/login')
   @GenerateSwaggerApiDoc({
     summary: '카카오 로그인',
     description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/kakao/login 으로 테스트 해주세요.',
   })
-  async kakaoLogin() {}
+  @NotUserAuth()
+  @UseGuards(KakaoOIDCGuard)
+  @Get('kakao/login')
+  async kakaoLogin(@Req() _req: Request, @Res() _res: Response) {}
+
+  @GenerateSwaggerApiDoc({
+    summary: '카카오 로그인',
+    description: 'Swagger에서 테스트 할 수 없습니다. http://localhost:3000/v2/auth/kakao/login 으로 테스트 해주세요.',
+  })
+  @NotUserAuth()
+  @UseGuards(KakaoOIDCGuard)
+  @Get('kakao/callback')
+  async kakaoCallback(@Req() req: Request, @Res() res: Response) {
+    const query = req.query;
+    if (query.code === undefined) {
+      throw new Error('code is not provided');
+    }
+    res.redirect(this.appConfigService.clientUrl);
+  }
 }
