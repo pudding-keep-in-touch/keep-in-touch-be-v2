@@ -126,6 +126,31 @@ describe('UsersService', () => {
 
       expect(userRepository.findUserByEmailWithLoginType).toHaveBeenCalledWith('test@example.com', LoginType.KAKAO);
     });
+
+    it('이미 존재하는 카카오 유저 조회', async () => {
+      const kakaoUser: SocialUserProfile = {
+        sub: '1234',
+        email: 'test@example.com',
+        nickname: 'John Doe',
+      };
+
+      jest.spyOn(userRepository, 'findUserByEmailWithLoginType').mockResolvedValue({
+        userId: '1',
+        email: 'test@example.com',
+        nickname: 'John Doe',
+        loginType: LoginType.KAKAO,
+      } as any);
+
+      const result = await service.createOrGetKakaoUser(kakaoUser);
+      expect(result).toEqual({ userId: '1', email: 'test@example.com' });
+      expect(userRepository.createUser).not.toHaveBeenCalled();
+
+      /**
+       * 이미 존재하는 유저 처리
+       * 이메일이 없는 카카오 계정 처리
+       * 닉네임 중복 처리
+       */
+    });
   });
 
   describe('getNicknameById', () => {
