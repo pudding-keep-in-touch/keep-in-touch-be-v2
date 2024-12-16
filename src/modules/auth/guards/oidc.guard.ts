@@ -1,3 +1,4 @@
+import { CustomLogger } from '@logger/custom-logger.service';
 import { CanActivate, ExecutionContext, Injectable, Type, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ModuleRef } from '@nestjs/core';
@@ -9,6 +10,7 @@ export class OIDCGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly moduleRef: ModuleRef,
+    private readonly logger: CustomLogger,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,7 +41,8 @@ export class OIDCGuard implements CanActivate {
       request.user = userProfile;
       return true;
     } catch (error) {
-      throw new UnauthorizedException(`Authentication failed: ${error.message}`);
+      this.logger.error(error.message, error.stack, 'OIDCGuard authentication failed');
+      throw new UnauthorizedException('Authentication failed');
     }
   }
 }
