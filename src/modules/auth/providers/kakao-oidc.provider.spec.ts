@@ -136,7 +136,7 @@ describe('KakaoOIDCProvider', () => {
       expect(params.get('client_id')).toBe(mockKakaoConfig.clientId);
       expect(params.get('redirect_uri')).toBe(mockKakaoConfig.callbackUrl);
       expect(params.get('response_type')).toBe('code');
-      expect(params.get('scope')).toBe('openid, account_email profile_nickname');
+      expect(params.get('scope')).toBe('openid account_email profile_nickname');
     });
   });
 });

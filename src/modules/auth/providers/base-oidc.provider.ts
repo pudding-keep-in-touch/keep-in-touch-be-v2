@@ -121,7 +121,9 @@ export abstract class BaseOIDCProvider {
 
   protected parseJwt(token: string): IdTokenType {
     try {
-      const payload = Buffer.from(token.split('.')[1], 'base64').toString();
+      // jwt encoding: base64url
+      // @see https://www.rfc-editor.org/rfc/rfc7519.html#section-3
+      const payload = Buffer.from(token.split('.')[1], 'base64url').toString();
       return JSON.parse(payload);
     } catch (_error) {
       throw new Error('Failed to parse JWT');

@@ -14,7 +14,7 @@ export class KakaoOIDCProvider extends BaseOIDCProvider {
       redirectUri: kakaoConfigService.callbackUrl,
       authorizationEndpoint: 'https://kauth.kakao.com/oauth/authorize',
       tokenEndpoint: 'https://kauth.kakao.com/oauth/token',
-      scope: 'openid, account_email profile_nickname',
+      scope: 'openid account_email profile_nickname',
       validIssuers: ['https://kauth.kakao.com'],
     };
     super(config, logger);

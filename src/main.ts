@@ -17,7 +17,7 @@ async function bootstrap() {
   const logger = app.get(CustomLogger);
   app.useLogger(logger);
   // 환경 변수 로드
-  const environment = appConfigService || 'development';
+  const environment = appConfigService.env || 'development';
   logger.log(`Application is running in ${environment} mode`, 'Bootstrap');
 
   //FIXME: 더 안전한 CORS 설정 필요
