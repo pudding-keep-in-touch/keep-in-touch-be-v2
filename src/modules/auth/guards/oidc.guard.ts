@@ -33,7 +33,7 @@ export class OIDCGuard implements CanActivate {
       }
 
       const code = request.query.code;
-      if (!code) {
+      if (!code || typeof code !== 'string' || code.trim().length === 0) {
         throw new UnauthorizedException('No authorization code found');
       }
 
