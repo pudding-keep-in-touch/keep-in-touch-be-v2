@@ -1,7 +1,7 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 import { GenerateSwaggerApiDoc, NotUserAuth } from '@common/common.decorator';
 
@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { UseOIDC } from './decorators/use-oidc.decorator';
 import { GoogleOIDCProvider } from './providers/google-oidc.provider';
 import { KakaoOIDCProvider } from './providers/kakao-oidc.provider';
+import { RequestSocialUser } from './types/user-profile.type';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -36,13 +37,13 @@ export class AuthController {
   @NotUserAuth()
   @Get('google/callback')
   @UseOIDC(GoogleOIDCProvider)
-  async googleLoginCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
+  async googleLoginCallback(@Req() req: RequestSocialUser, @Res() res: Response): Promise<void> {
     const query = req.query;
 
     if (query.code === undefined) {
       throw new Error('code is not provided');
     }
-    const { accessToken, userId } = await this.authService.googleLogin(req.user);
+    const { accessToken, userId } = await this.authService.googleLogin(req.socialUser);
     const redirectUrl = `${this.appConfigService.clientUrl}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
 
     res.redirect(redirectUrl);
@@ -64,12 +65,12 @@ export class AuthController {
   @NotUserAuth()
   @Get('kakao/callback')
   @UseOIDC(KakaoOIDCProvider)
-  async kakaoCallback(@Req() req: Request, @Res() res: Response) {
+  async kakaoCallback(@Req() req: RequestSocialUser, @Res() res: Response) {
     const query = req.query;
     if (query.code === undefined) {
       throw new Error('code is not provided');
     }
-    const { accessToken, userId } = await this.authService.kakaoLogin(req.user);
+    const { accessToken, userId } = await this.authService.kakaoLogin(req.socialUser);
     const redirectUrl = `${this.appConfigService.clientUrl}/auth/callback?userId=${userId}&accessToken=${accessToken}`;
 
     res.redirect(redirectUrl);

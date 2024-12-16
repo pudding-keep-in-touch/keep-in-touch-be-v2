@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { LoginType, User } from '@entities/user.entity';
@@ -6,7 +6,7 @@ import { UserRepository } from '@repositories/user.repository';
 
 import { MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
-import { UserProfile } from '@modules/auth/types/user-profile.type';
+import { SocialUserProfile } from '@modules/auth/types/user-profile.type';
 import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
@@ -83,8 +83,8 @@ describe('UsersService', () => {
 
   describe('createOrGetGoogleUser', () => {
     it('새 구글 유저 생성', async () => {
-      const googleUser: UserProfile = {
-        id: '1234',
+      const googleUser: SocialUserProfile = {
+        sub: '1234',
         email: 'test@example.com',
         nickname: 'John Doe',
       };
@@ -109,8 +109,8 @@ describe('UsersService', () => {
 
   describe('createOrGetKakaoUser', () => {
     it('새 카카오 유저 생성', async () => {
-      const kakaoUser: UserProfile = {
-        id: '1234',
+      const kakaoUser: SocialUserProfile = {
+        sub: '1234',
         email: 'test@example.com',
         nickname: 'John Doe',
       };

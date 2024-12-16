@@ -16,6 +16,7 @@ import {
 
 import { BaseResponseDto } from './common.dto';
 import { SwaggerDocInterface } from './common.interface';
+import { RequestUser } from './types/request-user.type';
 
 /**
  * @brief Auth가 필요하지 않을때 데코레이터
@@ -100,6 +101,6 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
 // Auth 데코레이터
 export const UserAuth = createParamDecorator((_: unknown, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
+  const request: RequestUser = ctx.switchToHttp().getRequest();
   return request.user;
 });

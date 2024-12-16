@@ -3,7 +3,7 @@ import { CustomLogger } from '@logger/custom-logger.service';
 import { Injectable } from '@nestjs/common';
 import { KakaoIdTokenType } from '../types/id-token.type';
 import { OIDCConfig } from '../types/oidc.type';
-import { UserProfile } from '../types/user-profile.type';
+import { SocialUserProfile } from '../types/user-profile.type';
 import { BaseOIDCProvider } from './base-oidc.provider';
 
 @Injectable()
@@ -20,13 +20,13 @@ export class KakaoOIDCProvider extends BaseOIDCProvider {
     super(config, logger);
   }
 
-  protected getUserProfile(decodedIdToken: KakaoIdTokenType): UserProfile {
+  protected getUserProfile(decodedIdToken: KakaoIdTokenType): SocialUserProfile {
     if (!decodedIdToken.email) {
       throw new Error('Email is required, 이메일이 인증되지 않은 카카오 계정입니다');
     }
 
     return {
-      id: decodedIdToken.sub,
+      sub: decodedIdToken.sub,
       email: decodedIdToken.email,
       nickname: decodedIdToken.nickname,
     };

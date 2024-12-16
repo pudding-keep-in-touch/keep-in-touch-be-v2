@@ -65,7 +65,7 @@ describe('GoogleOIDCProvider', () => {
       const profile = (provider as any).getUserProfile(token);
 
       expect(profile).toEqual({
-        id: '12345',
+        sub: '12345',
         email: 'test@gmail.com',
         nickname: 'Test User',
       });
@@ -117,7 +117,7 @@ describe('GoogleOIDCProvider', () => {
       const result = await provider.exchangeCodeForTokens('valid-code');
 
       expect(result).toEqual({
-        id: '12345',
+        sub: '12345',
         email: 'test@gmail.com',
         nickname: 'Test User',
       });

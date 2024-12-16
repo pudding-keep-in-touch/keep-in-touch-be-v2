@@ -9,7 +9,7 @@ import { BaseOIDCProvider } from './base-oidc.provider';
 class TestOIDCProvider extends BaseOIDCProvider {
   protected getUserProfile(decodedIdToken: IdTokenType) {
     return {
-      id: decodedIdToken.sub,
+      sub: decodedIdToken.sub,
       email: 'test@example.com',
       nickname: 'Test User',
     };
@@ -100,7 +100,7 @@ describe('BaseOIDCProvider', () => {
       const result = await provider.exchangeCodeForTokens('valid-code');
 
       expect(result).toBeDefined();
-      expect(result.id).toBe(mockValidToken.sub);
+      expect(result.sub).toBe(mockValidToken.sub);
 
       const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
       expect(fetchCall[0]).toBe(mockConfig.tokenEndpoint);

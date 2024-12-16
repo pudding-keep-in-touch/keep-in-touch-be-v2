@@ -6,7 +6,7 @@ import { UserRepository } from '@repositories/user.repository';
 import { getOrderUpperCase } from '@common/helpers/pagination-option.helper';
 import { PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
-import { UserProfile } from '@modules/auth/types/user-profile.type';
+import { SocialUserProfile } from '@modules/auth/types/user-profile.type';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
@@ -28,11 +28,11 @@ export class UsersService {
     private readonly messageRepository: MessageRepository,
   ) {}
 
-  async createOrGetGoogleUser(googleUser: UserProfile): Promise<UserCreationResult> {
+  async createOrGetGoogleUser(googleUser: SocialUserProfile): Promise<UserCreationResult> {
     return this.findOrCreateSocialUser(googleUser, LoginType.GOOGLE);
   }
 
-  async createOrGetKakaoUser(kakaoUser: UserProfile): Promise<UserCreationResult> {
+  async createOrGetKakaoUser(kakaoUser: SocialUserProfile): Promise<UserCreationResult> {
     return this.findOrCreateSocialUser(kakaoUser, LoginType.KAKAO);
   }
 
@@ -101,7 +101,10 @@ export class UsersService {
     return this.userRepository.findUserById(id);
   }
 
-  private async findOrCreateSocialUser(userProfile: UserProfile, loginType: LoginType): Promise<UserCreationResult> {
+  private async findOrCreateSocialUser(
+    userProfile: SocialUserProfile,
+    loginType: LoginType,
+  ): Promise<UserCreationResult> {
     const user = await this.userRepository.findUserByEmailWithLoginType(userProfile.email, loginType);
 
     if (user) {

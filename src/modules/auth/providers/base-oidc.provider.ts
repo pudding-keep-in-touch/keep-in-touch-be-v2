@@ -2,7 +2,7 @@ import { CustomLogger } from '@logger/custom-logger.service';
 import { Injectable } from '@nestjs/common';
 import { IdTokenType } from '../types/id-token.type';
 import { OIDCConfig } from '../types/oidc.type';
-import { UserProfile } from '../types/user-profile.type';
+import { SocialUserProfile } from '../types/user-profile.type';
 
 @Injectable()
 export abstract class BaseOIDCProvider {
@@ -37,7 +37,7 @@ export abstract class BaseOIDCProvider {
    * @param code 인증 서버에서 받은 code
    * @returns
    */
-  async exchangeCodeForTokens(code: string): Promise<UserProfile> {
+  async exchangeCodeForTokens(code: string): Promise<SocialUserProfile> {
     if (!this.config.clientId || !this.config.redirectUri) {
       throw new Error('Client configuration is incomplete');
     }
@@ -94,7 +94,7 @@ export abstract class BaseOIDCProvider {
   /**
    * idToken을 검증한다.
    *
-   * @param idToken
+   * @param idToken decoded id token
    */
   protected verifyIdToken(idToken: IdTokenType): void {
     try {
@@ -130,5 +130,5 @@ export abstract class BaseOIDCProvider {
     }
   }
 
-  protected abstract getUserProfile(decodedIdToken: IdTokenType): UserProfile;
+  protected abstract getUserProfile(decodedIdToken: IdTokenType): SocialUserProfile;
 }

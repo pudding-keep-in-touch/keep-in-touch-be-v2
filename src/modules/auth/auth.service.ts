@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { JwtConfigService } from '@configs/jwt/jwt-config.service';
 import { UsersService } from '../users/users.service';
+import { SocialUserProfile } from './types/user-profile.type';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,7 @@ export class AuthService {
     private readonly jwtConfigService: JwtConfigService,
   ) {}
 
-  async googleLogin(googleUser: any) {
+  async googleLogin(googleUser: SocialUserProfile) {
     const { userId, email } = await this.usersService.createOrGetGoogleUser(googleUser);
 
     const payload = { email: email, sub: userId };
@@ -25,7 +26,7 @@ export class AuthService {
     return { accessToken, userId };
   }
 
-  async kakaoLogin(kakaoUser: any) {
+  async kakaoLogin(kakaoUser: SocialUserProfile) {
     const { userId, email } = await this.usersService.createOrGetKakaoUser(kakaoUser);
 
     const payload = { email: email, sub: userId };

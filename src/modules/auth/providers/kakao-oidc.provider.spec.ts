@@ -64,7 +64,7 @@ describe('KakaoOIDCProvider', () => {
       const profile = (provider as any).getUserProfile(token);
 
       expect(profile).toEqual({
-        id: '12345',
+        sub: '12345',
         email: 'test@kakao.com',
         nickname: '테스트 유저',
       });
@@ -116,7 +116,7 @@ describe('KakaoOIDCProvider', () => {
       const result = await provider.exchangeCodeForTokens('valid-code');
 
       expect(result).toEqual({
-        id: '12345',
+        sub: '12345',
         email: 'test@kakao.com',
         nickname: '테스트 유저',
       });

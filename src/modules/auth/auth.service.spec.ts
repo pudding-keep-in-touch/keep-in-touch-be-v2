@@ -46,9 +46,9 @@ describe('AuthService', () => {
   describe('googleLogin', () => {
     it('access token과 user id를 리턴해야 한다.', async () => {
       const mockGoogleUser = {
+        sub: '11234',
         email: 'test@gmail.com',
-        firstName: 'Test',
-        lastName: 'User',
+        nickname: 'test',
       };
 
       const userInfo = {
