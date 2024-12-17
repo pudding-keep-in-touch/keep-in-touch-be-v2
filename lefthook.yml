@@ -1,0 +1,14 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: '*.{js,ts,json}'
+      run: echo "⌛️ Running Biome..." && pnpm biome check --write --no-errors-on-unmatched {staged_files} && git add {staged_files}
+    test:
+      run: echo "🧪 Running Tests..." && pnpm run test
+# test 추가되면 run test
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
