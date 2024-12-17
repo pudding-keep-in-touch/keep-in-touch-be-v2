@@ -1,13 +1,12 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { GoogleUser } from '@common/types/google-user.type';
-import { User } from '@entities/user.entity';
+import { LoginType, User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
 import { getOrderUpperCase } from '@common/helpers/pagination-option.helper';
 import { PaginationOption } from '@common/types/pagination-option.type';
 import { Message } from '@entities/message.entity';
-//import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
+import { SocialUserProfile } from '@modules/auth/types/user-profile.type';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import {
@@ -18,7 +17,8 @@ import {
 } from './dto/get-my-messages.dto';
 import { MyQuestionDto, ResponseGetMyQuestionsDto } from './dto/get-my-questions.dto';
 import { ResponseGetUserNicknameDto } from './dto/get-user-nickname.dto';
-import { LoginType } from './users.constants';
+
+type UserCreationResult = { userId: string; email: string };
 
 @Injectable()
 export class UsersService {
@@ -26,28 +26,14 @@ export class UsersService {
     private readonly userRepository: UserRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly messageRepository: MessageRepository,
-    //private readonly messageStatisticRepository: MessageStatisticRepository,
   ) {}
 
-  /**
-   * 구글 사용자 로그인 혹은 회원가입
-   *
-   * @param googleUser
-   * @returns
-   */
-  async createOrGetGoogleUser(googleUser: GoogleUser): Promise<{ userId: string; email: string }> {
-    const user = await this.getUserByEmail(googleUser.email);
+  async createOrGetGoogleUser(googleUser: SocialUserProfile): Promise<UserCreationResult> {
+    return this.findOrCreateSocialUser(googleUser, LoginType.GOOGLE);
+  }
 
-    if (user !== null) {
-      if (user.loginType !== LoginType.GOOGLE) {
-        throw new ConflictException('이미 다른 로그인 방식으로 가입된 이메일입니다.');
-      }
-      return { userId: user.userId, email: user.email };
-    }
-    const nickname = googleUser.displayName || this.generateNickname();
-
-    const userId = await this.userRepository.createUser(googleUser.email, nickname, LoginType.GOOGLE);
-    return { userId, email: googleUser.email };
+  async createOrGetKakaoUser(kakaoUser: SocialUserProfile): Promise<UserCreationResult> {
+    return this.findOrCreateSocialUser(kakaoUser, LoginType.KAKAO);
   }
 
   /**
@@ -106,16 +92,6 @@ export class UsersService {
   }
 
   /**
-   * email 기준으로 사용자 조회
-   *
-   * @param email (unique)
-   * @returns
-   */
-  async getUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findUserByEmail(email);
-  }
-
-  /**
    * id 기준으로 사용자 조회
    *
    * @param id
@@ -123,6 +99,25 @@ export class UsersService {
    */
   async getUserById(id: string): Promise<User | null> {
     return this.userRepository.findUserById(id);
+  }
+
+  private async findOrCreateSocialUser(
+    userProfile: SocialUserProfile,
+    loginType: LoginType,
+  ): Promise<UserCreationResult> {
+    const user = await this.userRepository.findUserByEmailWithLoginType(userProfile.email, loginType);
+
+    if (user) {
+      return { userId: user.userId, email: user.email };
+    }
+
+    const nickname = userProfile.nickname || this.generateNickname();
+    const userId = await this.userRepository.createUser({
+      email: userProfile.email,
+      nickname,
+      loginType,
+    });
+    return { userId, email: userProfile.email };
   }
 
   private generateNickname(): string {

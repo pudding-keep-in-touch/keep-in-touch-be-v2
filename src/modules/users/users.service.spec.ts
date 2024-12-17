@@ -1,17 +1,16 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { GoogleUser } from '@common/types/google-user.type';
-import { User } from '@entities/user.entity';
+import { LoginType, User } from '@entities/user.entity';
 import { UserRepository } from '@repositories/user.repository';
 
 import { MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { SocialUserProfile } from '@modules/auth/types/user-profile.type';
 import { MessageStatisticRepository } from '@repositories/message-statistic.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { QuestionRepository } from '@repositories/question.repository';
 import { GetMyMessagesQuery, GetMyReceivedMessagedDto, GetMySentMessagesDto } from './dto/get-my-messages.dto';
-import { LoginType } from './users.constants';
 import { UsersService } from './users.service';
 
 export const createMockMessage = (overrides = {}) => ({
@@ -49,6 +48,7 @@ describe('UsersService', () => {
             insert: jest.fn(),
             findUserById: jest.fn(),
             createUser: jest.fn(),
+            findUserByEmailWithLoginType: jest.fn(),
           },
         },
         {
@@ -83,12 +83,13 @@ describe('UsersService', () => {
 
   describe('createOrGetGoogleUser', () => {
     it('새 구글 유저 생성', async () => {
-      const googleUser: GoogleUser = {
+      const googleUser: SocialUserProfile = {
+        sub: '1234',
         email: 'test@example.com',
-        displayName: 'John Doe',
+        nickname: 'John Doe',
       };
 
-      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findUserByEmailWithLoginType').mockResolvedValue(null);
       jest
         .spyOn(userRepository, 'insert')
         .mockResolvedValue({ identifiers: [{ id: '1' }], generatedMaps: [], raw: [] });
@@ -96,27 +97,59 @@ describe('UsersService', () => {
 
       const result = await service.createOrGetGoogleUser(googleUser);
 
-      expect(userRepository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(userRepository.createUser).toHaveBeenCalledWith('test@example.com', 'John Doe', LoginType.GOOGLE);
+      expect(userRepository.findUserByEmailWithLoginType).toHaveBeenCalledWith('test@example.com', LoginType.GOOGLE);
+      expect(userRepository.createUser).toHaveBeenCalledWith({
+        email: googleUser.email,
+        nickname: googleUser.nickname,
+        loginType: LoginType.GOOGLE,
+      });
       expect(result).toEqual({ userId: '1', email: 'test@example.com' });
     });
+  });
 
-    it('다른 로그인 방식으로 가입된 사용자면 Conflict exception', async () => {
-      const googleUser: GoogleUser = {
+  describe('createOrGetKakaoUser', () => {
+    it('새 카카오 유저 생성', async () => {
+      const kakaoUser: SocialUserProfile = {
+        sub: '1234',
         email: 'test@example.com',
-        displayName: 'John Doe',
+        nickname: 'John Doe',
       };
 
-      const existingUser: User = {
+      jest.spyOn(userRepository, 'findUserByEmailWithLoginType').mockResolvedValue(null);
+      jest
+        .spyOn(userRepository, 'insert')
+        .mockResolvedValue({ identifiers: [{ id: '1' }], generatedMaps: [], raw: [] });
+
+      jest.spyOn(userRepository, 'createUser').mockResolvedValue('1');
+
+      const result = await service.createOrGetKakaoUser(kakaoUser);
+
+      expect(userRepository.findUserByEmailWithLoginType).toHaveBeenCalledWith('test@example.com', LoginType.KAKAO);
+    });
+
+    it('이미 존재하는 카카오 유저 조회', async () => {
+      const kakaoUser: SocialUserProfile = {
+        sub: '1234',
+        email: 'test@example.com',
+        nickname: 'John Doe',
+      };
+
+      jest.spyOn(userRepository, 'findUserByEmailWithLoginType').mockResolvedValue({
         userId: '1',
         email: 'test@example.com',
         nickname: 'John Doe',
         loginType: LoginType.KAKAO,
-      } as User;
+      } as any);
 
-      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(existingUser);
+      const result = await service.createOrGetKakaoUser(kakaoUser);
+      expect(result).toEqual({ userId: '1', email: 'test@example.com' });
+      expect(userRepository.createUser).not.toHaveBeenCalled();
 
-      await expect(service.createOrGetGoogleUser(googleUser)).rejects.toThrow(ConflictException);
+      /**
+       * 이미 존재하는 유저 처리
+       * 이메일이 없는 카카오 계정 처리
+       * 닉네임 중복 처리
+       */
     });
   });
 
@@ -144,34 +177,6 @@ describe('UsersService', () => {
       jest.spyOn(userRepository, 'findUserById').mockResolvedValue(null);
 
       await expect(service.getNicknameById(userId)).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('getUserByEmail', () => {
-    it('email로 유저 조회', async () => {
-      const email = 'test@example.com';
-      const user: User = {
-        userId: '1',
-        email: 'test@example.com',
-        nickname: 'John Doe',
-        loginType: LoginType.GOOGLE,
-      } as User;
-
-      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(user);
-
-      const result = await service.getUserByEmail(email);
-
-      expect(result).toEqual(user);
-      expect(userRepository.findUserByEmail).toHaveBeenCalledWith(email);
-    });
-
-    it('유저가 없으면 null 반환', async () => {
-      const email = 'test@example.com';
-
-      jest.spyOn(userRepository, 'findUserByEmail').mockResolvedValue(null);
-      const result = await service.getUserByEmail(email);
-
-      expect(result).toBeNull();
     });
   });
 
