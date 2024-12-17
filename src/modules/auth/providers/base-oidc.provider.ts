@@ -83,6 +83,7 @@ export abstract class BaseOIDCProvider {
       const decodedToken = this.parseJwt(idToken);
       this.verifyIdToken(decodedToken);
 
+      // request.socialUser에 저장
       return this.getUserProfile(decodedToken);
     } catch (error) {
       this.logger.error(`Failed to exchange code for tokens: ${error.message}`, error.stack);

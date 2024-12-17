@@ -59,7 +59,7 @@ export class AuthController {
   async kakaoLogin() {}
 
   @GenerateSwaggerApiDoc({
-    summary: '카카오 로그인',
+    summary: '카카오 로그인 콜백',
     description: 'Swagger에서 테스트 할 수 없습니다. ${APP_URL}/v2/auth/kakao/callback 으로 테스트 해주세요.',
   })
   @NotUserAuth()

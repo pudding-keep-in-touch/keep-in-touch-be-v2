@@ -37,8 +37,9 @@ export class OIDCGuard implements CanActivate {
         throw new UnauthorizedException('No authorization code found');
       }
 
-      const userProfile = await provider.exchangeCodeForTokens(code);
-      request.user = userProfile;
+      const socialUser = await provider.exchangeCodeForTokens(code);
+      request.socialUser = socialUser;
+
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'OIDCGuard authentication failed');
