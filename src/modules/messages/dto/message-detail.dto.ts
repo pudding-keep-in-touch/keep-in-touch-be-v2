@@ -1,6 +1,7 @@
 import { Message } from '@entities/message.entity';
+import { toReactionTypeString } from '@modules/reactions/helpers/reactions.helper';
 import { ApiProperty } from '@nestjs/swagger';
-import { getReactionTypeKorean, toMessageStatusString } from '../helpers/message-reaction.helper';
+import { toMessageStatusString } from '../helpers/messages.helper';
 import { MessageStatusString, MessageType } from '../types/messages.type';
 import { BaseMessageDto } from './base-message.dto';
 
@@ -65,7 +66,7 @@ abstract class MessageDetailDto extends BaseMessageDto {
       reactions: reactions.map((reaction) => ({
         reactionId: reaction.reactionId,
         content: reaction.reactionTemplate.content,
-        type: getReactionTypeKorean(reaction.reactionTemplate.type),
+        type: toReactionTypeString(reaction.reactionTemplate.type),
         emoji: reaction.reactionTemplate.emoji,
       })),
       createdAt,

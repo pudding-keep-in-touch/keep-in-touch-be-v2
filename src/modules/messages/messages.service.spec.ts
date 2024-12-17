@@ -1,5 +1,5 @@
 import { Emotion } from '@entities/emotion.entity';
-import { Message, MessageStatus } from '@entities/message.entity';
+import { MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
 import { User } from '@entities/user.entity';
 import {

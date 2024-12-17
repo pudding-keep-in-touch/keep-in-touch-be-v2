@@ -8,7 +8,7 @@ import {
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
 import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
-import { toMessageStatusEnum } from './helpers/message-reaction.helper';
+import { toMessageStatusEnum } from './helpers/messages.helper';
 import { MessageBaseData, MessageDetailParam, UpdateMessageStatusParam } from './types/messages.type';
 
 @Injectable()

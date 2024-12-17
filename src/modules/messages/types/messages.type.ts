@@ -24,8 +24,6 @@ export type MessageOrder = 'desc' | 'asc';
 
 export type MessageStatusString = (typeof MESSAGE_STATUS)[number];
 
-export type ReactionTypeKorean = '감사' | '사과' | '응원' | '화해';
-
 export type MessageDetailParam = {
   messageId: string;
   userId: string;
