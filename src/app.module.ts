@@ -10,6 +10,7 @@ import { QuestionsModule } from '@modules/questions/questions.module';
 import { UsersModule } from '@modules/users/users.module';
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { ReactionsModule } from '@modules/reactions/reactions.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -29,6 +30,7 @@ import { LoggerModule } from './logger/logger.module';
     UsersModule,
     QuestionsModule,
     MessagesModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
   providers: [

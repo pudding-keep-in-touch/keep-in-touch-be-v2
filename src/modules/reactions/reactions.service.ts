@@ -7,6 +7,12 @@ import { toReactionTypeString } from './helpers/reactions.helper';
 export class ReactionsService {
   constructor(private readonly reactionTemplateRepository: ReactionTemplateRepository) {}
 
+  /**
+   * reaction template 전체를 조회합니다.
+   * sorting 없음.
+   *
+   * @returns
+   */
   async getReactionTemplates(): Promise<GetReactionTemplatesDto[]> {
     const templates = this.reactionTemplateRepository.getReactionTemplates();
     return (await templates).map((template) => ({

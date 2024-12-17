@@ -1,4 +1,5 @@
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
+import { InternalServerErrorException } from '@nestjs/common';
 import { ReactionTypeString } from '../types/reactions.type';
 
 /**
@@ -13,5 +14,14 @@ const REACTION_TYPE_MAPPING = {
 } as const;
 
 export function toReactionTypeString(type: ReactionTemplateType): ReactionTypeString {
-  return REACTION_TYPE_MAPPING[type];
+  const reactionTypeString = REACTION_TYPE_MAPPING[type];
+
+  // DB에서 온 값이 enum에 정의되지 않은 값인 경우 (ex: 0)
+  if (!reactionTypeString) {
+    throw new InternalServerErrorException(
+      `Invalid reaction type in database: ${type}. Expected one of: ${Object.values(ReactionTemplateType).join(', ')}`,
+    );
+  }
+
+  return reactionTypeString;
 }
