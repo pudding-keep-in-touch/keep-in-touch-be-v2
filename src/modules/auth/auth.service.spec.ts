@@ -1,6 +1,6 @@
 import { UsersService } from '@modules/users/users.service';
 
-import { ConfigService } from '@nestjs/config';
+import { JwtConfigService } from '@configs/jwt/jwt-config.service';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
@@ -9,7 +9,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let usersService: UsersService;
   let jwtService: JwtService;
-  let configService: ConfigService;
+  let jwtConfigService: JwtConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,13 +28,10 @@ describe('AuthService', () => {
           },
         },
         {
-          provide: ConfigService,
+          provide: JwtConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
-              if (key === 'JWT_SECRET') return 'testSecret';
-              if (key === 'JWT_EXPIRES_IN') return '1h';
-              return '';
-            }),
+            secret: 'testSecret',
+            expiresIn: '1h',
           },
         },
       ],
@@ -43,15 +40,15 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
     jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
+    jwtConfigService = module.get<JwtConfigService>(JwtConfigService);
   });
 
   describe('googleLogin', () => {
     it('access token과 user id를 리턴해야 한다.', async () => {
       const mockGoogleUser = {
+        sub: '11234',
         email: 'test@gmail.com',
-        firstName: 'Test',
-        lastName: 'User',
+        nickname: 'test',
       };
 
       const userInfo = {
