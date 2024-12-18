@@ -29,8 +29,9 @@ export class UsersController {
 
   @Get(':userId/messages')
   @GenerateSwaggerApiDoc({
-    summary: '유저가 작성한 쪽지 조회',
-    description: '유저 id 기준 작성한 쪽지 조회, 로그인한 유저 id와 일치하지 않으면 조회 불가. ',
+    summary: '유저가 보낸/받은 쪽지 조회',
+    description:
+      '유저 id 기준 보내거나 받은 쪽지 조회, 로그인한 유저 id와 일치하지 않으면 조회 불가. type query parameter로 보낸 쪽지(sent)와 받은 쪽지(received) 구분하여 조회 가능.',
     responseType: GetMySentMessagesDto,
   })
   @UseGuards(IsOwnerGuard)

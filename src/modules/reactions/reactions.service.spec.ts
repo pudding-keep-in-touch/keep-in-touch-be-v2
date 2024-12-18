@@ -1,10 +1,11 @@
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
 import { Test, TestingModule } from '@nestjs/testing';
+import { MessageRepository } from '@repositories/message.repository';
 import { ReactionTemplateRepository } from '@repositories/reaction-template.repository';
+import { ReactionRepository } from '@repositories/reaction.repository';
 import { ResponseReactionTemplates } from './dto/get-reaction-templates.dto';
 import { toReactionTypeString } from './helpers/reactions.helper';
 import { ReactionsService } from './reactions.service';
-import { type ReactionTypeString } from './types/reactions.type';
 
 describe('ReactionsService', () => {
   let reactionsService: ReactionsService;
@@ -18,6 +19,19 @@ describe('ReactionsService', () => {
           provide: ReactionTemplateRepository,
           useValue: {
             getReactionTemplates: jest.fn(),
+          },
+        },
+        {
+          provide: MessageRepository,
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: ReactionRepository,
+          useValue: {
+            create: jest.fn(),
+            insert: jest.fn(),
           },
         },
       ],

@@ -26,7 +26,7 @@ export class ReactionsService {
    * reaction template 전체를 조회합니다.
    * sorting 없음.
    *
-   * @returns
+   * @returns 조회한 템플릿 정보 배열
    */
   async getReactionTemplates(): Promise<ResponseReactionTemplates[]> {
     const templates = await this.reactionTemplateRepository.getReactionTemplates();
