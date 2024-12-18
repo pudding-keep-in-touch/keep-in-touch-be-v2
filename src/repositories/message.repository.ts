@@ -4,6 +4,7 @@ import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.de
 import { PaginationOption } from '@common/types/pagination-option.type';
 //import { MessageStatistic } from '@entities/message-statistic.entity';
 import { Message } from '@entities/message.entity';
+import { ReactionInfo } from '@entities/reaction-info.entity';
 import {
   CreateEmotionMessageParam,
   CreateQuestionMessageParam,
@@ -40,7 +41,6 @@ export class MessageRepository extends Repository<Message> {
    */
   async findMessageDetailById(messageId: string, userId: string): Promise<Message | null> {
     return this.manager.transaction(async (manager) => {
-      // Repository 대신 EntityManager 사용
       const message = await manager.findOne(Message, {
         where: { messageId },
         relations: ['receiver', 'question', 'emotion', 'reactions', 'reactions.reactionTemplate'],
@@ -50,17 +50,16 @@ export class MessageRepository extends Repository<Message> {
         return null;
       }
       // 읽음 처리
-      // FIXME: 이걸 insert into..로...? 변경
       if (message.receiverId === userId && message.readAt === null) {
         await manager.update(Message, { messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
-        //await manager.update(
-        //  MessageStatistic,
-        //  { userId: userId },
-        //  {
-        //    unreadMessageCount: () => 'unreadMessageCount - 1',
-        //  },
-        //);
       }
+      if (message.senderId === userId) {
+        const reactionInfo = await manager.findOne(ReactionInfo, { where: { messageId } });
+        if (reactionInfo && reactionInfo.readAt === null) {
+          await manager.update(ReactionInfo, { messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
+        }
+      }
+
       return message;
     });
   }
