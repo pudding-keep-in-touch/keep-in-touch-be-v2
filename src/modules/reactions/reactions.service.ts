@@ -14,8 +14,8 @@ export class ReactionsService {
    * @returns
    */
   async getReactionTemplates(): Promise<ResponseReactionTemplates[]> {
-    const templates = this.reactionTemplateRepository.getReactionTemplates();
-    return (await templates).map((template) => ({
+    const templates = await this.reactionTemplateRepository.getReactionTemplates();
+    return templates.map((template) => ({
       reactionTemplateId: String(template.reactionTemplateId),
       emoji: template.emoji,
       content: template.content,
