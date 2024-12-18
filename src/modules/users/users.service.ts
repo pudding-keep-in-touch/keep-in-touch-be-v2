@@ -128,12 +128,6 @@ export class UsersService {
   }
 
   private async getSentMetaData(userId: string, messages: Message[], hasNextPage: boolean) {
-    //// TODO: reaction info get
-    //const { sentMessageCount } = await this.messageStatisticRepository.findOneOrFail({
-    //  select: ['sentMessageCount'],
-    //  where: { userId: userId },
-    //});
-
     const sentMessageCount = await this.messageRepository.countBy({ senderId: userId });
     const nextCursor = this.getNextCursor(messages, hasNextPage);
     return { sentMessageCount, nextCursor };
@@ -148,16 +142,19 @@ export class UsersService {
     const receivedMessageCount = allMessage.length;
     const unreadMessageCount = allMessage.filter((message) => message.readAt === null).length;
 
-    //const { receivedMessageCount, unreadMessageCount } = await this.messageStatisticRepository.findOneOrFail({
-    //  select: ['receivedMessageCount', 'unreadMessageCount'],
-    //  where: { userId: userId },
-    //});
     const nextCursor = this.getNextCursor(messages, hasNextPage);
     return { receivedMessageCount, unreadMessageCount, nextCursor };
   }
 
   private getNextCursor(messages: Message[], hasNextPage: boolean) {
+    if (!hasNextPage || messages.length <= 1) {
+      return null;
+    }
+
     // 다음에 가져와야 하는 날짜 설정: 마지막 메시지의 생성 시간 + 1ms
-    return hasNextPage && messages.length > 1 ? new Date(messages[messages.length - 1].createdAt.getTime() + 1) : null;
+    const lastMessage = messages[messages.length - 1];
+    // NOTE: reactionInfo.createdAt이 있는 경우 reactionInfo.createdAt을 기준으로, 없는 경우 message.createdAt을 기준으로
+    const lastMessageDate = lastMessage.reactionInfo?.createdAt || lastMessage.createdAt;
+    return new Date(lastMessageDate.getTime() + 1);
   }
 }

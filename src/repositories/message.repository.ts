@@ -65,37 +65,82 @@ export class MessageRepository extends Repository<Message> {
   }
 
   /**
-   *
+   * 유저가 보낸/받은 메시지를 조회합니다.
    *
    * @param userId 조회할 유저의 id (senderId 또는 receiverId)
-   * @param options cursor, limit, order
    * @param type sent or received
-   * @returns
+   * @param options cursor, limit, order
+   * @returns Promise<Message[]>
    */
   async findMessagesByUserId(userId: string, type: MessageType, options: PaginationOption): Promise<Message[]> {
-    const { cursor, limit, order } = options;
+    return type === 'received' ? this.findReceivedMessages(userId, options) : this.findSentMessages(userId, options);
+  }
 
-    /**
-     * type에 따라 receiverId 또는 senderId로 조회합니다.
-     * cursor가 주어진 경우 cursor 이전의 데이터를 조회합니다.
-     * limit만큼 조회하고, order에 따라 정렬합니다.
-     */
-    const query = this.createQueryBuilder('message')
+  /**
+   * 받은 메시지를 조회합니다.
+   * 메세지 생성일자를 기준으로 정렬합니다.
+   *
+   * @param userId 조회할 유저의 id
+   * @param param1 cursor, limit, order
+   * @returns
+   */
+  private async findReceivedMessages(userId: string, { cursor, limit, order }: PaginationOption): Promise<Message[]> {
+    return this.createQueryBuilder('message')
       .innerJoin('message.receiver', 'receiver')
       .addSelect(['receiver.nickname', 'receiver.userId'])
       .where(cursor ? 'message.createdAt < :cursor' : '1=1', { cursor })
+      .andWhere('message.receiverId = :userId', { userId })
       .orderBy('message.createdAt', order)
-      .addOrderBy('message.messageId', order) // timestamp 같을 때를 위한 보조 정렬 추가
-      .take(limit + 1); // limit + 1을 해서 다음 페이지가 있는지 확인합니다.
+      .addOrderBy('message.messageId', order)
+      .take(limit + 1)
+      .getMany();
+  }
 
-    if (type === 'sent') {
-      query.leftJoin('message.reactionInfo', 'reactionInfo');
-      query.addSelect(['reactionInfo.readAt', 'reactionInfo.createdAt']);
-      query.andWhere('message.senderId = :userId', { userId });
-    } else {
-      query.andWhere('message.receiverId = :userId', { userId });
-    }
-    return query.getMany();
+  /**
+   * 보낸 메시지를 조회합니다.
+   * 반응이 있는 메세지는 반응의 생성일자를 기준으로 정렬하고, 반응이 없는 메세지는 메세지 생성일자를 기준으로 정렬합니다.
+   *
+   * @param userId 조회할 유저의 id
+   * @param param1 cursor, limit, order
+   * @returns
+   */
+  private async findSentMessages(userId: string, { cursor, limit, order }: PaginationOption): Promise<Message[]> {
+    const baseQuery = this.createQueryBuilder('message')
+      .innerJoin('message.receiver', 'receiver')
+      .addSelect(['receiver.nickname', 'receiver.userId'])
+      .addSelect(['reactionInfo.createdAt', 'reactionInfo.readAt'])
+      .where('message.senderId = :userId', { userId })
+      .take(limit + 1);
+
+    // 1. reaction이 있는 메시지 조회
+    const withReactions = await baseQuery
+      .clone()
+      .innerJoin('message.reactionInfo', 'reactionInfo')
+      .andWhere(cursor ? 'reactionInfo.createdAt < :cursor' : '1=1', { cursor })
+      .orderBy('reactionInfo.createdAt', order)
+      .addOrderBy('message.messageId', order)
+      .getMany();
+
+    // 2. reaction이 없는 메시지 조회
+    const withoutReactions = await baseQuery
+      .clone()
+      .leftJoin('message.reactionInfo', 'reactionInfo')
+      .andWhere('reactionInfo.messageId IS NULL')
+      .andWhere(cursor ? 'message.createdAt < :cursor' : '1=1', { cursor })
+      .orderBy('message.createdAt', order)
+      .addOrderBy('message.messageId', order)
+      .getMany();
+
+    // 3. 결과 합치기
+    const allSentMessages = [...withReactions, ...withoutReactions];
+    return allSentMessages
+      .sort((a, b) => {
+        const timeA = a.reactionInfo?.createdAt ?? a.createdAt;
+        const timeB = b.reactionInfo?.createdAt ?? b.createdAt;
+
+        return timeB.getTime() - timeA.getTime();
+      })
+      .slice(0, limit + 1);
   }
 
   /**
@@ -115,7 +160,7 @@ export class MessageRepository extends Repository<Message> {
       // NOTE: transaction 정말 필요한지? 통계 연산이 실패했다고 쪽지 생성이 실패해야 하는가?
       // NOTE : +1, -1 등의 연산으로 update하는 것보다 insert 하고 나중에 계산하는 방식이 좀 더 안전하다고 판단되어 create 시 통계 연산 삭제.
       // sent, received total count가 필요한 경우는 COUNT를 사용하고 있음.
-      // 나중에 데이터가 쌓이면 EXPLAIN ANALYZE 등을 이용하여 실제 시간을 체크해 볼 필요가 있음.s
+      // 나중에 데이터가 쌓이면 EXPLAIN ANALYZE 등을 이용하여 실제 시간을 체크해 볼 필요가 있음.
 
       //await Promise.all([
       //  manager
