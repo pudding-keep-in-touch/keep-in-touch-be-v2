@@ -6,75 +6,72 @@ import { CreateMessageDto } from '@modules/messages/dto/create-message.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
-import { createTestingApp } from './helpers/create-testing-app.helper';
+import { TestFixtureManager } from './helpers/fixtures';
+import { TestSetup } from './test-setup';
 
 describe('Messages API test', () => {
+  let testSetup: TestSetup;
+  let testData: Awaited<ReturnType<TestFixtureManager['createBasicTestData']>>;
   let app: INestApplication;
   let dataSource: DataSource;
-  const loginUserId = '1'; // 테스트용 유저 ID
-  const targetUserId = '2'; // 테스트용 유저 ID
-  let targetQuestionIds: string[];
+  let targetUserId: string;
+  let loginUserId;
+
   let loginToTargetMessageId: string;
   let targetToLoginMessageId: string;
 
   beforeAll(async () => {
-    const testApp = await createTestingApp();
-    app = testApp.app;
-    dataSource = testApp.dataSource;
-    await app.init();
+    testSetup = await new TestSetup().init();
+    app = testSetup.app;
+    dataSource = testSetup.dataSource;
+  });
 
-    const emotionRepository = dataSource.getRepository(Emotion);
-    const emotions = await emotionRepository.find();
-    if (emotions.length === 0) {
-      await emotionRepository.insert([
-        { emotionId: '1', name: '응원과 감사', emoji: '🌟' },
-        { emotionId: '2', name: '솔직한 대화', emoji: '🤝' },
-      ]);
-    }
+  beforeEach(async () => {
+    console.log("++++++++++++++++++++++++++I'm in beforeEach++++++++++++++++++++++++++");
 
-    const questionRepository = dataSource.getRepository(Question);
-    const questions = await questionRepository.find({ where: { userId: targetUserId } });
-    targetQuestionIds = questions.map((item) => item.questionId);
-    if (questions.length === 0) {
-      const result = await questionRepository.insert([
-        { userId: targetUserId, content: '질문1', isHidden: false },
-        { userId: targetUserId, content: '질문2', isHidden: false },
-      ]);
-      targetQuestionIds = result.identifiers.map((item) => item.questionId);
-    }
+    await testSetup.fixtures.cleanDatabase();
+    testData = await testSetup.fixtures.createBasicTestData();
 
-    const messageRepository = dataSource.getRepository(Message);
-
-    // NOTE: test용 메세지 두 개 (emotion, question) login -> target
-    const emotionMessage = await messageRepository.save({
-      senderId: loginUserId,
-      receiverId: targetUserId,
-      content: '감정 메시지 테스트',
-      emotionId: '1',
+    testSetup.setUser({
+      userId: testData.users.sender.userId,
+      email: testData.users.sender.email,
+      nickname: testData.users.sender.nickname,
     });
-    loginToTargetMessageId = emotionMessage.messageId;
 
-    // target -> login
-    const questionMessage = await messageRepository.save({
-      senderId: targetUserId,
-      receiverId: loginUserId,
-      content: '질문 메시지 테스트',
-      questionId: targetQuestionIds[0],
+    testSetup.setUser({
+      userId: testData.users.sender.userId,
+      email: testData.users.sender.email,
+      nickname: testData.users.sender.nickname,
     });
-    targetToLoginMessageId = questionMessage.messageId;
+
+    //const request = {
+    //  user: {
+    //    userId: testData.users.sender.userId,
+    //    email: testData.users.sender.email,
+    //  },
+    //};
+
+    //testSetup.app.use((req: any, _: any, next: any) => {
+    //  req.user = request.user;
+    //  next();
+    //});
+
+    targetUserId = testData.users.receiver.userId;
+    loginUserId = testData.users.sender.userId;
+    loginToTargetMessageId = testData.messages[0].messageId;
+    targetToLoginMessageId = testData.messages[1].messageId;
   });
 
   afterAll(async () => {
-    await dataSource.destroy(); // 데이터베이스 연결 종료
-    await app.close(); // 애플리케이션 종료
+    await testSetup.cleanup();
   });
 
   describe('POST /messages', () => {
     it('question 에 쪽지 보내기', () => {
       const createMessageDto: CreateMessageDto = {
-        receiverId: targetUserId,
+        receiverId: testData.users.receiver.userId,
         content: '테스트 메시지입니다.',
-        questionId: targetQuestionIds[0],
+        questionId: testData.questions[0].questionId,
       };
 
       return request(app.getHttpServer())
@@ -141,7 +138,7 @@ describe('Messages API test', () => {
         receiverId: targetUserId,
         content: '테스트 메시지입니다.',
         emotionId: '1',
-        questionId: targetQuestionIds[0],
+        questionId: testData.questions[0].questionId,
       };
 
       return request(app.getHttpServer()).post('/messages').send(createMessageDto).expect(HttpStatus.BAD_REQUEST);
@@ -188,7 +185,7 @@ describe('Messages API test', () => {
   describe('GET /messages/:messageId', () => {
     it('보낸 메시지 상세 조회 성공', () => {
       return request(app.getHttpServer())
-        .get(`/messages/${loginToTargetMessageId}`)
+        .get(`/messages/${testData.messages[0].messageId}`)
         .expect(HttpStatus.OK)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
@@ -204,7 +201,7 @@ describe('Messages API test', () => {
 
     it('받은 메시지 상세 조회 성공', () => {
       return request(app.getHttpServer())
-        .get(`/messages/${targetToLoginMessageId}`)
+        .get(`/messages/${testData.messages[1].messageId}`)
         .expect(HttpStatus.OK)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
