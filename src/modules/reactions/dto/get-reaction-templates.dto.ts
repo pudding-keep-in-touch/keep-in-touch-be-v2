@@ -3,8 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 // omit reactions of ReactionTemplate entity
 export class GetReactionTemplatesDto {
   @ApiProperty({
-    description: 'reaction template id',
-    example: 1,
+    description: '반응 템플릿 아이디',
+    example: '1',
   })
   reactionTemplateId: string;
 
@@ -16,7 +16,7 @@ export class GetReactionTemplatesDto {
 
   @ApiProperty({
     description: 'content',
-    example: '감사',
+    example: '고마워',
   })
   content: string;
 

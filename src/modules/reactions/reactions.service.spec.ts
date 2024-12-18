@@ -31,13 +31,13 @@ describe('ReactionsService', () => {
     it('type이 string으로 변환된 반응 템플릿 리턴', async () => {
       const mockTemplates = [
         {
-          reactionTemplateId: 1,
+          reactionTemplateId: '1',
           emoji: '😀',
           content: '',
           type: ReactionTemplateType.APOLOGY,
         },
         {
-          reactionTemplateId: 2,
+          reactionTemplateId: '2',
           emoji: '😢',
           content: 'Sad',
           type: ReactionTemplateType.RECONCILIATION,
