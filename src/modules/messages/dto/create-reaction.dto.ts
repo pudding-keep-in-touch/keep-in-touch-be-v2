@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMaxSize, ArrayMinSize, IsArray } from 'class-validator';
+import { IsArray } from 'class-validator';
+import { IsValidTemplateIds } from '../decorators/is-valid-template-id.decorator';
 
 export class CreateReactionDto {
   @ApiProperty({
@@ -7,9 +8,7 @@ export class CreateReactionDto {
     example: ['1', '2'],
   })
   @IsArray()
-  @ArrayMinSize(1, { message: '최소 1개 이상의 template ID가 필요합니다' })
-  @ArrayMaxSize(5, { message: '최대 5개까지의 template ID만 허용됩니다' })
-  // TODO: 중복검사, 숫자형태 검사.
+  @IsValidTemplateIds()
   templateIds: string[];
 }
 
