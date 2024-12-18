@@ -247,7 +247,7 @@ describe('UsersService', () => {
       const query: GetMyMessagesQuery = {
         type: 'sent',
         limit: 10,
-        order: 'asc',
+        order: 'desc',
       };
       const messages = [
         createMockMessage({
@@ -273,7 +273,7 @@ describe('UsersService', () => {
 
       expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'sent', {
         limit: 10,
-        order: 'ASC',
+        order: 'DESC',
       });
 
       expect(result).toEqual(
@@ -289,7 +289,7 @@ describe('UsersService', () => {
       const query: GetMyMessagesQuery = {
         type: 'received',
         limit: 10,
-        order: 'asc',
+        order: 'desc',
       };
       const messages = [
         createMockMessage({ messageId: '1' }),
@@ -311,7 +311,7 @@ describe('UsersService', () => {
 
       expect(messageRepository.findMessagesByUserId).toHaveBeenCalledWith(userId, 'received', {
         limit: 10,
-        order: 'ASC',
+        order: 'DESC',
       });
 
       expect(result).toEqual(
