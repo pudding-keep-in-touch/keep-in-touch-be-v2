@@ -1,5 +1,5 @@
 import { Message } from '@entities/message.entity';
-import { toMessageStatusString } from '@modules/messages/helpers/message-reaction.helper';
+import { toMessageStatusString } from '@modules/messages/helpers/messages.helper';
 import { MessageOrder, MessageStatusString, MessageType } from '@modules/messages/types/messages.type';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';

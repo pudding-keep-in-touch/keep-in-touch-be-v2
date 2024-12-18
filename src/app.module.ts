@@ -11,6 +11,7 @@ import { UsersModule } from '@modules/users/users.module';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { PostgresConfigService } from '@configs/postgres/postgres-config.service';
 import { RootConfigModule } from '@configs/root-config.module';
+import { ReactionsModule } from '@modules/reactions/reactions.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './logger/logger.module';
@@ -28,6 +29,7 @@ import { LoggerModule } from './logger/logger.module';
     UsersModule,
     QuestionsModule,
     MessagesModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
   providers: [
