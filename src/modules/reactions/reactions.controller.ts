@@ -1,7 +1,7 @@
 import { GenerateSwaggerApiDoc } from '@common/common.decorator';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { GetReactionTemplatesDto } from './dto/get-reaction-templates.dto';
+import { ResponseReactionTemplates } from './dto/get-reaction-templates.dto';
 import { ReactionsService } from './reactions.service';
 
 @ApiTags('reactions')
@@ -12,7 +12,7 @@ export class ReactionsController {
   @GenerateSwaggerApiDoc({
     summary: '반응 템플릿 조회',
     description: '반응 템플릿 조회',
-    responseType: [GetReactionTemplatesDto],
+    responseType: [ResponseReactionTemplates],
   })
   @Get('templates')
   async getReactionTemplates() {

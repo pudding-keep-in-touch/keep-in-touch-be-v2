@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ReactionTemplateRepository } from '@repositories/reaction-template.repository';
-import { GetReactionTemplatesDto } from './dto/get-reaction-templates.dto';
+import { ResponseReactionTemplates } from './dto/get-reaction-templates.dto';
 import { toReactionTypeString } from './helpers/reactions.helper';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ReactionsService {
    *
    * @returns
    */
-  async getReactionTemplates(): Promise<GetReactionTemplatesDto[]> {
+  async getReactionTemplates(): Promise<ResponseReactionTemplates[]> {
     const templates = this.reactionTemplateRepository.getReactionTemplates();
     return (await templates).map((template) => ({
       reactionTemplateId: String(template.reactionTemplateId),

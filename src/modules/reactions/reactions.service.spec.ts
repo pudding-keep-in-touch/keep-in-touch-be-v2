@@ -1,7 +1,7 @@
 import { ReactionTemplateType } from '@entities/reaction-template.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReactionTemplateRepository } from '@repositories/reaction-template.repository';
-import { GetReactionTemplatesDto } from './dto/get-reaction-templates.dto';
+import { ResponseReactionTemplates } from './dto/get-reaction-templates.dto';
 import { toReactionTypeString } from './helpers/reactions.helper';
 import { ReactionsService } from './reactions.service';
 import { type ReactionTypeString } from './types/reactions.type';
@@ -48,7 +48,7 @@ describe('ReactionsService', () => {
       jest.spyOn(reactionTemplateRepository, 'getReactionTemplates').mockResolvedValue(mockTemplates);
 
       // Expected DTO output
-      const expectedOutput: GetReactionTemplatesDto[] = mockTemplates.map((template: any) => ({
+      const expectedOutput: ResponseReactionTemplates[] = mockTemplates.map((template: any) => ({
         reactionTemplateId: template.reactionTemplateId,
         emoji: template.emoji,
         content: template.content,
