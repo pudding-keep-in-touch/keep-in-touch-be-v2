@@ -11,6 +11,7 @@ export class ReactionInfo {
     () => Message,
     (message) => message.reactionInfo,
   )
+  @JoinColumn({ name: 'message_id' })
   message: Message;
 
   @Column({ name: 'read_at', type: 'timestamp', nullable: true })

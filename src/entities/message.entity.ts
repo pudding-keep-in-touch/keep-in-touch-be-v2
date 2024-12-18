@@ -104,6 +104,5 @@ export class Message {
     () => ReactionInfo,
     (reactionInfo) => reactionInfo.message,
   )
-  @JoinColumn({ name: 'message_id' })
   reactionInfo: ReactionInfo;
 }
