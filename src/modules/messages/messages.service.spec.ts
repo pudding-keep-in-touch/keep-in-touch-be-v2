@@ -2,6 +2,7 @@ import { Emotion } from '@entities/emotion.entity';
 import { MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
 import { User } from '@entities/user.entity';
+import { CustomLogger } from '@logger/custom-logger.service';
 import {
   BadRequestException,
   ForbiddenException,
@@ -10,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
+import { ReactionInfoRepository } from '@repositories/reaction-info.repository';
+import { find } from 'rxjs';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
@@ -21,6 +24,7 @@ describe('MessagesService', () => {
   let userRepository: UserRepository;
   let questionRepository: QuestionRepository;
   let emotionRepository: EmotionRepository;
+  let reactionInfoRepository: ReactionInfoRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +61,19 @@ describe('MessagesService', () => {
             findEmotionById: jest.fn(),
           },
         },
+        {
+          provide: ReactionInfoRepository,
+          useValue: {
+            findOne: jest.fn(),
+            update: jest.fn(),
+          },
+        },
+        {
+          provide: CustomLogger,
+          useValue: {
+            error: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -65,6 +82,7 @@ describe('MessagesService', () => {
     userRepository = module.get<UserRepository>(UserRepository);
     questionRepository = module.get<QuestionRepository>(QuestionRepository);
     emotionRepository = module.get<EmotionRepository>(EmotionRepository);
+    reactionInfoRepository = module.get<ReactionInfoRepository>(ReactionInfoRepository);
   });
 
   // SECTION: createMessage success case

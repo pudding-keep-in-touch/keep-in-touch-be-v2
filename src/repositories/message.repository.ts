@@ -2,9 +2,7 @@ import { Repository } from 'typeorm';
 
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { PaginationOption } from '@common/types/pagination-option.type';
-//import { MessageStatistic } from '@entities/message-statistic.entity';
 import { Message } from '@entities/message.entity';
-import { ReactionInfo } from '@entities/reaction-info.entity';
 import {
   CreateEmotionMessageParam,
   CreateQuestionMessageParam,
@@ -39,29 +37,15 @@ export class MessageRepository extends Repository<Message> {
    * @param messageId select 할 message의 id
    * @returns
    */
-  async findMessageDetailById(messageId: string, userId: string): Promise<Message | null> {
-    return this.manager.transaction(async (manager) => {
-      const message = await manager.findOne(Message, {
-        where: { messageId },
-        relations: ['receiver', 'question', 'emotion', 'reactions', 'reactions.reactionTemplate'],
-      });
-
-      if (!message) {
-        return null;
-      }
-      // 읽음 처리
-      if (message.receiverId === userId && message.readAt === null) {
-        await manager.update(Message, { messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
-      }
-      if (message.senderId === userId) {
-        const reactionInfo = await manager.findOne(ReactionInfo, { where: { messageId } });
-        if (reactionInfo && reactionInfo.readAt === null) {
-          await manager.update(ReactionInfo, { messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
-        }
-      }
-
-      return message;
+  async findMessageDetailById(messageId: string): Promise<Message | null> {
+    return this.findOne({
+      where: { messageId },
+      relations: ['receiver', 'question', 'emotion', 'reactions', 'reactions.reactionTemplate'],
     });
+  }
+
+  async updateMessageReadAt(messageId: string): Promise<void> {
+    await this.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
   }
 
   /**
