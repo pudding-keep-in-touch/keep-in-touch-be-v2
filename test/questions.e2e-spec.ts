@@ -29,19 +29,13 @@ describe('Questions API test', () => {
     testData = await testSetup.fixtures.createBasicTestData();
 
     testSetup.setUser({
-      userId: testData.users.sender.userId,
-      email: testData.users.sender.email,
-      nickname: testData.users.sender.nickname,
+      userId: testData.users.loginUser.userId,
+      email: testData.users.loginUser.email,
+      nickname: testData.users.loginUser.nickname,
     });
 
-    testSetup.setUser({
-      userId: testData.users.sender.userId,
-      email: testData.users.sender.email,
-      nickname: testData.users.sender.nickname,
-    });
-
-    targetUserId = testData.users.receiver.userId;
-    loginUserId = testData.users.sender.userId;
+    targetUserId = testData.users.targetUser.userId;
+    loginUserId = testData.users.loginUser.userId;
     loginToTargetMessageId = testData.messages[0].messageId;
     targetToLoginMessageId = testData.messages[1].messageId;
   });

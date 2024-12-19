@@ -148,25 +148,25 @@ export class TestFixtureManager {
    */
   async createBasicTestData() {
     const emotions = await this.emotionFactory.createMany(2);
-    const [sender, receiver] = await this.userFactory.createMany(2);
-    const questions = await this.questionFactory.createMany(2, { userId: receiver.userId });
+    const [loginUser, targetUser] = await this.userFactory.createMany(2);
+    const questions = await this.questionFactory.createMany(2, { userId: targetUser.userId });
 
-    // sender -> receiver: emotion (0)
-    // receiver -> sender: question (1)
+    // loginUser -> targetUser: emotion (0)
+    // targetUser -> loginUser: question (1)
     const messages = await Promise.all([
       this.messageFactory.createEmotionMessage('1', {
-        senderId: sender.userId,
-        receiverId: receiver.userId,
+        senderId: loginUser.userId,
+        receiverId: targetUser.userId,
       }),
       this.messageFactory.createQuestionMessage(questions[0].questionId, {
-        senderId: receiver.userId,
-        receiverId: sender.userId,
+        senderId: targetUser.userId,
+        receiverId: loginUser.userId,
       }),
     ]);
 
     return {
       emotions,
-      users: { sender, receiver },
+      users: { loginUser, targetUser },
       questions,
       messages,
     };
