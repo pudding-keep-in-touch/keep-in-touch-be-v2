@@ -29,7 +29,7 @@ export class ReactionsService {
    * @returns 조회한 템플릿 정보 배열
    */
   async getReactionTemplates(): Promise<ResponseReactionTemplates[]> {
-    const templates = await this.reactionTemplateRepository.getReactionTemplates();
+    const templates = await this.reactionTemplateRepository.find();
     return templates.map((template) => ({
       reactionTemplateId: String(template.reactionTemplateId),
       emoji: template.emoji,
