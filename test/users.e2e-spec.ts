@@ -1,54 +1,57 @@
-import { Emotion } from '@entities/emotion.entity';
-import { Message } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
 import { GetMySentMessagesDto } from '@modules/users/dto/get-my-messages.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource } from 'typeorm';
-import { createTestingApp } from './helpers/create-testing-app.helper';
+
+import { TestFixtureManager } from './helpers/fixtures';
+import { TestSetup } from './test-setup';
 
 describe('Users API test', () => {
+  let testSetup: TestSetup;
+  let testData: Awaited<ReturnType<TestFixtureManager['createBasicTestData']>>;
   let app: INestApplication;
-  let dataSource: DataSource;
-  const loginUserId = '1'; // 테스트용 유저 ID
-  const targetUserId = '2'; // 테스트용 유저 ID
-  let targetQuestionIds: string[];
-  const hiddenQuestionContent = '숨김질문';
-  const insertQuestions = [
-    { userId: loginUserId, content: '질문1', isHidden: false },
-    { userId: loginUserId, content: '질문2', isHidden: false },
-    { userId: loginUserId, content: hiddenQuestionContent, isHidden: true },
-  ];
+  let loginUserId: string;
+  let targetUserId: string;
+
+  let loginToTargetMessageId: string;
+  let targetToLoginMessageId: string;
 
   beforeAll(async () => {
-    const testApp = await createTestingApp();
-    app = testApp.app;
-    dataSource = testApp.dataSource;
-    await app.init();
+    testSetup = await new TestSetup().init();
+    app = testSetup.app;
+  });
 
-    const emotionRepository = dataSource.getRepository(Emotion);
-    const emotions = await emotionRepository.find();
-    if (emotions.length === 0) {
-      await emotionRepository.insert([
-        { emotionId: '1', name: '응원과 감사', emoji: '🌟' },
-        { emotionId: '2', name: '솔직한 대화', emoji: '🤝' },
-      ]);
-    }
+  beforeEach(async () => {
+    await testSetup.fixtures.cleanDatabase();
+    testData = await testSetup.fixtures.createBasicTestData();
 
-    const questionRepository = dataSource.getRepository(Question);
-    await questionRepository.delete({ userId: loginUserId });
+    testSetup.setUser({
+      userId: testData.users.loginUser.userId,
+      email: testData.users.loginUser.email,
+      nickname: testData.users.loginUser.nickname,
+    });
 
-    const result = await questionRepository.insert(insertQuestions);
-    targetQuestionIds = result.identifiers.map((item) => item.questionId);
+    targetUserId = testData.users.targetUser.userId;
+    loginUserId = testData.users.loginUser.userId;
+    loginToTargetMessageId = testData.messages[0].messageId;
+    targetToLoginMessageId = testData.messages[1].messageId;
   });
 
   afterAll(async () => {
-    await dataSource.destroy(); // 데이터베이스 연결 종료
-    await app.close(); // 애플리케이션 종료
+    await testSetup.cleanup();
   });
 
   describe('GET /users/:userId/questions', () => {
-    it('유저가 작성한 질문 조회. 숨김여부 상관없이 모든 question 응답', () => {
+    it('유저가 작성한 질문 조회. 숨김여부 상관없이 모든 question 응답', async () => {
+      await testSetup.fixtures.questionFactory.createMany(10, {
+        userId: loginUserId,
+      });
+      await testSetup.fixtures.questionFactory.createMany(10, {
+        userId: loginUserId,
+        isHidden: true,
+      });
+      const baseQuestionLen = testData.questions.filter((q) => q.userId === loginUserId).length;
+
       return request(app.getHttpServer())
         .get(`/users/${loginUserId}/questions`)
         .expect(HttpStatus.OK)
@@ -59,7 +62,7 @@ describe('Users API test', () => {
           expect(response.body).toHaveProperty('status');
 
           expect(body.data).toBeInstanceOf(Array);
-          expect(body.data.length).toBe(3);
+          expect(body.data.length).toBe(20 + baseQuestionLen);
 
           for (const q of body.data) {
             expect(q).toHaveProperty('questionId');
@@ -71,10 +74,14 @@ describe('Users API test', () => {
     });
 
     it('유저가 작성한 질문이 없을 때 data에 빈 배열 응답', async () => {
-      await dataSource.getRepository(Question).delete({ userId: loginUserId });
-
-      const questionsAfterDelete = await dataSource.getRepository(Question).find({ where: { userId: loginUserId } });
-      expect(questionsAfterDelete.length).toBe(0); // 데이터 삭제 확인
+      await testSetup.fixtures.cleanDatabase();
+      const user = await testSetup.fixtures.userFactory.create();
+      loginUserId = user.userId;
+      testSetup.setUser({
+        userId: user.userId,
+        email: user.email,
+        nickname: user.nickname,
+      });
 
       const res = await request(app.getHttpServer())
         .get(`/users/${loginUserId}/questions`)
@@ -89,7 +96,6 @@ describe('Users API test', () => {
           expect(body.data.length).toBe(0);
         });
 
-      await dataSource.getRepository(Question).insert(insertQuestions);
       return res;
     });
 
@@ -154,11 +160,10 @@ describe('Users API test', () => {
       });
 
       it('(sent)cursor가 없을 때 가장 최근 메시지 조회', async () => {
-        const recentMessage = await dataSource.getRepository(Message).findOne({
-          where: {
-            senderId: loginUserId,
-          },
-          order: { createdAt: 'DESC' },
+        const messages = await testSetup.fixtures.messageFactory.createMany(20, {
+          senderId: loginUserId,
+          receiverId: targetUserId,
+          emotionId: '1',
         });
 
         return request(app.getHttpServer())
@@ -171,16 +176,14 @@ describe('Users API test', () => {
             expect(response.body).toHaveProperty('status');
 
             expect(body.data.messageList).toBeInstanceOf(Array);
-            expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+            expect(body.data.messageList[0].messageId).toBe(messages[messages.length - 1].messageId);
           });
       });
-
       it('(sent)cursor가 있을 때 cursor 이전의 메시지 조회', async () => {
-        const recentMessage = await dataSource.getRepository(Message).findOne({
-          where: {
-            senderId: loginUserId,
-          },
-          order: { createdAt: 'DESC' },
+        const recentMessage = await testSetup.fixtures.messageFactory.create({
+          senderId: loginUserId,
+          receiverId: targetUserId,
+          emotionId: '1',
         });
 
         return request(app.getHttpServer())
@@ -200,17 +203,14 @@ describe('Users API test', () => {
       });
 
       it('(sent)마지막 페이지일 때 nextCursor가 null', async () => {
-        const messages = await dataSource.getRepository(Message).find({
-          where: {
-            senderId: loginUserId,
-          },
-          order: { createdAt: 'ASC' },
-          take: 2, // 과거 메시지 2개만 조회
+        const message = await testSetup.fixtures.messageFactory.create({
+          senderId: loginUserId,
+          receiverId: targetUserId,
+          emotionId: '1',
         });
-
         return request(app.getHttpServer())
           .get(
-            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${messages[messages.length - 1].createdAt.toISOString()}`,
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${message.createdAt.toISOString()}`,
           )
           .expect(HttpStatus.OK)
           .expect((response) => {
@@ -226,11 +226,13 @@ describe('Users API test', () => {
       });
 
       it('(sent)여러번 요청했을 때 정상적인 값이 오는지 확인', async () => {
-        const totalMessages = await dataSource
-          .getRepository(Message)
-          .find({ where: { senderId: loginUserId }, order: { createdAt: 'DESC' } });
-        const total = totalMessages.length;
-        let msgList: any[] = [];
+        const totalMessages = await testSetup.fixtures.messageFactory.createMany(20, {
+          senderId: loginUserId,
+          receiverId: targetUserId,
+          emotionId: '1',
+        });
+
+        const baseMessage = testData.messages.filter((m) => m.receiverId === loginUserId);
 
         const limit = 30;
         let totalResCount = 0;
@@ -251,13 +253,9 @@ describe('Users API test', () => {
               expect(body.data.messageList.length).toBeLessThanOrEqual(limit);
               cursor = body.data.nextCursor;
               totalResCount += body.data.messageList.length;
-              msgList.push(...body.data.messageList);
             });
         }
-        const remainingMessages = totalMessages.filter(
-          (msg) => !msgList.some((receivedMsg) => receivedMsg.messageId === msg.messageId),
-        );
-        expect(totalResCount).toBe(total);
+        expect(totalResCount).toBe(totalMessages.length + baseMessage.length);
       });
     });
 
@@ -295,11 +293,10 @@ describe('Users API test', () => {
       });
 
       it('cursor가 없을 때 가장 최근 메시지 조회', async () => {
-        const recentMessage = await dataSource.getRepository(Message).findOne({
-          where: {
-            receiverId: loginUserId,
-          },
-          order: { createdAt: 'DESC' },
+        const recentMessage = await testSetup.fixtures.messageFactory.create({
+          senderId: targetUserId,
+          receiverId: loginUserId,
+          emotionId: '1',
         });
 
         return request(app.getHttpServer())
@@ -312,18 +309,16 @@ describe('Users API test', () => {
             expect(response.body).toHaveProperty('status');
 
             expect(body.data.messageList).toBeInstanceOf(Array);
-            expect(body.data.messageList[0].messageId).toBe(recentMessage?.messageId);
+            expect(body.data.messageList[0].messageId).toBe(recentMessage.messageId);
           });
       });
 
       it('cursor가 있을 때 cursor 이전의 메시지 조회', async () => {
-        const recentMessage = await dataSource.getRepository(Message).findOne({
-          where: {
-            receiverId: loginUserId,
-          },
-          order: { createdAt: 'DESC' },
+        const recentMessage = await testSetup.fixtures.messageFactory.create({
+          senderId: targetUserId,
+          receiverId: loginUserId,
+          emotionId: '1',
         });
-
         return request(app.getHttpServer())
           .get(
             `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${recentMessage?.createdAt.toISOString()}`,
@@ -341,17 +336,16 @@ describe('Users API test', () => {
       });
 
       it('마지막 페이지일 때 nextCursor가 null', async () => {
-        const messages = await dataSource.getRepository(Message).find({
-          where: {
-            receiverId: loginUserId,
-          },
-          order: { createdAt: 'ASC' },
-          take: 2, // 과거 메시지 2개만 조회
+        // 마지막 - 1 번째 message
+        const message = await testSetup.fixtures.messageFactory.create({
+          senderId: targetUserId,
+          receiverId: loginUserId,
+          emotionId: '1',
         });
 
         return request(app.getHttpServer())
           .get(
-            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${messages[messages.length - 1].createdAt.toISOString()}`,
+            `/users/${loginUserId}/messages?type=${query.type}&order=${query.order}&cursor=${message.createdAt.toISOString()}`,
           )
           .expect(HttpStatus.OK)
           .expect((response) => {
@@ -367,12 +361,12 @@ describe('Users API test', () => {
       });
 
       it('여러번 요청했을 때 정상적인 값이 오는지 확인', async () => {
-        const totalMessages = await dataSource
-          .getRepository(Message)
-          .find({ where: { receiverId: loginUserId }, order: { createdAt: 'DESC' } });
-        const total = totalMessages.length;
-        let msgList: any[] = [];
-
+        const totalMessages = await testSetup.fixtures.messageFactory.createMany(20, {
+          senderId: targetUserId,
+          receiverId: loginUserId,
+          emotionId: '1',
+        });
+        const baseMessage = testData.messages.filter((m) => m.receiverId === loginUserId);
         const limit = query.limit;
         let totalResCount = 0;
         let cursor = undefined;
@@ -392,13 +386,9 @@ describe('Users API test', () => {
               expect(body.data.messageList.length).toBeLessThanOrEqual(limit);
               cursor = body.data.nextCursor;
               totalResCount += body.data.messageList.length;
-              msgList.push(...body.data.messageList);
             });
         }
-        const remainingMessages = totalMessages.filter(
-          (msg) => !msgList.some((receivedMsg) => receivedMsg.messageId === msg.messageId),
-        );
-        expect(totalResCount).toBe(total);
+        expect(totalResCount).toBe(totalMessages.length + baseMessage.length);
       });
     });
   });
