@@ -1,11 +1,8 @@
-import { Emotion } from '@entities/emotion.entity';
 import { Message } from '@entities/message.entity';
-import { Question } from '@entities/question.entity';
 import { User } from '@entities/user.entity';
 import { CreateMessageDto } from '@modules/messages/dto/create-message.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource } from 'typeorm';
 import { TestFixtureManager } from './helpers/fixtures';
 import { TestSetup } from './test-setup';
 
@@ -13,9 +10,8 @@ describe('Messages API test', () => {
   let testSetup: TestSetup;
   let testData: Awaited<ReturnType<TestFixtureManager['createBasicTestData']>>;
   let app: INestApplication;
-  let dataSource: DataSource;
+  let loginUserId: string;
   let targetUserId: string;
-  let loginUserId;
 
   let loginToTargetMessageId: string;
   let targetToLoginMessageId: string;
@@ -23,7 +19,6 @@ describe('Messages API test', () => {
   beforeAll(async () => {
     testSetup = await new TestSetup().init();
     app = testSetup.app;
-    dataSource = testSetup.dataSource;
   });
 
   beforeEach(async () => {
@@ -43,18 +38,6 @@ describe('Messages API test', () => {
       email: testData.users.sender.email,
       nickname: testData.users.sender.nickname,
     });
-
-    //const request = {
-    //  user: {
-    //    userId: testData.users.sender.userId,
-    //    email: testData.users.sender.email,
-    //  },
-    //};
-
-    //testSetup.app.use((req: any, _: any, next: any) => {
-    //  req.user = request.user;
-    //  next();
-    //});
 
     targetUserId = testData.users.receiver.userId;
     loginUserId = testData.users.sender.userId;
@@ -224,19 +207,14 @@ describe('Messages API test', () => {
 
     it('권한이 없는 메시지 조회시 403', async () => {
       // Create a message between other users
-      const messageRepository = dataSource.getRepository(Message);
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.save([{ userId: '3', nickname: '테스트3', email: 'hello', loginType: 1 }]);
+      const user = await testSetup.fixtures.userFactory.create(); // 임의 유저 생성
 
-      const unauthorizedMessage = await messageRepository.save({
-        senderId: '3', // Different user
-        receiverId: '2', // Different user
-        content: '권한 없는 메시지',
-        emotionId: '1',
+      const { messageId } = await testSetup.fixtures.messageFactory.createEmotionMessage('1', {
+        senderId: user.userId,
+        receiverId: targetUserId,
       });
-
       return request(app.getHttpServer())
-        .get(`/messages/${unauthorizedMessage.messageId}`)
+        .get(`/messages/${messageId}`)
         .expect(HttpStatus.FORBIDDEN)
         .expect((response) => {
           expect(response.body).toHaveProperty('message', '쪽지를 볼 권한이 없습니다.');
