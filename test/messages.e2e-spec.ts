@@ -1,5 +1,3 @@
-import { Message } from '@entities/message.entity';
-import { User } from '@entities/user.entity';
 import { CreateMessageDto } from '@modules/messages/dto/create-message.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
@@ -22,8 +20,6 @@ describe('Messages API test', () => {
   });
 
   beforeEach(async () => {
-    console.log("++++++++++++++++++++++++++I'm in beforeEach++++++++++++++++++++++++++");
-
     await testSetup.fixtures.cleanDatabase();
     testData = await testSetup.fixtures.createBasicTestData();
 

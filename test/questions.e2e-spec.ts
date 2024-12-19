@@ -25,8 +25,6 @@ describe('Questions API test', () => {
   });
 
   beforeEach(async () => {
-    console.log("++++++++++++++++++++++++++I'm in beforeEach++++++++++++++++++++++++++");
-
     await testSetup.fixtures.cleanDatabase();
     testData = await testSetup.fixtures.createBasicTestData();
 
