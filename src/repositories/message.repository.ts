@@ -134,33 +134,13 @@ export class MessageRepository extends Repository<Message> {
    * @returns 생성된 쪽지의 id
    */
   private async createMessage(message: CreateQuestionMessageParam | CreateEmotionMessageParam): Promise<string> {
-    //const { senderId, receiverId } = message;
-
-    const messageId = await this.manager.transaction(async (manager) => {
-      const messageResult = await manager.getRepository(Message).insert(message);
-
-      // sender의 sentMessageCount를 1 증가시키고, receiver의 receivedMessageCount와 unreadMessageCount를 1 증가시킵니다.
-      // 순서 상관없으므로 Promise.all을 사용합니다.
-      // NOTE: transaction 정말 필요한지? 통계 연산이 실패했다고 쪽지 생성이 실패해야 하는가?
-      // NOTE : +1, -1 등의 연산으로 update하는 것보다 insert 하고 나중에 계산하는 방식이 좀 더 안전하다고 판단되어 create 시 통계 연산 삭제.
-      // sent, received total count가 필요한 경우는 COUNT를 사용하고 있음.
-      // 나중에 데이터가 쌓이면 EXPLAIN ANALYZE 등을 이용하여 실제 시간을 체크해 볼 필요가 있음.
-
-      //await Promise.all([
-      //  manager
-      //    .getRepository(MessageStatistic)
-      //    .update({ userId: senderId }, { sentMessageCount: () => 'sent_message_count + 1' }),
-      //  manager.getRepository(MessageStatistic).update(
-      //    { userId: receiverId },
-      //    {
-      //      receivedMessageCount: () => 'received_message_count + 1',
-      //      unreadMessageCount: () => 'unread_message_count + 1',
-      //    },
-      //  ),
-      //]);
-
-      return messageResult.identifiers[0].messageId;
+    const result = await this.insert({
+      senderId: message.senderId,
+      receiverId: message.receiverId,
+      content: message.content,
+      questionId: message.questionId,
+      emotionId: message.emotionId,
     });
-    return messageId;
+    return result.identifiers[0].messageId;
   }
 }
