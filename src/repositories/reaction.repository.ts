@@ -22,14 +22,15 @@ export class ReactionRepository extends Repository<Reaction> {
       });
     });
 
+    const reactionInfo = await this.manager.findOne(ReactionInfo, { where: { messageId } });
+    if (reactionInfo) {
+      throw new ConflictException('이미 반응을 추가한 메시지입니다.');
+    }
+
     /**
      * read_at, created_at을 관리하는 reaction info를 생성.
      */
     return this.manager.transaction(async (manager) => {
-      const reactionInfo = await manager.findOne(ReactionInfo, { where: { messageId } });
-      if (reactionInfo) {
-        throw new ConflictException('이미 반응을 추가한 메시지입니다.');
-      }
       const reaction = await manager.save(Reaction, reactions);
       await manager.insert(ReactionInfo, { messageId, createdAt: reaction[0].createdAt }); // reaction의 createdAt을 사용
       return reaction.map((r) => r.reactionId);
