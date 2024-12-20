@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { PaginationOption } from '@common/types/pagination-option.type';
@@ -30,6 +30,20 @@ export class MessageRepository extends Repository<Message> {
     return this.createMessage(message);
   }
 
+  async countUnreadMessages(userId: string): Promise<number> {
+    return this.count({ where: { receiverId: userId, readAt: IsNull() } });
+  }
+
+  // 보낸 쪽지에 받은 사람으로부터 반응을 받을 수 있다.
+  // 받은 반응 중 읽지 않은 것의 개수를 반환한다.
+  async countUnreadReactionMessages(userId: string): Promise<number> {
+    return this.createQueryBuilder('message')
+      .innerJoin('message.reactionInfo', 'reactionInfo')
+      .where('message.sender = :userId', { userId })
+      .andWhere('reactionInfo.readAt IS NULL')
+      .getCount();
+  }
+
   // TODO: join 개선
   /**
    * messageId에 해당하는 쪽지의 상세 정보를 조회합니다.
@@ -42,10 +56,6 @@ export class MessageRepository extends Repository<Message> {
       where: { messageId },
       relations: ['receiver', 'question', 'emotion', 'reactions', 'reactions.reactionTemplate'],
     });
-  }
-
-  async updateMessageReadAt(messageId: string): Promise<void> {
-    await this.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
   }
 
   /**

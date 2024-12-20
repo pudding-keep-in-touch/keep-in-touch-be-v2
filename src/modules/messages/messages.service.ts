@@ -62,6 +62,16 @@ export class MessagesService {
     return { messageId };
   }
 
+  async getUnreadMessageCount(userId: string) {
+    const unreadMessageCount = await this.messageRepository.countUnreadMessages(userId);
+    const unreadReactionCount = await this.messageRepository.countUnreadReactionMessages(userId);
+
+    return {
+      unreadMessageCount,
+      unreadReactionCount,
+    };
+  }
+
   /**
    * 메세지 상세 정보를 조회합니다.
    *
@@ -83,11 +93,14 @@ export class MessagesService {
 
     try {
       if (message.receiverId === userId && message.readAt === null) {
-        this.messageRepository.updateMessageReadAt(messageId); // 읽음처리 - 비동기
+        // update message readAt
+        this.messageRepository.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
       }
       if (message.senderId === userId) {
         const reactionInfo = await this.reactionInfoRepository.findOne({ where: { messageId } });
         if (reactionInfo && reactionInfo.readAt === null) {
+          // update reactionInfo readAt
+          await this.reactionInfoRepository.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
         }
       }
     } catch (error) {
