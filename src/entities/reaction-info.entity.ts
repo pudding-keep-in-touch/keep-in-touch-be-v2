@@ -4,7 +4,6 @@ import { Message } from './message.entity';
 @Entity({ name: 'reaction_info' })
 export class ReactionInfo {
   @PrimaryColumn({ name: 'message_id', type: 'bigint' })
-  @JoinColumn({ name: 'message_id' })
   messageId: string;
 
   @OneToOne(
