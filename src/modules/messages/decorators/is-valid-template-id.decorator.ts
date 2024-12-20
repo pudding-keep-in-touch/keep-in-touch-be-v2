@@ -9,7 +9,10 @@ import {
 @ValidatorConstraint({ async: false })
 export class IsValidTemplateIdsConstraint implements ValidatorConstraintInterface {
   validate(value: any, args: ValidationArguments): boolean {
-    if (!Array.isArray(value)) return false;
+    if (!Array.isArray(value)) {
+      args.constraints[0].failReason = 'templateIds는 배열이어야 합니다.';
+      return false;
+    }
 
     // 1. 배열 크기 검사
     if (value.length < 1 || value.length > 5) {
@@ -17,7 +20,10 @@ export class IsValidTemplateIdsConstraint implements ValidatorConstraintInterfac
     }
 
     // 2. 각 요소가 숫자 형태의 문자열인지 검사
-    if (!value.every((item) => typeof item === 'string' && /^\d+$/.test(item))) return false;
+    if (!value.every((item) => typeof item === 'string' && /^\d+$/.test(item))) {
+      args.constraints[0].failReason = 'templateId값은 숫자 형태의 문자열이어야 합니다.';
+      return false;
+    }
 
     // 3. 중복값 검사
     const uniqueSet = new Set(value);

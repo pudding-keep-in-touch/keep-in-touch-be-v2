@@ -19,12 +19,6 @@ export class MessagesController {
     private readonly reactionsService: ReactionsService,
   ) {}
 
-  @GenerateSwaggerApiDoc({
-    summary: '쪽지 전송',
-    description: '쪽지를 전송합니다.',
-    responseType: ResponseCreateMessageDto,
-    responseStatus: HttpStatus.CREATED,
-  })
   //@ApiExtraModels(CreateEmotionMessageDto, CreateQuestionMessageDto)
   //@ApiBody({
   //  schema: {
@@ -39,6 +33,12 @@ export class MessagesController {
   //    },
   //  },
   //})
+  @GenerateSwaggerApiDoc({
+    summary: '쪽지 전송',
+    description: '쪽지를 전송합니다.',
+    responseType: ResponseCreateMessageDto,
+    responseStatus: HttpStatus.CREATED,
+  })
   @Post()
   async createMessage(@Body() createMessageDto: CreateMessageDto, @UserAuth() user: User) {
     return response(
@@ -79,6 +79,7 @@ export class MessagesController {
     summary: '메시지에 reaction 추가',
     description: '메시지에 reaction을 추가합니다.',
     responseType: ResponseCreateReactionDto,
+    responseStatus: HttpStatus.CREATED,
   })
   @Post(':messageId/reactions')
   async createReaction(
@@ -92,6 +93,6 @@ export class MessagesController {
       reactionTemplateIds: createReactionDto.templateIds,
     });
 
-    return response(result, '반응이 성공적으로 추가되었습니다.');
+    return response(result, '반응이 성공적으로 추가되었습니다.', HttpStatus.CREATED);
   }
 }
