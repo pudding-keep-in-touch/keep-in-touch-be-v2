@@ -3,7 +3,6 @@ import { CreateQuestionDto } from '@modules/questions/dto/create-question.dto';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
-import { CustomLogger } from '@logger/custom-logger.service';
 import { ResponseGetSharedQuestionDetailDto } from '@modules/questions/dto/get-shared-question-detail.dto';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
 import { TestFixtureManager } from './helpers/fixtures';

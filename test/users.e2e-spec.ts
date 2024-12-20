@@ -1,4 +1,3 @@
-import { Question } from '@entities/question.entity';
 import { GetMySentMessagesDto } from '@modules/users/dto/get-my-messages.dto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
