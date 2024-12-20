@@ -1,6 +1,7 @@
 import { Emotion } from '@entities/emotion.entity';
 import { Message, MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
+import { ReactionTemplate } from '@entities/reaction-template.entity';
 import { LoginType, User } from '@entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 
@@ -120,6 +121,64 @@ export class EmotionFactory extends BaseFactory<Emotion> {
   }
 }
 
+export class ReactionTemplateFactory extends BaseFactory<ReactionTemplate> {
+  protected entityClass = ReactionTemplate;
+
+  protected async defineDefault(): Promise<ReactionTemplate> {
+    const emojis = [
+      '😊',
+      '🥰',
+      '😘',
+      '🥹',
+      '🤭',
+      '🥲',
+      '😔',
+      '🥹',
+      '😭',
+      '🥺',
+      '😎',
+      '🤩',
+      '👏',
+      '💪',
+      '🍀',
+      '☺️',
+      '🤗',
+      '😁',
+      '😤',
+      '😉',
+    ];
+    const contents = [
+      '고마워',
+      '덕분이야',
+      '최고야',
+      '감동이야',
+      '너밖에 없어',
+      '내가 더 잘할게',
+      '잘못했어',
+      '죄인이오',
+      '반성하는 중',
+      '미안해',
+      '화이팅',
+      '멋있어',
+      '고생 많았어',
+      '응원할게',
+      '행운을 빌어요',
+      '그럴 수 있지',
+      '괜찮아',
+      '잘 부탁해',
+      '나한테 잘해',
+      '한 번만 봐줄게',
+    ];
+    const types = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4];
+
+    return this.manager.create(ReactionTemplate, {
+      emoji: emojis[this.sequence % emojis.length],
+      content: contents[this.sequence % contents.length],
+      type: types[this.sequence % types.length],
+    });
+  }
+}
+
 // Test Fixture Manager
 export class TestFixtureManager {
   public readonly userFactory: UserFactory;
@@ -163,6 +222,8 @@ export class TestFixtureManager {
         receiverId: loginUser.userId,
       }),
     ]);
+
+    await new ReactionTemplateFactory(this.dataSource).createMany(20);
 
     return {
       emotions,

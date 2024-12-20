@@ -276,4 +276,84 @@ describe('Messages API test', () => {
         });
     });
   });
+
+  describe('POST /messages/:messageId/reactions', () => {
+    it('쪽지에 반응 추가 성공', () => {
+      return request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({ templateIds: ['1', '2'] })
+        .expect(HttpStatus.CREATED)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('messageId', targetToLoginMessageId);
+          expect(response.body.data).toHaveProperty('reactionIds');
+          expect(response.body.data.reactionIds).toHaveLength(2);
+        });
+    });
+
+    it('존재하지 않는 쪽지에 반응 추가시 404', () => {
+      return request(app.getHttpServer())
+        .post('/messages/999999/reactions')
+        .send({ templateIds: ['1', '2'] })
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('이미 반응이 추가된 쪽지에 반응 추가시 409', async () => {
+      // 초기 반응 추가
+      await request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({ templateIds: ['1', '2'] });
+
+      return request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({ templateIds: ['1', '2'] })
+        .expect(HttpStatus.CONFLICT)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('유효하지 않은 reaction template id 포함시 400', () => {
+      return request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({ templateIds: ['1', '111991'] })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('숫자 형식이 아닌 reaction template id 포함시 400', () => {
+      return request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({ templateIds: ['1', 'invalid'] })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('reaction template id가 누락된 경우 400', () => {
+      return request(app.getHttpServer())
+        .post(`/messages/${targetToLoginMessageId}/reactions`)
+        .send({})
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    it('message id가 bigint 형식이 아닌 경우 400', () => {
+      return request(app.getHttpServer())
+        .post(`/messages/invalid/reactions`)
+        .send({ templateIds: ['1', '2'] })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('message');
+        });
+    });
+  });
 });
