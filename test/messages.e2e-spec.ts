@@ -277,8 +277,9 @@ describe('Messages API test', () => {
     });
   });
 
+  // 받은 쪽지에 반응을 남길 수 있음.
   describe('POST /messages/:messageId/reactions', () => {
-    it('쪽지에 반응 추가 성공', () => {
+    it('받은 쪽지에 반응 추가 성공', () => {
       return request(app.getHttpServer())
         .post(`/messages/${targetToLoginMessageId}/reactions`)
         .send({ templateIds: ['1', '2'] })

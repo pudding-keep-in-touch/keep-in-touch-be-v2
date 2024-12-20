@@ -391,5 +391,52 @@ describe('Users API test', () => {
         expect(totalResCount).toBe(totalMessages.length + baseMessage.length);
       });
     });
+
+    it('반응이 있는 쪽지가 있는 경우 반응 createdAt 기준으로 정렬되어야 함', async () => {
+      const messages = await testSetup.fixtures.messageFactory.createMany(20, {
+        senderId: loginUserId,
+        receiverId: testData.users.targetUser.userId,
+        questionId: testData.questions[0].questionId,
+      });
+
+      for (let i = 0; i < messages.length; i += 5) {
+        testSetup.setUser({
+          userId: testData.users.targetUser.userId,
+          email: testData.users.targetUser.email,
+          nickname: testData.users.targetUser.nickname,
+        });
+
+        const response = await request(app.getHttpServer())
+          .post(`/messages/${messages[i].messageId}/reactions`)
+          .send({ templateIds: ['1'] });
+
+        expect(response.status).toBe(HttpStatus.CREATED);
+        expect(response.body).toHaveProperty('data');
+      }
+
+      testSetup.setUser({
+        userId: testData.users.loginUser.userId,
+        email: testData.users.loginUser.email,
+        nickname: testData.users.loginUser.nickname,
+      });
+
+      return request(app.getHttpServer())
+        .get(`/users/${loginUserId}/messages?type=sent&limit=10&order=desc`)
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          const { body } = response;
+          expect(response.body).toHaveProperty('data');
+          expect(response.body).toHaveProperty('message');
+          expect(response.body).toHaveProperty('status');
+
+          expect(body.data.messageList).toBeInstanceOf(Array);
+          expect(body.data.messageList.length).toBe(10);
+
+          for (let i = 0; i < 4; i++) {
+            expect(body.data.messageList[i].messageId).toBe(messages[15 - i * 5].messageId);
+          }
+          expect(body.data.messageList[4].messageId).toBe(messages[messages.length - 1].messageId);
+        });
+    });
   });
 });

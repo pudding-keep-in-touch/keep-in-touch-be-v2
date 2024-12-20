@@ -178,6 +178,7 @@ export class ReactionTemplateFactory extends BaseFactory<ReactionTemplate> {
     });
   }
 }
+// reaction은 API로 생성
 
 // Test Fixture Manager
 export class TestFixtureManager {
