@@ -18,7 +18,8 @@ export class PostgresConfigService implements TypeOrmOptionsFactory {
       entities: [join(__dirname, '..', '..', '**', '*.entity.{ts,js}')],
       autoLoadEntities: true,
       synchronize: false,
-      logging: this.configService.get('APP_ENV') === 'local' || this.configService.get('APP_ENV') === 'test',
+      //logging: this.configService.get('APP_ENV') === 'local' || this.configService.get('APP_ENV') === 'test',
+      logging: this.configService.get('APP_ENV') === 'local',
     };
   }
 }

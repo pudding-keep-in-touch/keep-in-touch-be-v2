@@ -20,7 +20,7 @@ export class Reaction {
   messageId: string;
 
   @Column({ name: 'reaction_template_id', type: 'integer' })
-  reactionTemplateId: number;
+  reactionTemplateId: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

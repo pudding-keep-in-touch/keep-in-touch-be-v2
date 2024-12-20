@@ -43,14 +43,14 @@ export class GetMyMessagesQuery {
   limit: number = 3;
 
   @ApiProperty({
-    description: '정렬 (desc/asc), (default: desc)',
+    description: '정렬 (desc/asc), (default: desc), 현재는 desc만 지원합니다.',
     required: false,
     example: 'desc',
     default: 'desc',
-    enum: ['desc', 'asc'],
+    enum: ['desc'],
   })
   @IsOptional()
-  @IsIn(['desc', 'asc'])
+  @IsIn(['desc'])
   order: MessageOrder = 'desc';
 }
 
@@ -106,10 +106,12 @@ export class SentMessageDto extends BaseMessageDto {
       receiverNickname: message.receiver.nickname,
       content: message.content,
       createdAt: message.createdAt,
-      reactionInfo: message.reactionInfo && {
-        createdAt: message.reactionInfo.createdAt,
-        readAt: message.reactionInfo.readAt,
-      },
+      reactionInfo:
+        (message.reactionInfo && {
+          createdAt: message.reactionInfo.createdAt,
+          readAt: message.reactionInfo.readAt || null,
+        }) ||
+        null,
     };
   }
 }
