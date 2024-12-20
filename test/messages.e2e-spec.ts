@@ -155,6 +155,120 @@ describe('Messages API test', () => {
     });
   });
 
+  describe('GET /messages/unread', () => {
+    it('읽지 않은 메시지 개수 조회 성공', async () => {
+      const messages = await testSetup.fixtures.messageFactory.createMany(20, {
+        senderId: loginUserId,
+        receiverId: testData.users.targetUser.userId,
+        questionId: testData.questions[0].questionId,
+      });
+
+      testSetup.setUser({
+        userId: testData.users.targetUser.userId,
+        email: testData.users.targetUser.email,
+        nickname: testData.users.targetUser.nickname,
+      });
+      // 4개
+      for (let i = 0; i < messages.length; i += 5) {
+        const response = await request(app.getHttpServer())
+          .post(`/messages/${messages[i].messageId}/reactions`)
+          .send({ templateIds: ['1'] });
+
+        expect(response.status).toBe(HttpStatus.CREATED);
+        expect(response.body).toHaveProperty('data');
+      }
+
+      testSetup.setUser({
+        userId: testData.users.loginUser.userId,
+        email: testData.users.loginUser.email,
+        nickname: testData.users.loginUser.nickname,
+      });
+
+      return request(app.getHttpServer())
+        .get('/messages/unread')
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('unreadMessageCount', 1); // base message
+          expect(response.body.data).toHaveProperty('unreadReactionCount', 4);
+        });
+    });
+
+    it('받은 메세지를 하나 읽을 경우 읽지 않은 메세지 개수가 줄어들어야 함', async () => {
+      await request(app.getHttpServer())
+        .get('/messages/unread')
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('unreadMessageCount', 1);
+          expect(response.body.data).toHaveProperty('unreadReactionCount', 0);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/messages/${targetToLoginMessageId}`)
+        .send({ status: 'read' })
+        .expect(HttpStatus.OK);
+
+      return request(app.getHttpServer())
+        .get('/messages/unread')
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('unreadMessageCount', 0);
+          expect(response.body.data).toHaveProperty('unreadReactionCount', 0);
+        });
+    });
+
+    it('반응이 추가된 보낸 메세지를 읽을 경우 읽지 않은 반응 메세지 개수가 줄어들어야 함', async () => {
+      const messages = await testSetup.fixtures.messageFactory.createMany(20, {
+        senderId: loginUserId,
+        receiverId: testData.users.targetUser.userId,
+        questionId: testData.questions[0].questionId,
+      });
+
+      testSetup.setUser({
+        userId: testData.users.targetUser.userId,
+        email: testData.users.targetUser.email,
+        nickname: testData.users.targetUser.nickname,
+      });
+      // 4개
+      for (let i = 0; i < messages.length; i += 5) {
+        const response = await request(app.getHttpServer())
+          .post(`/messages/${messages[i].messageId}/reactions`)
+          .send({ templateIds: ['1'] });
+
+        expect(response.status).toBe(HttpStatus.CREATED);
+        expect(response.body).toHaveProperty('data');
+      }
+
+      testSetup.setUser({
+        userId: testData.users.loginUser.userId,
+        email: testData.users.loginUser.email,
+        nickname: testData.users.loginUser.nickname,
+      });
+
+      await request(app.getHttpServer())
+        .get('/messages/unread')
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('unreadMessageCount', 1); // base message
+          expect(response.body.data).toHaveProperty('unreadReactionCount', 4);
+        });
+
+      await request(app.getHttpServer()).get(`/messages/${messages[0].messageId}`).expect(HttpStatus.OK);
+
+      return request(app.getHttpServer())
+        .get('/messages/unread')
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          expect(response.body).toHaveProperty('data');
+          expect(response.body.data).toHaveProperty('unreadMessageCount', 1);
+          expect(response.body.data).toHaveProperty('unreadReactionCount', 3);
+        });
+    });
+  });
+
   describe('GET /messages/:messageId', () => {
     it('보낸 메시지 상세 조회 성공', () => {
       return request(app.getHttpServer())
