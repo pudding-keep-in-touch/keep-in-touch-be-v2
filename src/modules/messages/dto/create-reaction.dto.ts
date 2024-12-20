@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray } from 'class-validator';
 import { IsValidTemplateIds } from '../decorators/is-valid-template-id.decorator';
 
 export class CreateReactionDto {
@@ -7,7 +6,6 @@ export class CreateReactionDto {
     description: '생성할 반응의 템플릿 아이디 리스트, 최대 5개.',
     example: ['1', '2'],
   })
-  @IsArray()
   @IsValidTemplateIds()
   templateIds: string[];
 }
