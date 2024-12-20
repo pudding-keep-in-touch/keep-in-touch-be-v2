@@ -52,7 +52,7 @@ export class Message {
   questionId: string | null;
 
   @Column({ name: 'read_at', type: 'timestamp', nullable: true })
-  readAt: Date;
+  readAt: Date | null;
 
   @Index()
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })

@@ -1,7 +1,6 @@
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
 import { ReactionInfo } from '@entities/reaction-info.entity';
 import { Reaction } from '@entities/reaction.entity';
-import { ConflictException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 @CustomEntityRepository(Reaction)
@@ -21,11 +20,6 @@ export class ReactionRepository extends Repository<Reaction> {
         reactionTemplateId,
       });
     });
-
-    const reactionInfo = await this.manager.findOne(ReactionInfo, { where: { messageId } });
-    if (reactionInfo) {
-      throw new ConflictException('이미 반응을 추가한 메시지입니다.');
-    }
 
     /**
      * read_at, created_at을 관리하는 reaction info를 생성.

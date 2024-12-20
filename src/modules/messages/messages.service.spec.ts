@@ -1,5 +1,5 @@
 import { Emotion } from '@entities/emotion.entity';
-import { MessageStatus } from '@entities/message.entity';
+import { Message, MessageStatus } from '@entities/message.entity';
 import { Question } from '@entities/question.entity';
 import { User } from '@entities/user.entity';
 import { CustomLogger } from '@logger/custom-logger.service';
@@ -12,7 +12,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
 import { ReactionInfoRepository } from '@repositories/reaction-info.repository';
-import { find } from 'rxjs';
+
 import { CreateMessageDto } from './dto/create-message.dto';
 import { SentMessageDetailDto } from './dto/message-detail.dto';
 import { MessagesService } from './messages.service';
@@ -297,6 +297,78 @@ describe('MessagesService', () => {
       });
     });
   });
+
+  it('받은 쪽지를 조회할 경우 읽음 처리', async () => {
+    const messageDetailParam: MessageDetailParam = {
+      userId: '2',
+      messageId: '5',
+    };
+
+    const message = {
+      messageId: '5',
+      senderId: '1',
+      receiverId: '2',
+      receiver: {
+        userId: '2',
+        nickname: 'KimReceiver',
+      } as User,
+      questionId: '1',
+      question: {
+        questionId: '1',
+        content: 'test question',
+      } as Question,
+      reactions: [],
+      content: 'test content',
+      status: MessageStatus.NORMAL,
+      createdAt: new Date(),
+      readAt: null,
+    };
+
+    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as any);
+    jest.spyOn(messageRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+
+    await service.getMessageDetail(messageDetailParam);
+
+    expect(messageRepository.update).toHaveBeenCalledTimes(1);
+  });
+  it('보낸 쪽지에 반응이 있을 경우 조회 시 읽음 처리', async () => {
+    const messageDetailParam: MessageDetailParam = {
+      userId: '1',
+      messageId: '5',
+    };
+
+    const message = {
+      messageId: '5',
+      senderId: '1',
+      receiverId: '2',
+      receiver: {
+        userId: '2',
+        nickname: 'KimReceiver',
+      } as User,
+      questionId: '1',
+      question: {
+        questionId: '1',
+        content: 'test question',
+      } as Question,
+      reactions: [],
+      content: 'test content',
+      status: MessageStatus.NORMAL,
+      createdAt: new Date(),
+      readAt: null,
+    };
+
+    jest.spyOn(messageRepository, 'findMessageDetailById').mockResolvedValue(message as any);
+    jest.spyOn(messageRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+    jest.spyOn(reactionInfoRepository, 'findOne').mockResolvedValue({
+      createdAt: new Date(),
+      readAt: null,
+    } as any);
+
+    await service.getMessageDetail(messageDetailParam);
+
+    expect(reactionInfoRepository.update).toHaveBeenCalledTimes(1);
+  });
+
   // !SECTION
 
   // SECTION: getMessageDetail failure case
