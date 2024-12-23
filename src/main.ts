@@ -15,13 +15,30 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const appConfigService = app.get(AppConfigService);
   const logger = app.get(CustomLogger);
+
   app.useLogger(logger);
   // 환경 변수 로드
   const environment = appConfigService.env || 'development';
   logger.log(`Application is running in ${environment} mode`, 'Bootstrap');
 
-  //FIXME: 더 안전한 CORS 설정 필요
-  app.enableCors();
+  const allowedOrigins =
+    process.env.NODE_ENV === 'production'
+      ? [appConfigService.clientUrl]
+      : [
+          appConfigService.clientUrl, // dev 환경의 프론트엔드 URL
+          'http://localhost:3000', // 로컬 개발 환경
+          /^http:\/\/localhost:[0-9]+$/, // 또는 모든 로컬 포트 허용
+        ];
+
+  //NOTE: CORS 설정. method 추가 시 수정
+  app.enableCors({
+    origin: allowedOrigins,
+    methods: 'GET, HEAD, PATCH, POST, OPTIONS', // EXCEPT PUT, DELETE
+    allowedHeaders: 'Content-Type, Authorization', // accept: 기본 cors 허용 헤더
+    credentials: true,
+    maxAge: appConfigService.env === 'production' ? 3600 : 5, // 1시간
+    // preflightContinue: false - default setting
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
