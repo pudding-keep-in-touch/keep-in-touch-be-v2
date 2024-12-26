@@ -1,24 +1,45 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { AuthModule } from '@modules/auth/auth.module';
+import { HealthModule } from '@modules/health/health.module';
+import { MessagesModule } from '@modules/messages/messages.module';
+import { QuestionsModule } from '@modules/questions/questions.module';
+import { UsersModule } from '@modules/users/users.module';
+
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { PostgresConfigService } from '@configs/postgres/postgres-config.service';
+import { RootConfigModule } from '@configs/root-config.module';
+import { ReactionsModule } from '@modules/reactions/reactions.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HealthModule } from '@modules/health/health.module';
-import { CommonModule } from '@common/common.module';
-import { RouterModule } from '@router/router.module';
-import { ConfigModule } from '@nestjs/config';
-import { validateEnv } from '@configs/process-env.config';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
-      validationSchema: validateEnv,
-      isGlobal: true,
+    RootConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [RootConfigModule],
+      useClass: PostgresConfigService,
     }),
+    LoggerModule,
     HealthModule,
-    CommonModule,
-    RouterModule.register(),
+    AuthModule,
+    UsersModule,
+    QuestionsModule,
+    MessagesModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // @see https://docs.nestjs.com/fundamentals/testing#overriding-globally-registered-enhancers
+    {
+      provide: APP_GUARD,
+      useExisting: JwtAuthGuard,
+    },
+    JwtAuthGuard,
+  ],
 })
 export class AppModule {}

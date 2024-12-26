@@ -11,23 +11,25 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DATABASE}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
+      - pg_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   app:
     build:
       context: .
-      dockerfile: Dockerfile.local
-    container_name: keepintouch-server
-    restart: always
     env_file:
       - .env.local
+    container_name: keepintouch-server
+    restart: always
     ports:
-      - '3000:3000'
+      - '${APP_PORT}:${APP_PORT}'
     depends_on:
-      - postgres
-    #volumes:
-    #  - ./src:/app/src #실시간 코드 수정 반영
-
+      postgres:
+        condition: service_healthy
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -40,8 +42,8 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - postgres
-
+      postgres:
+        condition: service_healthy
 volumes:
-  postgres_data:
+  pg_data:
   pgadmin_data:
