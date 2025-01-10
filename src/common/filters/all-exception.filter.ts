@@ -16,7 +16,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }, {});
   }
 
-  catch(exception: Error, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -33,8 +33,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // exception의 세부 정보를 로깅
     const errorJson = {
-      message: exception.message,
-      name: exception.name,
+      message: exception instanceof Error ? exception.message : 'Internal server error', // exception이 Error인 경우만 접근
+      name: exception instanceof Error ? exception.name : 'UnknownError',
     };
 
     const headers = this.maskSensitiveFields(request.headers);
@@ -57,7 +57,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     if (status >= 500) {
-      this.logger.error('', exception.stack, 'AllExceptionsFilter', {
+      this.logger.error('', exception instanceof Error ? exception.stack : '', 'AllExceptionsFilter', {
         method: request.method,
         path: request.url,
         status: status,
