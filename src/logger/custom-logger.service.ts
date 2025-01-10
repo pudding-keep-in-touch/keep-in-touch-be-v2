@@ -25,6 +25,8 @@ export class CustomLogger implements LoggerService {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => {
         if (typeof value === 'object') {
+          // logfmt 형식에서 "key=value" 형태로 출력하기 위해 JSON.stringify를 두 번 사용
+          // ex) key="{\"key\":\"value\"}"
           return `${key}=${JSON.stringify(JSON.stringify(value))}`;
         }
         return `${key}="${value}"`;

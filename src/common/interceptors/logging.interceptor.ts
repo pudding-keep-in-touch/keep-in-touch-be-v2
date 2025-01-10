@@ -10,9 +10,7 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const url = request.url;
-    if (url === '/health') {
-      return next.handle();
-    }
+
     const method = request.method;
     const now = performance.now();
     const response = context.switchToHttp().getResponse();
@@ -22,7 +20,13 @@ export class LoggingInterceptor implements NestInterceptor {
       tap({
         next: () => {
           const responseTime = Math.round(performance.now() - now);
-          this.logger.log(`[${method}] ${url} ${statusCode} +${responseTime}ms`, 'LoggingInterceptor');
+
+          this.logger.log('', 'LoggingInterceptor', {
+            method: method,
+            path: url,
+            status: statusCode,
+            duration: `${responseTime}ms`,
+          });
         },
       }),
     );
