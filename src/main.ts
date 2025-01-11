@@ -5,6 +5,7 @@ import { CustomLogger } from '@logger/custom-logger.service';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as swaggerStats from 'swagger-stats';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -69,6 +70,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v2', app, document);
+
+  app.use(swaggerStats.getMiddleware({ swaggerSpec: document }));
 
   // 문서의 모든 API description을 순회하면서 플레이스홀더 치환
   for (const path of Object.values(document.paths)) {
