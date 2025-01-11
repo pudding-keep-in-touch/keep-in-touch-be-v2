@@ -7,6 +7,7 @@ import { JwtConfigService } from './jwt/jwt-config.service';
 import { KakaoConfigService } from './kakao/kakao-config.service';
 import { loadConfigs } from './load-configs';
 import { PostgresConfigService } from './postgres/postgres-config.service';
+import { SwaggerStatsConfigService } from './swagger-stats/swagger-stats-config.service';
 import { validateEnv } from './validate-env.config';
 
 @Global() // global module
@@ -27,6 +28,7 @@ import { validateEnv } from './validate-env.config';
     KakaoConfigService,
     PostgresConfigService,
     JwtConfigService,
+    SwaggerStatsConfigService,
   ],
   exports: [
     ConfigService,
@@ -35,6 +37,7 @@ import { validateEnv } from './validate-env.config';
     KakaoConfigService,
     PostgresConfigService,
     JwtConfigService,
+    SwaggerStatsConfigService,
   ],
 })
 export class RootConfigModule {}

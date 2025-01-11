@@ -28,4 +28,8 @@ export const validateEnv = Joi.object({
   // JWT
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().required(),
+
+  // SWAGGER STATS
+  SWAGGER_STATS_USERNAME: Joi.string().required(),
+  SWAGGER_STATS_PASSWORD: Joi.string().required(),
 });
