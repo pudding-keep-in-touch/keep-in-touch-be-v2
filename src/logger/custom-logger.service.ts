@@ -4,6 +4,14 @@ import * as winston from 'winston';
 
 const { combine, timestamp, printf, colorize, align } = winston.format;
 
+type HttpMetaData = {
+  method: string;
+  path: string;
+  status: number;
+  duration?: string;
+  contents?: object;
+};
+
 @Injectable()
 export class CustomLogger implements LoggerService {
   private logger: winston.Logger;
@@ -12,17 +20,53 @@ export class CustomLogger implements LoggerService {
     this.initializeLogger();
   }
 
+  private formatMetadata(metadata: object): string {
+    return Object.entries(metadata)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, value]) => {
+        if (typeof value === 'object') {
+          // logfmt 형식에서 "key=value" 형태로 출력하기 위해 JSON.stringify를 두 번 사용
+          // ex) key="{\"key\":\"value\"}"
+          return `${key}=${JSON.stringify(JSON.stringify(value))}`;
+        }
+        return `${key}="${value}"`;
+      })
+      .join(' ');
+  }
+
   private initializeLogger() {
-    // Console 로그를 위한 포맷
-    const consoleFormat = combine(
+    // for local, test etc
+    const developmentFormat = combine(
       colorize({ all: true }),
       timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       align(),
       printf(({ timestamp, level, message, context, trace, ...meta }) => {
         const contextStr = context ? `[${context}] ` : '';
-        const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-        const traceStr = trace ? `\nStack Trace:\n${trace}` : '';
-        return `${timestamp} ${level}: ${contextStr}${message}${metaStr}${traceStr}`;
+        let metaStr = '';
+
+        if (meta?.method && meta?.path && meta?.status) {
+          metaStr = `[${meta.method}] ${meta.path} ${meta.status}${meta.duration ? ` +${meta.duration}` : ''}`;
+        }
+        if (meta?.contents) {
+          // map contents to string
+          const contents = meta.contents as any;
+          for (const key in contents) {
+            metaStr += `\n${key}: ${JSON.stringify(contents[key])}`;
+          }
+        }
+        const traceStr = trace ? `\nStack Trace: ${trace}` : '';
+        return `${timestamp} ${level}: ${contextStr}${metaStr}${traceStr}${message}`;
+      }),
+    );
+
+    // for production environment
+    const productionFormat = combine(
+      timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss',
+      }),
+      printf(({ timestamp, level, message, context, ...meta }) => {
+        const format = `time="${timestamp}" level="${level}" context="${context}" ${this.formatMetadata(meta)} ${message}`;
+        return format.replace(/\s+/g, ' ');
       }),
     );
 
@@ -36,34 +80,34 @@ export class CustomLogger implements LoggerService {
       level: level,
       transports: [
         new winston.transports.Console({
-          format: consoleFormat,
+          format: environment === 'production' || environment === 'development' ? productionFormat : developmentFormat,
         }),
       ],
     });
   }
 
   // log === info
-  log(message: string, context?: string) {
-    this.logger.info(message, { context });
+  log(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.info(message, { context, ...meta });
   }
 
-  error(message: string, trace?: string, context?: string) {
-    this.logger.error(message, { context, trace });
+  error(message: string, trace?: string, context?: string, meta?: HttpMetaData) {
+    this.logger.error(message, { context, trace, ...meta });
   }
 
-  warn(message: string, context?: string) {
-    this.logger.warn(message, { context });
+  warn(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.warn(message, { context, ...meta });
   }
 
-  debug(message: string, context?: string) {
-    this.logger.debug(message, { context });
+  debug(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.debug(message, { context, ...meta });
   }
 
-  verbose(message: string, context?: string) {
-    this.logger.verbose(message, { context });
+  verbose(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.verbose(message, { context, ...meta });
   }
 
-  silly(message: string, context?: string) {
-    this.logger.silly(message, { context });
+  silly(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.silly(message, { context, ...meta });
   }
 }
