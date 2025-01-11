@@ -1,6 +1,7 @@
 import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
 import { AppConfigService } from '@configs/app/app-config.service';
+import { SwaggerStatsConfigService } from '@configs/swagger-stats/swagger-stats-config.service';
 import { CustomLogger } from '@logger/custom-logger.service';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -15,6 +16,7 @@ async function bootstrap() {
   // 서버를 UTC로 설정해서 해결 가능.
   const app = await NestFactory.create(AppModule);
   const appConfigService = app.get(AppConfigService);
+  const swaggerStatsConfigService = app.get(SwaggerStatsConfigService);
   const logger = app.get(CustomLogger);
 
   app.useLogger(logger);
@@ -71,7 +73,15 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v2', app, document);
 
-  app.use(swaggerStats.getMiddleware({ swaggerSpec: document }));
+  app.use(
+    swaggerStats.getMiddleware({
+      swaggerSpec: document,
+      authentication: true,
+      onAuthenticate: (_req, username, password) => {
+        return username === swaggerStatsConfigService.username && password === swaggerStatsConfigService.password;
+      },
+    }),
+  );
 
   // 문서의 모든 API description을 순회하면서 플레이스홀더 치환
   for (const path of Object.values(document.paths)) {
