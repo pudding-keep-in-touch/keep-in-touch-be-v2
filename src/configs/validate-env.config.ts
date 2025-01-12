@@ -7,6 +7,7 @@ export const validateEnv = Joi.object({
   APP_URL: Joi.string().uri().required(),
   APP_PORT: Joi.number().required().default(3000),
   REDIRECT_URL: Joi.string().uri().required(),
+  SENTRY_DSN: Joi.string().required(),
 
   // POSTGRES
   POSTGRES_HOST: Joi.string().required(),

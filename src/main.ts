@@ -6,6 +6,8 @@ import { CustomLogger } from '@logger/custom-logger.service';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as Sentry from '@sentry/nestjs';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import * as swaggerStats from 'swagger-stats';
 import { AppModule } from './app.module';
 
@@ -14,6 +16,7 @@ async function bootstrap() {
   // 이유: KST 인 호스트에서 실행되면 timestamp without timezone으로 저장된 모든 데이터가 실제보다 9시간 빠르게 조회됨
   // pagination 등에서 엄청난 데이터 불일치가 발생함.
   // 서버를 UTC로 설정해서 해결 가능.
+
   const app = await NestFactory.create(AppModule);
   const appConfigService = app.get(AppConfigService);
   const swaggerStatsConfigService = app.get(SwaggerStatsConfigService);
@@ -41,6 +44,26 @@ async function bootstrap() {
     credentials: true,
     maxAge: appConfigService.env === 'production' ? 3600 : 5, // 1시간
     // preflightContinue: false - default setting
+  });
+
+  let sampleRate = 1.0;
+  if (appConfigService.env === 'production') {
+    sampleRate = 0.1;
+  } else if (appConfigService.env === 'development') {
+    sampleRate = 0.3;
+  }
+  // Ensure to call this before importing any other modules!
+  Sentry.init({
+    dsn: appConfigService.sentryDsn,
+    integrations: [
+      // Add our Profiling integration
+      nodeProfilingIntegration(),
+    ],
+    environment: appConfigService.env,
+    // Add Tracing by setting tracesSampleRate
+    tracesSampleRate: sampleRate,
+    // Set sampling rate for profiling
+    profilesSampleRate: sampleRate,
   });
 
   app.useGlobalPipes(
