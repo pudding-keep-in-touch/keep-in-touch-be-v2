@@ -46,6 +46,12 @@ async function bootstrap() {
     // preflightContinue: false - default setting
   });
 
+  let sampleRate = 1.0;
+  if (appConfigService.env === 'production') {
+    sampleRate = 0.1;
+  } else if (appConfigService.env === 'development') {
+    sampleRate = 0.3;
+  }
   // Ensure to call this before importing any other modules!
   Sentry.init({
     dsn: appConfigService.sentryDsn,
@@ -53,14 +59,11 @@ async function bootstrap() {
       // Add our Profiling integration
       nodeProfilingIntegration(),
     ],
-
+    environment: appConfigService.env,
     // Add Tracing by setting tracesSampleRate
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-
+    tracesSampleRate: sampleRate,
     // Set sampling rate for profiling
-    // This is relative to tracesSampleRate
-    profilesSampleRate: 1.0,
+    profilesSampleRate: sampleRate,
   });
 
   app.useGlobalPipes(
