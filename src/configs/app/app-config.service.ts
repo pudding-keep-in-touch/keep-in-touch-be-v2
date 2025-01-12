@@ -24,4 +24,8 @@ export class AppConfigService {
   get clientUrl() {
     return this.configService.getOrThrow<string>('app.redirectUrl');
   }
+
+  get sentryDsn() {
+    return this.configService.getOrThrow<string>('app.sentryDsn');
+  }
 }

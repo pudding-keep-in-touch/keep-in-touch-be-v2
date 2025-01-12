@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SentryModule } from '@sentry/nestjs/setup';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
@@ -18,6 +19,7 @@ import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     RootConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [RootConfigModule],
