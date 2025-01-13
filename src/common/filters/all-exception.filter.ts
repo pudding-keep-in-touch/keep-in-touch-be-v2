@@ -1,6 +1,7 @@
 import { BaseResponseDto } from '@common/common.dto';
 import { CustomLogger } from '@logger/custom-logger.service';
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { Request, Response } from 'express';
 
 @Catch()
@@ -16,6 +17,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }, {});
   }
 
+  @SentryExceptionCaptured()
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -32,21 +34,44 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     // exception의 세부 정보를 로깅
-    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : exception;
-    const logMessage = `\n[${request.method}] ${request.url} ${status} - Error: ${
-      typeof exceptionResponse === 'object' ? JSON.stringify(exceptionResponse) : exceptionResponse
-    }
-Headers: ${JSON.stringify(this.maskSensitiveFields(request.headers))}
-Query: ${JSON.stringify(request.query)}
-Params: ${JSON.stringify(request.params)}
-Body: ${JSON.stringify(this.maskSensitiveFields(request.body))}
-IP: ${request.ip}
-User-Agent: ${request.get('user-agent')}
-`;
+    const errorJson = {
+      message: exception instanceof Error ? exception.message : 'Internal server error', // exception이 Error인 경우만 접근
+      name: exception instanceof Error ? exception.name : 'UnknownError',
+    };
+
+    const headers = this.maskSensitiveFields(request.headers);
+    const query = request.query;
+    const params = request.params;
+    const body = this.maskSensitiveFields(request.body);
+    const ip = request.headers['x-real-ip'] ?? request.ip;
+
+    const userAgent = request.get('user-agent');
+
+    const requestInfo = {
+      error: errorJson,
+      status,
+      headers,
+      query,
+      params,
+      body,
+      ip,
+      userAgent,
+    };
+
     if (status >= 500) {
-      this.logger.error(logMessage, (exception as Error).stack, 'AllExceptionsFilter');
+      this.logger.error('', exception instanceof Error ? exception.stack : '', 'AllExceptionsFilter', {
+        method: request.method,
+        path: request.url,
+        status: status,
+        contents: requestInfo,
+      });
     } else if (status >= 400) {
-      this.logger.warn(logMessage, 'AllExceptionsFilter');
+      this.logger.warn('', 'AllExceptionsFilter', {
+        method: request.method,
+        path: request.url,
+        status: status,
+        contents: requestInfo,
+      });
     }
 
     const responseBody: BaseResponseDto<null> = {

@@ -204,10 +204,7 @@ describe('Messages API test', () => {
           expect(response.body.data).toHaveProperty('unreadReactionCount', 0);
         });
 
-      await request(app.getHttpServer())
-        .get(`/messages/${targetToLoginMessageId}`)
-        .send({ status: 'read' })
-        .expect(HttpStatus.OK);
+      await request(app.getHttpServer()).get(`/messages/${targetToLoginMessageId}`).expect(HttpStatus.OK);
 
       return request(app.getHttpServer())
         .get('/messages/unread')

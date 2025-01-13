@@ -4,7 +4,7 @@
 <br />
 <div align="center">
 
-  <h3 align="center">KEEP IN TOUCH Frontend</h3>
+  <h3 align="center">KEEP IN TOUCH Backend</h3>
 
   <p align="center">
     푸딩캠프 토이스토리 3팀 
@@ -37,9 +37,6 @@
 - 성장: 피드백을 통한 개인과 관계의 성장
 
 ### 핵심 목표
-
-## 핵심 목표
-
 - **진정성 있는 소통을 유도하는 소통 플랫폼 완성**
   - 초기 기획의 목적을 반영하여, 친구들에게 진솔한 감정과 생각을 표현할 수 있도록 다양한 소통 방식을 지원.
   - 이를 통해 사용자가 서로의 감정을 담은 메세지를 편안하게 전달할 수 있게 하고, 서로를 더 깊이 이해할 수 있는 공간을 제공하는 것을 목표로 함.
@@ -60,20 +57,20 @@
 
 ### Built With
 
-- IDE : ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 - Framework : ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)
 ![TypeORM](https://img.shields.io/badge/TypeORM-FE0803.svg?style=for-the-badge&logo=typeorm&logoColor=white)
-- Web Server : ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 - DBMS : ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+- Web Server : ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 - CSP : ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 - CICD : ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 - Moniroting : ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white)
+![Sentry](https://img.shields.io/badge/sentry-%23362D59.svg?style=for-the-badge&logo=sentry&logoColor=white)
 ![Datadog](https://img.shields.io/badge/datadog-%23632CA6.svg?style=for-the-badge&logo=datadog&logoColor=white)
 - ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+- ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -81,7 +78,8 @@
 
 ## Getting Started
 
-TBU
+- set .env with .env.sample
+- `docker compose up`
 
 <!-- USAGE EXAMPLES -->
 
@@ -92,14 +90,35 @@ TBU
 <!-- CONTRIBUTING -->
 
 ## Contributing
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/jis-kim">
+          <img src="https://avatars.githubusercontent.com/u/71019735?v=4" width="100px;" alt=""/>
+          <br /><sub><b>jis-kim</b></sub>
+        </a>
+        <br />
+        <sub><b>Backend</b></sub>
+       </td>
+       <td align="center">
+        <a href="https://github.com/eeeclipse">
+          <img src="https://avatars.githubusercontent.com/u/48973781?v=4" width="100px;" alt=""/>
+          <br /><sub><b>eeeclipse</b></sub>
+        </a>
+        <br />
+        <sub><b>Infrastructure</b></sub>
+       </td>
+    </tr>
+  </tbody>
+</table>
 
-TBU
 
 <!-- LICENSE -->
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See [`LICENSE.txt`](./LICENSE.txt) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

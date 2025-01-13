@@ -7,6 +7,7 @@ export const validateEnv = Joi.object({
   APP_URL: Joi.string().uri().required(),
   APP_PORT: Joi.number().required().default(3000),
   REDIRECT_URL: Joi.string().uri().required(),
+  SENTRY_DSN: Joi.string().required(),
 
   // POSTGRES
   POSTGRES_HOST: Joi.string().required(),
@@ -28,4 +29,8 @@ export const validateEnv = Joi.object({
   // JWT
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().required(),
+
+  // SWAGGER STATS
+  SWAGGER_STATS_USERNAME: Joi.string().required(),
+  SWAGGER_STATS_PASSWORD: Joi.string().required(),
 });
