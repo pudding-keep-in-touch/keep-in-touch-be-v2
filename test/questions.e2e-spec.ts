@@ -2,51 +2,45 @@ import { QUESTION_COUNT_LIMIT } from '@modules/questions/constants/question.cons
 import { CreateQuestionDto } from '@modules/questions/dto/create-question.dto';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource, Repository } from 'typeorm';
 
-import { Question } from '@entities/question.entity';
 import { ResponseGetSharedQuestionDetailDto } from '@modules/questions/dto/get-shared-question-detail.dto';
-import { SharedQuestionDto } from '@modules/questions/dto/get-shared-questions.dto';
 import { UpdateQuestionHiddenDto } from '@modules/questions/dto/update-question-hidden';
-import { createTestingApp } from './helpers/create-testing-app.helper';
+import { TestFixtureManager } from './helpers/fixtures';
+import { TestSetup } from './test-setup';
 
 describe('Questions API test', () => {
+  let testSetup: TestSetup;
+  let testData: Awaited<ReturnType<TestFixtureManager['createBasicTestData']>>;
   let app: INestApplication;
-  let dataSource: DataSource;
-  let questionRepository: Repository<Question>;
-  let createdQuestionIds: string[] = []; // 생성된 questionId 추적용
-  const testUserId = '1'; // 테스트용 유저 ID
+  let targetUserId: string;
+  let loginUserId: string;
+
+  let loginToTargetMessageId: string;
+  let targetToLoginMessageId: string;
 
   beforeAll(async () => {
-    // 1, 2 번 유저 생성
-    const testApp = await createTestingApp();
-    app = testApp.app;
-    dataSource = testApp.dataSource;
-    questionRepository = dataSource.getRepository(Question);
-    await app.init();
-
-    await questionRepository.delete({ userId: testUserId });
+    testSetup = await new TestSetup().init();
+    app = testSetup.app;
   });
 
   beforeEach(async () => {
-    createdQuestionIds = []; // 테스트 시작 전 초기화
+    await testSetup.fixtures.cleanDatabase();
+    testData = await testSetup.fixtures.createBasicTestData();
+
+    testSetup.setUser({
+      userId: testData.users.loginUser.userId,
+      email: testData.users.loginUser.email,
+      nickname: testData.users.loginUser.nickname,
+    });
+
+    targetUserId = testData.users.targetUser.userId;
+    loginUserId = testData.users.loginUser.userId;
+    loginToTargetMessageId = testData.messages[0].messageId;
+    targetToLoginMessageId = testData.messages[1].messageId;
   });
 
   afterAll(async () => {
-    await dataSource.destroy(); // 데이터베이스 연결 종료
-    await app.close(); // 애플리케이션 종료
-  });
-
-  afterEach(async () => {
-    if (createdQuestionIds.length > 0) {
-      await dataSource
-        .createQueryBuilder()
-        .delete()
-        .from(Question)
-        .where('questionId IN (:...ids)', { ids: createdQuestionIds })
-        .execute();
-    }
-    createdQuestionIds = []; // 배열 초기화
+    await testSetup.cleanup();
   });
 
   describe('POST /questions', () => {
@@ -74,8 +68,6 @@ describe('Questions API test', () => {
 
           // json 에서 string으로 변환되기 때문에 "숫자"형식 string인지 판단해야 함.
           const questionId = response.body.data.questionId;
-          createdQuestionIds.push(questionId);
-
           // 메시지 검증
           expect(response.body.message).toBe('질문이 성공적으로 등록되었습니다.');
         });
@@ -106,15 +98,12 @@ describe('Questions API test', () => {
         isHidden: false,
       };
 
-      const questionCount = await questionRepository.count({ where: { userId: testUserId } });
-
-      // 먼저 10개의 질문 생성
-      for (let i = 0; i < QUESTION_COUNT_LIMIT - questionCount; i++) {
+      // 먼저 LIMIT개의 질문 생성 - fixture에는 loginUser가 아니라 targetUserId로 생성되어있으므로 정직하게 30개 생성하면 됨
+      for (let i = 0; i < QUESTION_COUNT_LIMIT; i++) {
         const response = await request(app.getHttpServer()).post('/questions').send(createQuestionDto).expect(201);
-        createdQuestionIds.push(response.body.data.questionId);
       }
 
-      // 11번째 질문 시도
+      // LIMIT + 1번째 질문 시도
       return request(app.getHttpServer())
         .post('/questions')
         .send(createQuestionDto)
@@ -131,43 +120,41 @@ describe('Questions API test', () => {
 
   describe('GET /questions', () => {
     it('userId에 해당하는, isHidden:false 질문 리스트 반환.', async () => {
-      const res = await questionRepository.insert([
-        {
-          content: '안숨겨진 질문',
-          isHidden: false,
-          userId: testUserId,
-        },
-        {
-          content: '숨겨진 질문',
-          isHidden: true,
-          userId: testUserId,
-        },
-      ]);
-      res.identifiers.forEach((id) => createdQuestionIds.push(id.questionId));
+      // 숨겨진, 숨겨지지 않은 5개의 질문 생성.
+      const questions = await testSetup.fixtures.questionFactory.createMany(4, {
+        userId: loginUserId,
+        isHidden: false,
+      });
+      await testSetup.fixtures.questionFactory.createMany(6, {
+        userId: loginUserId,
+        isHidden: true,
+      });
 
-      return request(app.getHttpServer())
-        .get(`/questions?userId=${testUserId}`)
-        .expect(200)
-        .expect((response) => {
-          expect(response.body).toHaveProperty('data');
-          expect(response.body).toHaveProperty('message');
-          expect(response.body).toHaveProperty('status');
+      const unhiddenQuestionIds = questions.map((question) => question.questionId);
 
-          expect(response.body.status).toBe(200);
-          expect(response.body.data).toBeInstanceOf(Array);
-          //console.log(response.body.data);
-          expect(response.body.data.length).toBe(1);
+      const response = await request(app.getHttpServer()).get(`/questions?userId=${loginUserId}`).expect(200);
 
-          // SharedQuestionDto 형식 검증
-          const data: SharedQuestionDto = response.body.data[0];
-          expect(data).toHaveProperty('userId');
-          expect(data).toHaveProperty('questionId');
-          expect(data).toHaveProperty('content');
-          expect(data).toHaveProperty('createdAt');
+      expect(response.body).toBeDefined();
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toBeDefined();
 
-          expect(data.userId).toBe(testUserId);
-          expect(data.content).toBe('안숨겨진 질문');
-        });
+      // 2. 데이터 배열 검증
+      const { data } = response.body;
+      expect(data).toBeInstanceOf(Array);
+      expect(data.length).toBe(4);
+
+      // 3. 각 데이터 검증
+      for (const question of data) {
+        expect(question).toHaveProperty('userId');
+        expect(question).toHaveProperty('questionId');
+        expect(question).toHaveProperty('content');
+        expect(question).toHaveProperty('createdAt');
+
+        // question id is in questionsIds
+        expect(unhiddenQuestionIds).toContain(question.questionId);
+
+        expect(question.userId).toBe(loginUserId);
+      }
     });
 
     it('userId query parameter가 없으면 400', () => {
@@ -199,15 +186,11 @@ describe('Questions API test', () => {
 
   describe('GET /questions/:questionId', () => {
     it('questionId에 해당하는 질문 반환', async () => {
-      const question = await questionRepository.save({
-        content: '테스트 질문입니다.',
-        isHidden: false,
-        userId: testUserId,
-      });
-      createdQuestionIds.push(question.questionId);
+      const questionId = testData.questions[0].questionId;
+      const userId = testData.questions[0].userId;
 
       return request(app.getHttpServer())
-        .get(`/questions/${question.questionId}`)
+        .get(`/questions/${questionId}`)
         .expect(200)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
@@ -223,21 +206,20 @@ describe('Questions API test', () => {
           expect(data).toHaveProperty('createdAt');
           expect(data).toHaveProperty('isHidden');
 
-          expect(data.userId).toBe(testUserId);
-          expect(data.content).toBe('테스트 질문입니다.');
+          expect(data.userId).toBe(userId);
+          expect(data.content).toBe(testData.questions[0].content);
         });
     });
 
     it('숨김 처리된 질문이어도 값을 반환해야 한다.', async () => {
-      const question = await questionRepository.save({
-        content: '숨겨진 테스트 질문',
+      // 남이 만든 숨김 질문
+      const { questionId, content } = await testSetup.fixtures.questionFactory.create({
+        userId: targetUserId,
         isHidden: true,
-        userId: testUserId,
       });
-      createdQuestionIds.push(question.questionId);
 
       return request(app.getHttpServer())
-        .get(`/questions/${question.questionId}`)
+        .get(`/questions/${questionId}`)
         .expect(200)
         .expect((response) => {
           expect(response.body).toHaveProperty('data');
@@ -253,8 +235,8 @@ describe('Questions API test', () => {
           expect(data).toHaveProperty('createdAt');
           expect(data).toHaveProperty('isHidden');
 
-          expect(data.userId).toBe(testUserId);
-          expect(data.content).toBe('숨겨진 테스트 질문');
+          expect(data.userId).toBe(targetUserId);
+          expect(data.content).toBe(content);
           expect(data.isHidden).toBe(true);
         });
     });
@@ -288,20 +270,11 @@ describe('Questions API test', () => {
 
   describe('PATCH /questions/:questionId', () => {
     it('user가 작성한 question의 숨김 처리 가능', async () => {
+      const { questionId } = await testSetup.fixtures.questionFactory.create({ userId: loginUserId });
+
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      let question = await questionRepository.findOne({ where: { userId: testUserId } });
-      if (!question) {
-        question = questionRepository.create({
-          content: '테스트 질문입니다.',
-          isHidden: false,
-          userId: testUserId,
-        });
-        await questionRepository.save(question);
-      }
-      const questionId = question.questionId;
-      createdQuestionIds.push(questionId);
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)
@@ -315,10 +288,7 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      const questionId = '1';
-      if (await questionRepository.findOne({ where: { questionId } })) {
-        await questionRepository.delete({ questionId });
-      }
+      const questionId = '10000';
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)
@@ -331,17 +301,8 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto = {
         isHidden: 'xxx', // boolean이 아닌 문자열
       };
-      let question = await questionRepository.findOne({ where: { userId: testUserId } });
-      if (!question) {
-        question = questionRepository.create({
-          content: '테스트 질문입니다.',
-          isHidden: false,
-          userId: testUserId,
-        });
-        await questionRepository.save(question);
-      }
-      const questionId = question.questionId;
-      createdQuestionIds.push(questionId);
+
+      const questionId = testData.questions[0].questionId;
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)
@@ -354,18 +315,12 @@ describe('Questions API test', () => {
       const updateQuestionHiddenDto: UpdateQuestionHiddenDto = {
         isHidden: true,
       };
-      let question = await questionRepository.findOne({ where: { userId: '2' } });
-      if (!question) {
-        question = questionRepository.create({
-          content: '테스트 질문입니다.',
-          isHidden: false,
-          userId: '2',
-        });
-        await questionRepository.save(question);
-      }
-      const questionId = question.questionId;
 
-      createdQuestionIds.push(questionId);
+      const { questionId } = await testSetup.fixtures.questionFactory.create({
+        userId: targetUserId,
+        content: '다른 유저의 질문',
+        isHidden: false,
+      });
 
       const response = await request(app.getHttpServer())
         .patch(`/questions/${questionId}`)

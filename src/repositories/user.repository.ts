@@ -1,8 +1,13 @@
 import { Repository } from 'typeorm';
 
 import { CustomEntityRepository } from '@common/custom-typeorm/custom-typeorm.decorator';
-import { MessageStatistic } from '@entities/message-statistic.entity';
-import { User } from '@entities/user.entity';
+import { LoginType, User } from '@entities/user.entity';
+
+type CreateUserParams = {
+  email: string;
+  nickname: string;
+  loginType: LoginType;
+};
 
 @CustomEntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -14,32 +19,19 @@ export class UserRepository extends Repository<User> {
    * @param loginType
    * @returns 생성한 user의 userId
    */
-  async createUser(email: string, nickname: string, loginType: number): Promise<string> {
-    return this.manager.transaction(async (transactionalEntityManager) => {
-      // 1. User 생성
-      const userResult = await transactionalEntityManager.insert(User, {
-        email,
-        nickname,
-        loginType,
-      });
+  async createUser(createUserParams: CreateUserParams): Promise<string> {
+    const result = await this.insert(createUserParams);
+    return result.identifiers[0].userId;
+  }
 
-      const userId = userResult.identifiers[0].userId;
-
-      // 2. MessageStatistics 생성 (user와 1:1 관계)
-      await transactionalEntityManager.insert(MessageStatistic, {
-        userId: userId,
-      });
-
-      return userId;
+  async findUserByEmailWithLoginType(email: string, loginType: LoginType): Promise<User | null> {
+    return await this.findOne({
+      select: ['userId', 'nickname', 'email', 'loginType'],
+      where: { email, loginType },
     });
   }
 
-  // 유저 이메일 기준으로 조회
-  async findUserByEmail(email: string): Promise<User | null> {
-    return await this.findOne({ where: { email } });
-  }
-
   async findUserById(id: string): Promise<User | null> {
-    return this.findOne({ where: { userId: id } });
+    return this.findOne({ select: ['userId', 'nickname', 'email'], where: { userId: id } });
   }
 }

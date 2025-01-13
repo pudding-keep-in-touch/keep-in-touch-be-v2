@@ -13,9 +13,10 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { isEmpty, isUndefined } from 'lodash';
+
 import { BaseResponseDto } from './common.dto';
 import { SwaggerDocInterface } from './common.interface';
+import { RequestUser } from './types/request-user.type';
 
 /**
  * @brief Auth가 필요하지 않을때 데코레이터
@@ -91,15 +92,15 @@ export const GenerateSwaggerApiDoc = (swaggerDocInterface: SwaggerDocInterface) 
 
   if (Array.isArray(tags)) methodDecorators.push(ApiTags(...tags));
 
-  if (!isEmpty(body)) methodDecorators.push(ApiBody(body));
+  if (body && typeof body === 'object' && Object.keys(body).length > 0) methodDecorators.push(ApiBody(body));
 
-  if (!isUndefined(responseType)) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
+  if (responseType !== undefined) methodDecorators.push(ResponseDtoType(responseType, responseStatus));
 
   return applyDecorators(ApiOperation({ summary, description }), ...methodDecorators);
 };
 
 // Auth 데코레이터
 export const UserAuth = createParamDecorator((_: unknown, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
+  const request: RequestUser = ctx.switchToHttp().getRequest();
   return request.user;
 });

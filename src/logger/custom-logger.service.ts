@@ -1,64 +1,77 @@
+import { AppConfigService } from '@configs/app/app-config.service';
 import { Injectable, LoggerService } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as winston from 'winston';
-//import * as DailyRotateFile from 'winston-daily-rotate-file';
 
 const { combine, timestamp, printf, colorize, align } = winston.format;
+
+type HttpMetaData = {
+  method: string;
+  path: string;
+  status: number;
+  duration?: string;
+  contents?: object;
+};
 
 @Injectable()
 export class CustomLogger implements LoggerService {
   private logger: winston.Logger;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly appConfigService: AppConfigService) {
     this.initializeLogger();
   }
 
+  private formatMetadata(metadata: object): string {
+    return Object.entries(metadata)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, value]) => {
+        if (typeof value === 'object') {
+          // logfmt 형식에서 "key=value" 형태로 출력하기 위해 JSON.stringify를 두 번 사용
+          // ex) key="{\"key\":\"value\"}"
+          return `${key}=${JSON.stringify(JSON.stringify(value))}`;
+        }
+        return `${key}="${value}"`;
+      })
+      .join(' ');
+  }
+
   private initializeLogger() {
-    // Console 로그를 위한 포맷
-    const consoleFormat = combine(
+    // for local, test etc
+    const developmentFormat = combine(
       colorize({ all: true }),
       timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       align(),
       printf(({ timestamp, level, message, context, trace, ...meta }) => {
         const contextStr = context ? `[${context}] ` : '';
-        const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-        const traceStr = trace ? `\nStack Trace:\n${trace}` : '';
-        return `${timestamp} ${level}: ${contextStr}${message}${metaStr}${traceStr}`;
+        let metaStr = '';
+
+        if (meta?.method && meta?.path && meta?.status) {
+          metaStr = `[${meta.method}] ${meta.path} ${meta.status}${meta.duration ? ` +${meta.duration}` : ''}`;
+        }
+        if (meta?.contents) {
+          // map contents to string
+          const contents = meta.contents as any;
+          for (const key in contents) {
+            metaStr += `\n${key}: ${JSON.stringify(contents[key])}`;
+          }
+        }
+        const traceStr = trace ? `\nStack Trace: ${trace}` : '';
+        return `${timestamp} ${level}: ${contextStr}${metaStr}${traceStr}${message}`;
       }),
     );
 
-    //const serviceName = this.configService.get('APP_NAME');
-    //// 파일 로그를 위한 포맷
-    //const fileFormat = combine(
-    //  timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    //  printf(({ timestamp, level, message, context, trace, ...meta }) => {
-    //    const contextStr = context ? `[${context}] ` : '';
-    //    const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-    //    const traceStr = trace ? `\nStack Trace: ${trace}` : '';
-    //    return `${timestamp} ${level.toUpperCase()}: ${contextStr}${message}${metaStr}${traceStr}`;
-    //  }),
-    //);
+    // for production environment
+    const productionFormat = combine(
+      timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss',
+      }),
+      printf(({ timestamp, level, message, context, ...meta }) => {
+        const format = `time="${timestamp}" level="${level}" context="${context}" ${this.formatMetadata(meta)} ${message}`;
+        return format.replace(/\s+/g, ' ');
+      }),
+    );
 
-    //const fileRotateTransport = new DailyRotateFile({
-    //  filename: `logs/${serviceName}-%DATE%.log`,
-    //  datePattern: 'YYYY-MM-DD',
-    //  zippedArchive: true,
-    //  maxSize: '20m',
-    //  maxFiles: '14d',
-    //  format: fileFormat,
-    //});
-
-    //const errorWarnTransport = new DailyRotateFile({
-    //  filename: `logs/${serviceName}-errors-%DATE%.log`,
-    //  datePattern: 'YYYY-MM-DD',
-    //  zippedArchive: true,
-    //  maxSize: '20m',
-    //  maxFiles: '30d',
-    //  level: 'warn', // warn 레벨 이상(warn과 error)만 기록
-    //  format: fileFormat,
-    //});
     let level = 'info';
-    const environment = this.configService.get<string>('APP_ENV');
+    const environment = this.appConfigService.env;
     if (environment === 'local') {
       level = 'debug';
     }
@@ -67,36 +80,34 @@ export class CustomLogger implements LoggerService {
       level: level,
       transports: [
         new winston.transports.Console({
-          format: consoleFormat,
+          format: environment === 'production' || environment === 'development' ? productionFormat : developmentFormat,
         }),
-        //fileRotateTransport,
-        //errorWarnTransport,
       ],
     });
   }
 
   // log === info
-  log(message: string, context?: string) {
-    this.logger.info(message, { context });
+  log(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.info(message, { context, ...meta });
   }
 
-  error(message: string, trace?: string, context?: string) {
-    this.logger.error(message, { context, trace });
+  error(message: string, trace?: string, context?: string, meta?: HttpMetaData) {
+    this.logger.error(message, { context, trace, ...meta });
   }
 
-  warn(message: string, context?: string) {
-    this.logger.warn(message, { context });
+  warn(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.warn(message, { context, ...meta });
   }
 
-  debug(message: string, context?: string) {
-    this.logger.debug(message, { context });
+  debug(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.debug(message, { context, ...meta });
   }
 
-  verbose(message: string, context?: string) {
-    this.logger.verbose(message, { context });
+  verbose(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.verbose(message, { context, ...meta });
   }
 
-  silly(message: string, context?: string) {
-    this.logger.silly(message, { context });
+  silly(message: string, context?: string, meta?: HttpMetaData) {
+    this.logger.silly(message, { context, ...meta });
   }
 }

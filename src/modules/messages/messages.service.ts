@@ -1,3 +1,4 @@
+import { CustomLogger } from '@logger/custom-logger.service';
 import {
   BadRequestException,
   ForbiddenException,
@@ -6,9 +7,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EmotionRepository, MessageRepository, QuestionRepository, UserRepository } from '@repositories/index';
+import { ReactionInfoRepository } from '@repositories/reaction-info.repository';
 import { CreateMessageDto, ResponseCreateMessageDto } from './dto/create-message.dto';
 import { ReceivedMessageDetailDto, SentMessageDetailDto } from './dto/message-detail.dto';
-import { toMessageStatusEnum } from './helpers/message-reaction.helper';
+import { toMessageStatusEnum } from './helpers/messages.helper';
 import { MessageBaseData, MessageDetailParam, UpdateMessageStatusParam } from './types/messages.type';
 
 @Injectable()
@@ -18,6 +20,8 @@ export class MessagesService {
     private readonly userRepository: UserRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly emotionRepository: EmotionRepository,
+    private readonly reactionInfoRepository: ReactionInfoRepository,
+    private readonly logger: CustomLogger,
   ) {}
 
   /**
@@ -58,6 +62,16 @@ export class MessagesService {
     return { messageId };
   }
 
+  async getUnreadMessageCount(userId: string) {
+    const unreadMessageCount = await this.messageRepository.countUnreadMessages(userId);
+    const unreadReactionCount = await this.messageRepository.countUnreadReactionMessages(userId);
+
+    return {
+      unreadMessageCount,
+      unreadReactionCount,
+    };
+  }
+
   /**
    * 메세지 상세 정보를 조회합니다.
    *
@@ -68,13 +82,29 @@ export class MessagesService {
     userId,
     messageId,
   }: MessageDetailParam): Promise<SentMessageDetailDto | ReceivedMessageDetailDto> {
-    const message = await this.messageRepository.findMessageDetailById(messageId, userId);
+    const message = await this.messageRepository.findMessageDetailById(messageId);
 
     if (!message) {
       throw new NotFoundException('쪽지가 존재하지 않습니다.');
     }
     if (message.senderId !== userId && message.receiverId !== userId) {
       throw new ForbiddenException('쪽지를 볼 권한이 없습니다.');
+    }
+
+    try {
+      if (message.receiverId === userId && message.readAt === null) {
+        // update message readAt
+        this.messageRepository.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
+      }
+      if (message.senderId === userId) {
+        const reactionInfo = await this.reactionInfoRepository.findOne({ where: { messageId } });
+        if (reactionInfo && reactionInfo.readAt === null) {
+          // update reactionInfo readAt
+          await this.reactionInfoRepository.update({ messageId }, { readAt: () => 'CURRENT_TIMESTAMP' });
+        }
+      }
+    } catch (error) {
+      this.logger.error('update readAt failed', error.stack);
     }
 
     // DTO 변환

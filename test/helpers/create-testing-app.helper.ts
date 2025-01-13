@@ -1,64 +1,57 @@
+import { ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { SentryModule } from '@sentry/nestjs/setup';
+
 import { AllExceptionsFilter } from '@common/filters/all-exception.filter';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
-import { User } from '@entities/user.entity';
 import { CustomLogger } from '@logger/custom-logger.service';
-import { ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 
-export type TestUser = {
-  userId: string;
-  email: string;
-  nickname: string;
-  loginType: number;
-};
+export interface TestContext {
+  app: INestApplication;
+  dataSource: DataSource;
+}
 
-/**
- * 공통 테스트용 앱 생성 함수
- * @param testUser
- * @returns
- */
-export const createTestingApp = async (
-  testUser: TestUser[] = [
-    {
-      userId: '1',
-      email: 'test@example.com',
-      nickname: 'loginUser',
-      loginType: 1,
-    },
-    {
-      userId: '2',
-      email: 'test2@exmple.com',
-      nickname: 'targetUser',
-      loginType: 1,
-    },
-  ],
-): Promise<{ app: INestApplication; dataSource: DataSource }> => {
-  const loginUser = testUser[0];
-  const targetUser = testUser[1];
+class MockSentryModule {
+  static forRoot() {
+    return {
+      module: MockSentryModule,
+      providers: [],
+    };
+  }
+}
 
+export const createTestingApp = async (): Promise<TestContext> => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
+    //.overrideProvider(PostgresConfigService)
+    //.useClass(TestDatabaseConfigService)
     .overrideProvider(JwtAuthGuard)
     .useValue({
-      canActivate: (context: ExecutionContext) => {
-        const request = context.switchToHttp().getRequest();
-        request.user = {
-          userId: loginUser.userId,
-          email: loginUser.email,
-        };
+      canActivate: (_context: ExecutionContext) => {
+        // loginUser는 fixtures에서 생성된 후 설정됨
         return true;
       },
     })
+    .overrideModule(SentryModule)
+    .useModule(MockSentryModule)
     .compile();
 
   const app = moduleFixture.createNestApplication();
   const dataSource = moduleFixture.get(DataSource);
   const logger = app.get(CustomLogger);
 
+  // sentry init mock
+  jest.mock('@sentry/node', () => ({
+    init: jest.fn(),
+    nodeProfilingIntegration: jest.fn(() => ({})),
+  }));
+
+  // 기본 앱 설정
   app.useLogger(logger);
   app.useGlobalPipes(
     new ValidationPipe({
@@ -69,41 +62,6 @@ export const createTestingApp = async (
   );
   app.useGlobalFilters(new AllExceptionsFilter(logger));
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
-
-  // create or check test user
-  const userRepository = dataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ userId: loginUser.userId });
-  const existingTargetUser = await userRepository.findOneBy({ userId: targetUser.userId });
-
-  await dataSource.manager.transaction(async (manager) => {
-    if (!existingUser) {
-      await manager.insert(User, loginUser);
-    }
-    if (!existingTargetUser) {
-      await manager.insert(User, targetUser);
-    }
-
-    //await manager.upsert(
-    //  MessageStatistic,
-    //  [
-    //    {
-    //      userId: loginUser.userId,
-    //      receivedMessageCount: 0,
-    //      sentMessageCount: 0,
-    //      unreadMessageCount: 0,
-    //      unreadReactionCount: 0,
-    //    },
-    //    {
-    //      userId: targetUser.userId,
-    //      receivedMessageCount: 0,
-    //      sentMessageCount: 0,
-    //      unreadMessageCount: 0,
-    //      unreadReactionCount: 0,
-    //    },
-    //  ],
-    //  ['userId'],
-    //);
-  });
 
   return { app, dataSource };
 };

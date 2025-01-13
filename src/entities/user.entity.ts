@@ -6,6 +6,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { MessageStatistic } from './message-statistic.entity';
@@ -15,16 +16,16 @@ import { Question } from './question.entity';
 export enum LoginType {
   EMAIL = 1,
   GOOGLE = 2,
-  NAVER = 3,
-  KAKAO = 4,
+  KAKAO = 3,
 }
 
 @Entity({ name: 'users' })
+@Unique(['email', 'loginType'])
 export class User {
   @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
   userId: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255 })
   email: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })

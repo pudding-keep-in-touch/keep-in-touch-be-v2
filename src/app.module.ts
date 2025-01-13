@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SentryModule } from '@sentry/nestjs/setup';
 
-import { CommonModule } from '@common/common.module';
-import { validateEnv } from '@configs/process-env.config';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
 import { MessagesModule } from '@modules/messages/messages.module';
@@ -10,25 +10,28 @@ import { QuestionsModule } from '@modules/questions/questions.module';
 import { UsersModule } from '@modules/users/users.module';
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { PostgresConfigService } from '@configs/postgres/postgres-config.service';
+import { RootConfigModule } from '@configs/root-config.module';
+import { ReactionsModule } from '@modules/reactions/reactions.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env',
-      validationSchema: validateEnv,
-      isGlobal: true,
+    SentryModule.forRoot(),
+    RootConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [RootConfigModule],
+      useClass: PostgresConfigService,
     }),
-    HealthModule,
-    CommonModule,
     LoggerModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     QuestionsModule,
     MessagesModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
   providers: [
