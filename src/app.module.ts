@@ -44,4 +44,5 @@ import { LoggerModule } from './logger/logger.module';
     JwtAuthGuard,
   ],
 })
+
 export class AppModule {}
