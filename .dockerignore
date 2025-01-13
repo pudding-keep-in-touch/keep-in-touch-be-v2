@@ -13,3 +13,5 @@ coverage
 dist
 logs
 *.log
+.env
+.env*
