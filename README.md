@@ -4,7 +4,7 @@
 <br />
 <div align="center">
 
-  <h3 align="center">KEEP IN TOUCH Frontend</h3>
+  <h3 align="center">KEEP IN TOUCH Backend</h3>
 
   <p align="center">
     푸딩캠프 토이스토리 3팀 
@@ -37,9 +37,6 @@
 - 성장: 피드백을 통한 개인과 관계의 성장
 
 ### 핵심 목표
-
-## 핵심 목표
-
 - **진정성 있는 소통을 유도하는 소통 플랫폼 완성**
   - 초기 기획의 목적을 반영하여, 친구들에게 진솔한 감정과 생각을 표현할 수 있도록 다양한 소통 방식을 지원.
   - 이를 통해 사용자가 서로의 감정을 담은 메세지를 편안하게 전달할 수 있게 하고, 서로를 더 깊이 이해할 수 있는 공간을 제공하는 것을 목표로 함.
@@ -59,7 +56,6 @@
 ## HOW TO
 
 ### Built With
-
 
 - Framework : ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
 ![PNPM](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)
